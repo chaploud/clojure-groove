@@ -12,9 +12,12 @@
 
 (defn session [] (:session @live/!state))
 
-(defn start! [] (live/start!) :playing)
+(defn start!
+  ([] (start! {}))
+  ([opts] (live/start! opts) :playing))
 (defn stop! [] (live/stop!) :stopped)
 (defn status [] (live/status))
+(defn devices [] (output/devices))
 
 (defn- commit! [f] (live/commit! f))
 

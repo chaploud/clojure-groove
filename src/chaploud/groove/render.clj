@@ -9,11 +9,9 @@
     (reduce + (map second arrangement))
     8))
 
-(defn render-file [path bars out]
-  (let [session (io/song->session (io/read-song path))]
-    (output/write-wav! (live/render session (or bars (song-bars session))) out)))
+(defn default-out [song]
+  (str "out/" (str/replace (.getName (java.io.File. ^String song)) #"\.edn$" "") ".wav"))
 
-(defn -main [path & [bars out]]
-  (let [out (or out (str "out/" (str/replace (.getName (java.io.File. ^String path)) #"\.edn$" "") ".wav"))]
-    (println (render-file path (some-> bars parse-long) out))
-    (shutdown-agents)))
+(defn render-file [song bars out]
+  (let [session (io/song->session (io/read-song song))]
+    (output/write-wav! (live/render session (or bars (song-bars session))) out)))

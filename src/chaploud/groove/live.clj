@@ -72,11 +72,11 @@
     (swap! !state update :session session/rewind)
     nil))
 
-(defn start! []
+(defn start! [opts]
   (or @!transport
       (let [mixer (mixer/make-mixer output/sample-rate)
             on-error (reporter *out*)
-            audio (output/start-line! mixer on-error)
+            audio (output/start-line! mixer opts on-error)
             running (volatile! true)
             thread (Thread. ^Runnable
                     (fn []
