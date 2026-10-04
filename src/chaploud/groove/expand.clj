@@ -4,7 +4,7 @@
 (defn- fail [msg path data]
   (throw (ex-info msg (assoc data :path path))))
 
-(def transforms #{:rev :fast :slow :every :transpose :degrade})
+(def transforms #{:rev :fast :slow :every :transpose :degrade :arp})
 
 (defn- check-transform [[op & args :as tf] path]
   (when-not (and (vector? tf) (transforms op))
@@ -18,6 +18,11 @@
                (check-transform (second args) path))
     :transpose (when-not (number? (first args))
                  (fail ":transpose needs a number of semitones" path {:transform tf}))
+    :arp (let [[order rate] args]
+           (when-not (#{:up :down :up-down :random} order)
+             (fail ":arp needs an order: :up :down :up-down or :random" path {:transform tf}))
+           (when-not (or (nil? rate) (and (ratio? rate) (pos? rate)))
+             (fail ":arp rate is a fraction of a bar such as 1/16" path {:transform tf})))
     :degrade (when-not (and (number? (first args)) (<= 0 (first args) 1))
                (fail ":degrade needs a probability between 0 and 1" path {:transform tf})))
   tf)

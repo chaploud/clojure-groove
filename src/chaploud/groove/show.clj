@@ -16,10 +16,10 @@
   (let [expanded (expand/expand node defs globals [])
         bars (or bars (max 1 (long (Math/ceil (double (:len expanded))))))
         events (for [bar (range bars)
-                     e (query/bar-events expanded bar {:seed [:show bar]})]
-                 (let [p (pitch/resolve-midi (instruments/resolve-event catalog e))]
-                   (assoc p :col (+ (* 16 bar) (long (Math/floor (* 16 (double (:t e))))))
-                          :label (row-label p (:inst e)))))
+                     e (query/bar-events expanded bar {:seed [:show bar]})
+                     p (pitch/resolve-pitches (instruments/resolve-event catalog e))]
+                 (assoc p :col (+ (* 16 bar) (long (Math/floor (* 16 (double (:t e))))))
+                        :label (row-label p (:inst e))))
         rows (->> (group-by :label events)
                   (sort-by (fn [[_ es]] (- (or (:midi (first es)) 1000)))))
         width (reduce max 4 (map (comp count first) rows))]

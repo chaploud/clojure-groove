@@ -7,4 +7,5 @@
  {:name "trap" :genre "trap" :about "Ratcheted hats, a long 808 and a sparse clap"}
  {:name "polymeter" :genre "study" :about "Loops of 16, 12, 10 and 7 steps drifting against each other"}
  {:name "euclid" :genre "study" :about "Euclidean rhythms from around the world"}
- {:name "cascade" :genre "study" :about "References and the attribute cascade, one motif reused four ways"}]
+ {:name "cascade" :genre "study" :about "References and the attribute cascade, one motif reused four ways"}
+ {:name "anthem" :genre "trance" :about "Bundled parts only: one progression drives pad, arpeggio and bass"}]

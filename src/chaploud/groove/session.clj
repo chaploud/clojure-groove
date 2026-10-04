@@ -38,14 +38,14 @@
   p)
 
 (defn params [catalog event bar-seconds]
-  (let [inst (:inst event)
-        p (pitch/resolve-midi (instruments/resolve-event catalog event))
-        p (check-params! (merge {:vel 0.8 :gate 1} p))]
-    (when (and (= :synth (:voice p)) (nil? (:midi p)))
-      (fail (str "Synth event for " inst " has no pitch") {:event event}))
-    (assoc p
-           :vel (double (:vel p))
-           :dur-s (* (double (:dur p)) (double (:gate p)) bar-seconds))))
+  (for [p (pitch/resolve-pitches (instruments/resolve-event catalog event))
+        :let [p (check-params! (merge {:vel 0.8 :gate 1} p))]]
+    (do
+      (when (and (= :synth (:voice p)) (nil? (:midi p)))
+        (fail (str "Synth event for " (:inst event) " has no pitch") {:event event}))
+      (assoc p
+             :vel (double (:vel p))
+             :dur-s (* (double (:dur p)) (double (:gate p)) bar-seconds)))))
 
 (defn tempo [session]
   (get-in session [:globals :tempo] 120))
@@ -85,8 +85,9 @@
   (let [secs (bar-seconds session)]
     (for [track (sort (keys (:tracks session)))
           :when (audible? session track)
-          e (track-events session compiled track bar)]
-      (params (library/catalog session) e secs))))
+          e (track-events session compiled track bar)
+          p (params (library/catalog session) e secs)]
+      p)))
 
 (defn- probe-bars [node]
   (min 64 (max 8 (* 4 (long (Math/ceil (double (:len node))))))))
@@ -97,8 +98,9 @@
         session (assoc-in session [:tracks track :launch] 0)
         voice-params (volatile! #{})]
     (doseq [bar (range (probe-bars (compiled track)))
-            e (track-events session compiled track bar {:all? true})]
-      (vswap! voice-params conj (dissoc (params catalog e secs) :t :dur :dur-s :track)))
+            e (track-events session compiled track bar {:all? true})
+            p (params catalog e secs)]
+      (vswap! voice-params conj (dissoc p :t :dur :dur-s :track)))
     (doseq [p @voice-params]
       (voices/make-voice (assoc p :dur-s 0.1) 48000 0))))
 
