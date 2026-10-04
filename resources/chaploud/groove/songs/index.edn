@@ -1,10 +1,10 @@
-[{:name "house" :genre "house" :tempo 122 :about "Swung drums from a shared library, an organ-ish stab and a round bass"}
- {:name "acid" :genre "techno" :tempo 132 :about "A 303-style line whose accents open the filter, reversed every fourth bar"}
- {:name "techno" :genre "techno" :tempo 130 :about "Rumbling reese, Euclidean rims and an offbeat ride"}
- {:name "trance" :genre "trance" :tempo 138 :about "A full arrangement: intro, build, drop, breakdown, drop"}
- {:name "dnb" :genre "drum and bass" :tempo 174 :about "A two-step break and a moving reese in mini-notation"}
- {:name "lofi" :genre "hip hop" :tempo 84 :about "Heavy swing, lazy seventh chords and a soft sub"}
- {:name "trap" :genre "trap" :tempo 140 :about "Ratcheted hats, a long 808 and a sparse clap"}
- {:name "polymeter" :genre "study" :tempo 118 :about "Loops of 16, 12, 10 and 7 steps drifting against each other"}
- {:name "euclid" :genre "study" :tempo 110 :about "Euclidean rhythms from around the world"}
- {:name "cascade" :genre "study" :tempo 124 :about "References and the attribute cascade, one motif reused four ways"}]
+[{:name "house" :genre "house" :about "Swung drums from a shared library, an organ-ish stab and a round bass"}
+ {:name "acid" :genre "techno" :about "A 303-style line whose accents open the filter, reversed every fourth bar"}
+ {:name "techno" :genre "techno" :about "Rumbling reese, Euclidean rims and an offbeat ride"}
+ {:name "trance" :genre "trance" :about "A full arrangement: intro, build, drop, breakdown, drop"}
+ {:name "dnb" :genre "drum and bass" :about "A two-step break and a moving reese in mini-notation"}
+ {:name "lofi" :genre "hip hop" :about "Heavy swing, lazy seventh chords and a soft sub"}
+ {:name "trap" :genre "trap" :about "Ratcheted hats, a long 808 and a sparse clap"}
+ {:name "polymeter" :genre "study" :about "Loops of 16, 12, 10 and 7 steps drifting against each other"}
+ {:name "euclid" :genre "study" :about "Euclidean rhythms from around the world"}
+ {:name "cascade" :genre "study" :about "References and the attribute cascade, one motif reused four ways"}]

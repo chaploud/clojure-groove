@@ -14,11 +14,15 @@
 
 A song is a path to an .edn file or the name of a bundled song, e.g. trance.")
 
+(defn- bars-arg [s]
+  (or (some-> s parse-long)
+      (throw (ex-info (str "bars must be a whole number, got " (pr-str s)) {}))))
+
 (defn- options [args]
   (loop [[a b & more :as args] args, opts {}, positional []]
     (cond
       (empty? args) [opts positional]
-      (= a "--bars") (recur more (assoc opts :bars (parse-long b)) positional)
+      (= a "--bars") (recur more (assoc opts :bars (bars-arg b)) positional)
       (= a "--device") (recur more (assoc opts :device b) positional)
       :else (recur (rest args) opts (conj positional a)))))
 
@@ -30,32 +34,45 @@ A song is a path to an .edn file or the name of a bundled song, e.g. trance.")
     (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable g/stop!))
     (println (str "Playing " song " at " (session/tempo s) " BPM"
                   (if bars (str " for " bars " bars") ", Ctrl+C to stop")))
-    (if bars
-      (Thread/sleep (long (* 1000 (+ 1.0 (* bars (session/bar-seconds s))))))
-      @(promise))
-    (g/stop!)))
+    (let [deadline (when bars (+ (System/currentTimeMillis) (long (* 1000 (+ 1.0 (* bars (session/bar-seconds s)))))))]
+      (while (and (:playing? (g/status))
+                  (or (nil? deadline) (< (System/currentTimeMillis) deadline)))
+        (Thread/sleep 200)))
+    (let [{:keys [errors]} (g/status)]
+      (g/stop!)
+      (when (seq errors)
+        (throw (ex-info (str "playback stopped: " (last errors)) {}))))))
 
 (defn- songs []
-  (doseq [{:keys [name genre tempo about]} (io/bundled-songs)]
-    (println (format "  %-10s %-14s %3d BPM  %s" name genre tempo about))))
+  (doseq [{:keys [name genre about]} (io/bundled-songs)]
+    (println (format "  %-10s %-14s %3d BPM  %s" name genre
+                     (session/tempo (io/song->session (io/read-song name))) about))))
+
+(defn- usage-error []
+  (throw (ex-info usage {:exit 2})))
 
 (defn run [[command & args]]
   (let [[opts [song & more]] (options args)]
     (case command
-      "play" (if song (play song opts) (println usage))
+      "play" (if song (play song opts) (usage-error))
       "render" (if song
-                 (println (render/render-file song (some-> (first more) parse-long)
+                 (println (render/render-file song (some-> (first more) bars-arg)
                                               (or (second more) (render/default-out song))))
-                 (println usage))
+                 (usage-error))
       "songs" (songs)
       "devices" (run! println (g/devices))
-      (println usage))))
+      (nil "help" "--help" "-h") (println usage)
+      (usage-error))))
 
 (defn -main [& args]
-  (try
-    (run args)
-    (catch clojure.lang.ExceptionInfo e
-      (binding [*out* *err*] (println "groove:" (ex-message e)))
-      (System/exit 1)))
-  (shutdown-agents)
-  (System/exit 0))
+  (let [code (try
+               (run args)
+               0
+               (catch clojure.lang.ExceptionInfo e
+                 (binding [*out* *err*] (println (if (:exit (ex-data e)) (ex-message e) (str "groove: " (ex-message e)))))
+                 (:exit (ex-data e) 1))
+               (catch Exception e
+                 (binding [*out* *err*] (println "groove:" (str e)))
+                 1))]
+    (shutdown-agents)
+    (System/exit code)))

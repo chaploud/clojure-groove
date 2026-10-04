@@ -26,8 +26,8 @@ You need a JDK (21 or newer) and [Babashka](https://babashka.org). Babashka runs
 | | JDK | Babashka |
 |---|---|---|
 | macOS | `brew install --cask temurin` | `brew install borkdude/brew/babashka` |
-| Windows | `winget install EclipseAdoptium.Temurin.21.JDK` | `scoop install babashka` |
-| Linux | `sudo apt install openjdk-21-jdk` (or your distribution's equivalent) | `bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)` |
+| Windows | `winget install EclipseAdoptium.Temurin.21.JDK` | `scoop bucket add scoop-clojure https://github.com/littleli/scoop-clojure` then `scoop install babashka` |
+| Linux | `sudo apt install openjdk-21-jdk` (or your distribution's equivalent) | `curl -sL https://raw.githubusercontent.com/babashka/babashka/master/install \| sudo bash` |
 
 On Linux, playback goes through ALSA, which PipeWire and PulseAudio both provide. Machines without any audio output can still render WAV files.
 
