@@ -127,6 +127,18 @@ A library of ready-made parts ships with the code, so a groove can start from a 
 
 Drum parts are written with roles (`:bd :sd :cp :hh :oh :rim :lt :mt :ht :cb :cr :rd`), and the `:kit` attribute decides which instrument plays each role, so one pattern works with every kit. Mini-notation words like `bd` are the same roles. Your own definitions win over bundled ones of the same name, and `save!` writes only yours. Define a kit of your own with `(g/kit! :my/kit {:base :kit/tr808 :bd :my/kick})`.
 
+## Movement
+
+Any numeric attribute can be a signal instead of a number. It is evaluated at each note's onset, counted in bars from when the track started, and repeats with its length:
+
+```clojure
+(g/play :acid [:bass/acid {:cutoff [:lfo :tri 8 180.0 900.0]}])        ; sweep the filter over 8 bars
+(g/play :lead [:clip/motif {:cutoff [:ramp 300.0 6000.0 8] :reverb 0.5}]) ; an 8-bar build
+(g/play :pad  [:prog/epic {:pan [:lfo :sine 2 -0.6 0.6]}])               ; drift left and right
+```
+
+`[:lfo shape bars low high]` with `:sine :tri :saw :square`, and `[:ramp from to bars]`. Signals cascade like any other attribute, so one on `:globals` moves every track.
+
 ## Composing with data
 
 A node is a Hiccup-style vector, `[tag attributes? & body]`:

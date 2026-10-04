@@ -1,9 +1,10 @@
-;; Acid techno at 132 BPM. Accented notes (:vel 1.0) open the filter wider; :every reverses the line every fourth bar.
+;; Acid techno at 132 BPM. Accented notes (:vel 1.0) open the filter wider, an LFO turns the cutoff
+;; over eight bars, and :every reverses the line every fourth bar.
 {:globals {:tempo 132 :root :a :scale :minor}
  :tracks
  {:kick [:steps {:inst :drum/kick} "x... x... x... x..."]
   :hat [:steps {:inst :drum/open-hat :vel 0.5} "..x. ..x. ..x. ..x."]
   :clap [:steps {:inst :drum/clap} ".... x... .... x..."]
   :acid [:fx [:every 4 [:rev]]
-         [:notes {:inst :synth/acid} [:s 0 0 {:degree 4 :vel 1.0} 0 2 0 {:degree 6 :vel 1.0} 0
+         [:notes {:inst :synth/acid :cutoff [:lfo :tri 8 180.0 900.0]} [:s 0 0 {:degree 4 :vel 1.0} 0 2 0 {:degree 6 :vel 1.0} 0
                                       0 3 0 2 {:degree 7 :vel 1.0} 0 4 2]]]}}
