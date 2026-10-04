@@ -26,11 +26,11 @@
 
   ;; 5. Name parts and reuse them. Attributes at the reference site win.
   (g/put! :clip/motif [:notes {:inst :synth/pluck} [:s 0 2 4 7 4 2 0 :_]])
-  (g/play! :lead [:seq :clip/motif [:fx [:transpose 5] :clip/motif]])
-  (g/play! :echo [:clip/motif {:octave 6 :vel 0.3}])
+  (g/play :lead [:seq :clip/motif [:fx [:transpose 5] :clip/motif]])
+  (g/play :echo [:clip/motif {:octave 6 :vel 0.3}])
 
   ;; 6. Performance controls
-  (g/fill! 1)
+  (g/fill 1)
   (g/drum :snare "..x. ..x. ..xx xxxx" :if :fill)
   (g/mute :kick)
   (g/unmute)
@@ -40,7 +40,7 @@
   ;; 7. Scenes and arrangement
   (g/snap! :drop)
   (g/scene! :break {:kick nil :clap nil :acid nil})
-  (g/launch! :break)
+  (g/launch :break)
   (g/arrange! [[:break 4] [:drop 8]])
 
   ;; 8. Files

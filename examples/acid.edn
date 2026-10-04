@@ -1,4 +1,4 @@
-;; Acid techno at 132 BPM. Accents (X) open the filter, :every flips the line every fourth bar.
+;; Acid techno at 132 BPM. Accented notes (:vel 1.0) open the filter wider; :every reverses the line every fourth bar.
 {:globals {:tempo 132 :root :a :scale :minor}
  :tracks
  {:kick [:steps {:inst :drum/kick} "x... x... x... x..."]

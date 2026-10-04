@@ -15,6 +15,6 @@
  :scenes
  {:intro {:kick :clip/kick :hat :clip/hat :arp :clip/arp}
   :build {:kick nil :roll :clip/roll :chords :clip/chords}
-  :drop {:kick :clip/kick :roll nil :bass :clip/bass :lead :clip/lead}
+  :drop {:kick :clip/kick :hat :clip/hat :roll nil :bass :clip/bass :lead :clip/lead}
   :breakdown {:kick nil :hat nil :bass nil :lead nil :arp :clip/arp}}
  :arrangement [[:intro 4] [:build 4] [:drop 8] [:breakdown 4] [:drop 8]]}
