@@ -95,3 +95,23 @@
 (deftest chords-take-the-octave-of-the-instrument
   (let [sess (session :b [:notes {:inst :synth/bass} [:w #{0 2 4}]])]
     (is (= [36 40 43] (sort (map :midi (events (s/begin-bar sess 0) 0)))))))
+
+(deftest glide-feel-and-sends
+  (testing "a glide carries the pitch it slides from"
+    (let [sess (session :b [:notes {:inst :synth/acid :root :c :scale :minor} [:s 0 {:degree 4 :glide true}]])]
+      (is (= [nil 36] (take 2 (map :glide-from-midi (events (s/begin-bar sess 0) 0)))))))
+  (testing "swing can act on eighths"
+    (let [ts #(map :t (events (s/begin-bar (session :h [:steps {:inst :drum/hat :swing 1/2 :swing-step %} "xxxxxxxx xxxxxxxx"]) 0) 0))]
+      (is (= [0 3/32 1/8] (take 3 (ts 1/16))))
+      (is (= [0 1/16 3/16 3/16] (take 4 (ts 1/8))) "the second eighth moves by half an eighth")))
+  (testing "humanize stays small and is repeatable"
+    (let [sess (session :h [:steps {:inst :drum/hat :humanize 1.0} "xxxx xxxx xxxx xxxx"])
+          es (events (s/begin-bar sess 0) 0)]
+      (is (= es (events (s/begin-bar sess 0) 0)))
+      (is (every? (fn [[e i]] (<= (Math/abs (double (- (:t e) (/ i 16)))) 1/64)) (map vector (sort-by :t es) (range))))
+      (is (not= #{0.8} (set (map :vel es))))))
+  (testing "send levels default by bus and can be overridden"
+    (let [[d] (events (s/begin-bar (session :k [:steps {:inst :drum/kick} "x"]) 0) 0)
+          [p] (events (s/begin-bar (session :p [:notes {:inst :synth/pad :reverb 0.2} [0]]) 0) 0)]
+      (is (= [0.0 0.15] [(:delay d) (:reverb d)]))
+      (is (= [1.0 0.2] [(:delay p) (:reverb p)])))))

@@ -57,3 +57,11 @@
                   onset (first (filter #(not (zero? (.getShort bb (int (* 4 %)))))
                                        (range (- expected 300) (+ expected 300))))]]
       (is (<= (Math/abs (- onset expected)) 1) (str "bar " bar)))))
+
+(deftest a-closed-hat-chokes-the-open-hat
+  (let [tail (fn [tracks]
+               (let [pcm (apply render tracks)]
+                 (rms pcm 6000 20000)))]
+    (is (< (* 3 (tail [:o [:steps {:inst :drum/open-hat} "x..............."]
+                       :c [:steps {:inst :drum/hat :vel 0.01} ".x.............."]]))
+           (tail [:o [:steps {:inst :drum/open-hat} "x..............."]])))))

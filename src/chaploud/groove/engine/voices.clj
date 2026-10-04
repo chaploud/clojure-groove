@@ -192,7 +192,7 @@
 
 (defn- synth-voice
   [{:keys [osc unison detune sub cutoff env fdecay res attack decay sustain release drive gain vel pan
-           dur-s midi spread]
+           dur-s midi spread glide-from-midi glide-time]
     :or {unison 1 detune 0.0 sub 0.0 env 0.0 fdecay 0.2 res 0.2 drive 1.0 spread 0.0}}
    sr seed]
   (let [sr (double sr)
@@ -222,12 +222,17 @@
         drive (double drive) norm (Math/tanh drive)
         amp (* (double gain) (double vel) (/ 1.0 (Math/sqrt (double n-osc))))
         pl (* amp (double pl)) pr (* amp (double pr))
-        n (long-array 1)]
+        n (long-array 1)
+        glide-semis (if glide-from-midi (- (double glide-from-midi) (double midi)) 0.0)
+        glide-tau (/ (double (or glide-time 0.06)) 3.0)]
     (reify Voice
       (render [_ l r from to]
         (loop [i from, j (aget n 0)]
           (if (and (< i to) (< j end))
             (let [t (/ (double j) sr)
+                  bend (if (zero? glide-semis)
+                         1.0
+                         (Math/pow 2.0 (/ (* glide-semis (Math/exp (/ (- t) glide-tau))) 12.0)))
                   _ (loop [o 0 al 0.0 ar 0.0]
                       (if (< o n-osc)
                         (let [p (aget phases o)
@@ -240,7 +245,7 @@
                         (do (aset mix 0 al) (aset mix 1 ar))))
                   sp (aget sub-phase 0)
                   sub-s (* sub (Math/sin (* TAU sp)))
-                  _ (aset sub-phase 0 (let [x (+ sp sub-inc)] (if (>= x 1.0) (- x 1.0) x)))
+                  _ (aset sub-phase 0 (let [x (+ sp (* bend sub-inc))] (if (>= x 1.0) (- x 1.0) x)))
                   fc (+ cutoff (* env (Math/exp (/ (- t) fdecay))))
                   g (g-of fc sr)
                   yl (lowpass st-l (+ (aget mix 0) sub-s) g k)

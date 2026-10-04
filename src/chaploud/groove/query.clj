@@ -124,16 +124,21 @@
     (or all?
         (and holds (or (nil? prob) (< (notation/chance seed) prob))))))
 
-(defn- swung [t {:keys [swing step] :or {step 1/16}}]
-  (let [pos (/ t step)]
+(defn- swung [t {:keys [swing swing-step step]}]
+  (let [step (or swing-step step 1/16)
+        pos (/ t step)]
     (if (and swing (integer? pos) (odd? pos))
       (+ t (* swing step))
       t)))
 
 (defn- finish [ev ctx]
   (let [e (:event ev)
+        h (:humanize e)
         t (cond-> (swung (:t ev) e)
-            (:nudge e) (+ (* (:nudge e) (:dur ev))))
+            (:nudge e) (+ (* (:nudge e) (:dur ev)))
+            h (+ (* (- (notation/chance :humanize-t (:seed ctx) (:t ev)) 0.5) 2 h 1/64)))
+        e (cond-> e
+            h (assoc :vel-scale (+ 1.0 (* (- (notation/chance :humanize-v (:seed ctx) (:t ev)) 0.5) 0.5 h))))
         r (:ratchet e 1)
         _ (when-not (pos-int? r)
             (throw (ex-info (str ":ratchet must be a positive integer, got " (pr-str r)) {:ratchet r})))

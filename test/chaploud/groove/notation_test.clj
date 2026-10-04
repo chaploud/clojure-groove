@@ -50,3 +50,9 @@
 (deftest triplets-do-not-shadow-note-names
   (is (= [[0 1/12 {:degree 0}] [1/12 1/12 {:note :e3}]]
          (mapv (juxt :t :dur :event) (n/parse-notes [:et 0 :e3] 1/16)))))
+
+(deftest glides-start-from-the-previous-note-and-wrap
+  (let [items (n/parse-notes [:s 0 {:degree 4 :glide true} 2 {:degree 7 :glide true}] 1/16)]
+    (is (= {:degree 0} (get-in items [1 :event :glide-from])))
+    (is (= {:degree 2} (get-in items [3 :event :glide-from])))
+    (is (nil? (get-in items [0 :event :glide-from])))))

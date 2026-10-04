@@ -33,7 +33,7 @@
                     (reduce (fn [row j]
                               (conj row (min (inc (peek row))
                                              (inc (prev (inc j)))
-                                             (+ (prev j) (if (= ca (.charAt b j)) 0 1)))))
+                                             (+ (prev j) (if (= ca (nth b j)) 0 1)))))
                             [(inc i)]
                             (range n)))
                   (vec (range (inc n)))
