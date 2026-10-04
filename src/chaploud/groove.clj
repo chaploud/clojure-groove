@@ -7,50 +7,58 @@
             [chaploud.groove.session :as session]
             [chaploud.groove.show :as show]))
 
+;; Naming: gestures you make while playing (drum, play, mute, launch, fill, tempo …) have no
+;; bang; definitions, files and the transport (put!, scene!, save!, start! …) do.
+
 (defn session [] (:session @live/!state))
 
 (defn start! [] (live/start!) :playing)
 (defn stop! [] (live/stop!) :stopped)
+(defn status [] (live/status))
 
-(defn- commit! [f] (live/commit! f) nil)
+(defn- commit! [f] (live/commit! f))
 
 ;; ---------------------------------------------------------------- tracks
 
-(defn play! [track node]
+(defn play [track node]
   (commit! #(session/play % track node))
   track)
 
-(defn clear! [& tracks]
-  (commit! #(update % :tracks (fn [ts] (apply dissoc ts tracks)))))
+(defn clear [& tracks]
+  (commit! #(update % :tracks (fn [ts] (if (seq tracks) (apply dissoc ts tracks) {}))))
+  nil)
 
 (defn hush []
-  (commit! #(assoc % :tracks {} :arrangement nil :current-scene nil)))
+  (commit! #(assoc % :tracks {} :arrangement nil :current-scene nil))
+  nil)
 
 (defn- default-drum [track]
   (let [k (keyword "drum" (name track))]
-    (cond
-      (contains? instruments/builtin k) k
-      (notation/sound-aliases (name track)) (notation/sound-aliases (name track))
-      :else (throw (ex-info (str "No drum named " track "; pass :inst, e.g. (drum " track " \"x...\" :inst :drum/rim)")
-                            {:track track})))))
+    (or (when (contains? instruments/builtin k) k)
+        (notation/sound-aliases (name track))
+        (throw (ex-info (str "No drum named " track "; pass :inst, e.g. (drum " track " \"x...\" :inst :drum/rim)")
+                        {:track track})))))
 
 (defn- default-synth [track]
   (let [k (keyword "synth" (name track))]
     (if (contains? instruments/builtin k) k :synth/keys)))
 
 (defn drum [track steps & {:as attrs}]
-  (play! track [:steps (merge {:inst (or (:inst attrs) (default-drum track))} attrs) steps]))
+  (play track [:steps (merge {:inst (or (:inst attrs) (default-drum track))} attrs) steps]))
 
 (defn synth [track notes & {:as attrs}]
-  (play! track [:notes (merge {:inst (or (:inst attrs) (default-synth track))} attrs) notes]))
+  (play track [:notes (merge {:inst (or (:inst attrs) (default-synth track))} attrs) notes]))
 
 (defn mini [track pattern & {:as attrs}]
-  (play! track [:cycle (or attrs {}) pattern]))
+  (play track [:cycle (or attrs {}) pattern]))
 
-(defn mute [& tracks] (commit! #(update % :mute into tracks)))
-(defn unmute [& tracks] (commit! #(update % :mute (fn [m] (reduce disj m (or (seq tracks) m))))))
-(defn solo [& tracks] (commit! #(update % :solo into tracks)))
-(defn unsolo [& tracks] (commit! #(update % :solo (fn [s] (reduce disj s (or (seq tracks) s))))))
+(defn- remove-or-reset [ks tracks]
+  (if (seq tracks) (apply disj ks tracks) #{}))
+
+(defn mute [& tracks] (commit! #(update % :mute into tracks)) nil)
+(defn unmute [& tracks] (commit! #(update % :mute remove-or-reset tracks)) nil)
+(defn solo [& tracks] (commit! #(update % :solo into tracks)) nil)
+(defn unsolo [& tracks] (commit! #(update % :solo remove-or-reset tracks)) nil)
 
 ;; ---------------------------------------------------------------- definitions
 
@@ -63,8 +71,7 @@
   k)
 
 (defn globals! [m]
-  (commit! #(update % :globals merge m))
-  (:globals (session)))
+  (:globals (commit! #(update % :globals merge m))))
 
 (defn tempo [bpm]
   (globals! {:tempo bpm})
@@ -76,7 +83,7 @@
   (commit! #(assoc-in % [:scenes k] tracks))
   k)
 
-(defn launch! [scene]
+(defn launch [scene]
   (commit! #(session/launch-scene % scene))
   scene)
 
@@ -90,12 +97,13 @@
   (commit! #(assoc % :arrangement plan :arrangement-start (next-bar) :current-scene nil))
   plan)
 
-(defn fill!
-  ([] (fill! 1))
+(defn fill
+  ([] (fill 1))
   ([bars]
    (let [from (next-bar)]
      (commit! #(update % :fill (fn [f] (into (set (remove (fn [b] (< b from)) f))
-                                             (range from (+ from bars)))))))))
+                                             (range from (+ from bars))))))
+     nil)))
 
 ;; ---------------------------------------------------------------- files & views
 
@@ -105,20 +113,16 @@
 (defn load! [path]
   (let [song (io/read-song path)
         start (next-bar)]
-    (commit! (fn [_] (cond-> (io/song->session song session/empty-session)
+    (commit! (fn [_] (cond-> (io/song->session song)
                        (:arrangement song) (assoc :arrangement-start start))))
     path))
 
-(defn render!
-  ([path bars] (render! path bars @live/!state))
-  ([path bars state]
-   (output/write-wav! (live/render state bars) path)))
+(defn render! [path bars]
+  (output/write-wav! (live/render (session) bars) path))
 
 (defn show
   ([x] (show x nil))
   ([x bars]
    (let [s (session)
-         node (cond
-                (and (simple-keyword? x) (get-in s [:tracks x])) (get-in s [:tracks x :node])
-                :else x)]
+         node (or (and (simple-keyword? x) (get-in s [:tracks x :node])) x)]
      (println (show/grid node (assoc (select-keys s [:defs :globals :instruments]) :bars bars))))))

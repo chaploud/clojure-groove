@@ -9,18 +9,17 @@
 (defn- check-transform [[op & args :as tf] path]
   (when-not (and (vector? tf) (transforms op))
     (fail (str "Unknown transform " (pr-str tf) "; expected one of " transforms) path {:transform tf}))
-  (let [num (fn [x] (when-not (and (number? x) (pos? x))
-                      (fail (str (pr-str op) " needs a positive number, got " (pr-str x)) path {:transform tf})))]
-    (case op
-      :rev nil
-      (:fast :slow) (num (first args))
-      :every (do (when-not (pos-int? (first args))
-                   (fail ":every needs a positive integer" path {:transform tf}))
-                 (check-transform (second args) path))
-      :transpose (when-not (number? (first args))
-                   (fail ":transpose needs a number of semitones" path {:transform tf}))
-      :degrade (when-not (and (number? (first args)) (<= 0 (first args) 1))
-                 (fail ":degrade needs a probability between 0 and 1" path {:transform tf}))))
+  (case op
+    :rev nil
+    (:fast :slow) (when-not (pos-int? (first args))
+                    (fail (str (pr-str op) " needs a positive integer, got " (pr-str (first args))) path {:transform tf}))
+    :every (do (when-not (pos-int? (first args))
+                 (fail ":every needs a positive integer" path {:transform tf}))
+               (check-transform (second args) path))
+    :transpose (when-not (number? (first args))
+                 (fail ":transpose needs a number of semitones" path {:transform tf}))
+    :degrade (when-not (and (number? (first args)) (<= 0 (first args) 1))
+               (fail ":degrade needs a probability between 0 and 1" path {:transform tf})))
   tf)
 
 (defn- split-node [node]
@@ -44,12 +43,17 @@
     (fail "Pattern is empty" path {}))
   node)
 
+(declare expand*)
+
 (defn expand
-  ([node defs] (expand node defs {} {} [] #{}))
+  ([node defs] (expand* node defs {} {} [] #{}))
+  ([node defs ctx path] (expand* node defs ctx {} path #{})))
+
+(defn- expand*
   ([node defs ctx overrides path seen]
    (cond
      (qualified-keyword? node)
-     (expand [node] defs ctx overrides path seen)
+     (expand* [node] defs ctx overrides path seen)
 
      (not (and (vector? node) (keyword? (first node))))
      (fail (str "Expected a node such as [:steps ...] or a reference such as :clip/name, got " (pr-str node))
@@ -66,9 +70,9 @@
              (fail (str "Undefined reference " tag) path {:ref tag}))
            (when (seq children)
              (fail (str "A reference takes only an attribute map: " (pr-str node)) path {}))
-           (expand (defs tag) defs ctx (merge attrs overrides) path (conj seen tag)))
+           (expand* (defs tag) defs ctx (merge attrs overrides) path (conj seen tag)))
          (let [ctx (merge ctx attrs overrides)
-               sub (fn [i child] (expand child defs ctx overrides (conj path i) seen))]
+               sub (fn [i child] (expand* child defs ctx overrides (conj path i) seen))]
            (case tag
              :steps (let [step (:step ctx 1/16)
                           steps (leaf path #(notation/parse-steps (one-child tag children path)))]

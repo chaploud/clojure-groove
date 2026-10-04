@@ -1,9 +1,6 @@
 (ns chaploud.groove.query
   (:require [chaploud.groove.notation :as notation]))
 
-(defn chance [& xs]
-  (/ (double (bit-and (hash xs) 0xffffff)) 0x1000000))
-
 (defn- floor [x] (long (Math/floor (double x))))
 (defn- ceil [x] (long (Math/ceil (double x))))
 
@@ -26,10 +23,10 @@
            (->> (q 0 len iter)
                 (map #(assoc % :t (- len (:t %) (:dur %))))
                 (filter #(and (<= lo (:t %)) (< (:t %) hi)))))
-    :fast (let [n (rationalize (first args))]
+    :fast (let [n (long (first args))]
             (fn [lo hi iter]
               (for [[k start a b] (loop-windows len (* lo n) (* hi n))
-                    ev (q a b (+ (* iter (ceil n)) k))]
+                    ev (q a b (+ (* iter n) k))]
                 (-> ev (update :t #(/ (+ start %) n)) (update :dur / n)))))
     :slow (let [n (long (first args))]
             (fn [lo hi iter]
@@ -45,7 +42,7 @@
     :transpose (fn [lo hi iter]
                  (map #(update-in % [:event :transpose] (fnil + 0) (first args)) (q lo hi iter)))
     :degrade (fn [lo hi iter]
-               (remove #(< (chance :degrade iter (:t %)) (first args)) (q lo hi iter)))))
+               (remove #(< (notation/chance :degrade iter (:t %)) (first args)) (q lo hi iter)))))
 
 (defn- expand-chord [{:keys [event] :as ev}]
   (if-let [notes (:chord event)]
@@ -85,21 +82,28 @@
              (update ev :t + start)))
     :fx (let [{:keys [child fx len]} node
               q (reduce (fn [q tf] (apply-transform tf q len))
-                        (fn [lo hi iter] (query child lo hi iter))
+                        (partial query child)
                         fx)]
           (q lo hi iter))))
 
-(defn- passes? [{:keys [if prob]} {:keys [iter fill? seed]}]
-  (and (case if
-         nil true
-         :fill fill?
-         :!fill (not fill?)
-         :1st (zero? iter)
-         :!1st (pos? iter)
-         (if (vector? if)
-           (let [[a b] if] (= (mod iter b) (dec a)))
-           (throw (ex-info (str "Unknown :if condition " (pr-str if)) {:if if}))))
-       (or (nil? prob) (< (chance seed) prob))))
+(defn- condition-holds? [condition {:keys [iter fill?]}]
+  (case condition
+    nil true
+    :fill fill?
+    :!fill (not fill?)
+    :1st (zero? iter)
+    :!1st (pos? iter)
+    (if (and (vector? condition) (= 2 (count condition)) (every? pos-int? condition)
+             (<= (first condition) (second condition)))
+      (let [[a b] condition] (= (mod iter b) (dec a)))
+      (throw (ex-info (str "Unknown :if condition " (pr-str condition)
+                           "; use :fill :!fill :1st :!1st or [a b] with 1 <= a <= b")
+                      {:if condition})))))
+
+(defn- passes? [{condition :if prob :prob} {:keys [seed all?] :as ctx}]
+  (let [holds (condition-holds? condition ctx)]
+    (or all?
+        (and holds (or (nil? prob) (< (notation/chance seed) prob))))))
 
 (defn- swung [t {:keys [swing step] :or {step 1/16}}]
   (let [pos (/ t step)]
@@ -111,18 +115,20 @@
   (let [e (:event ev)
         t (cond-> (swung (:t ev) e)
             (:nudge e) (+ (* (:nudge e) (:dur ev))))
-        r (long (:ratchet e 1))
+        r (:ratchet e 1)
+        _ (when-not (pos-int? r)
+            (throw (ex-info (str ":ratchet must be a positive integer, got " (pr-str r)) {:ratchet r})))
         d (/ (:dur ev) r)]
     (for [i (range r)
           :when (passes? e (assoc ctx :seed [(:seed ctx) (:t ev) i]))]
       (assoc e :t (+ t (* i d)) :dur d))))
 
-(defn bar-events [node bars-since-launch {:keys [fill? seed]}]
+(defn bar-events [node bars-since-launch {:keys [fill? seed all?]}]
   (let [len (:len node)
         lo bars-since-launch]
     (sort-by :t
              (for [[k start a b] (loop-windows len lo (inc lo))
                    ev (query node a b k)
                    out (finish (update ev :t + (- start lo))
-                               {:iter k :fill? fill? :seed [seed bars-since-launch]})]
+                               {:iter k :fill? fill? :all? all? :seed [seed bars-since-launch]})]
                out))))

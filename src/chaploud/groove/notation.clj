@@ -1,6 +1,5 @@
 (ns chaploud.groove.notation
-  (:require [chaploud.groove.pitch :as pitch]
-            [clojure.string :as str]))
+  (:require [chaploud.groove.pitch :as pitch]))
 
 (defn- fail [msg data] (throw (ex-info msg data)))
 
@@ -34,16 +33,16 @@
                       x)
     :else (fail "Steps must be a string or a vector" {:steps x})))
 
-(def ^:private note-rests #{nil :_ '_ "~"})
-
 ;; ---------------------------------------------------------------- notes
+
+(def ^:private note-rests #{nil :_ '_ "~"})
 
 (def ^:private durations {:w 1 :h 1/2 :q 1/4 :e 1/8 :s 1/16 :t 1/32})
 
 (defn- duration-of [k]
-  (let [[_ base mod] (re-matches #"([whqest])(\.|3)?" (name k))]
+  (let [[_ base mod] (re-matches #"([whqest])(\.|t)?" (name k))]
     (when-let [d (and base (durations (keyword base)))]
-      (case mod "." (* d 3/2) "3" (* d 2/3) d))))
+      (case mod "." (* d 3/2) "t" (* d 2/3) d))))
 
 (defn- pitch-of [v]
   (cond
@@ -74,16 +73,16 @@
    "cb" :drum/cowbell "cr" :drum/crash "rd" :drum/ride})
 
 (defn- word->event [w]
-  (let [[base variant] (str/split w #":" 2)]
-    (cond-> (cond
-              (re-matches #"-?\d+" base) {:degree (parse-long base)}
-              (sound-aliases base) {:inst (sound-aliases base)}
-              (pitch/parse-note base) {:note (keyword base)}
-              :else (fail (str "Unknown word in pattern: " base) {:word base}))
-      variant (assoc :variant (parse-long variant)))))
+  (cond
+    (re-matches #"-?\d+" w) {:degree (parse-long w)}
+    (sound-aliases w) {:inst (sound-aliases w)}
+    (pitch/parse-note w) {:note (keyword w)}
+    :else (fail (str "Unknown word in pattern: " w) {:word w})))
+
+(def ^:private modifier #"([*/@?!])((?:\d*\.)?\d+)")
 
 (defn- tokenize [s]
-  (re-seq #"[\[\]<>,()*/!?@~]|-?\d+(?:\.\d+)?(?::\d+)?|[A-Za-z#][\w#:.]*|\S" s))
+  (re-seq #"[*/@?!](?:\d*\.)?\d+|[\[\]<>,()*/!?@~]|-?\d+(?:\.\d+)?|[A-Za-z#][\w#]*|\S" s))
 
 (defn- number-token [t]
   (or (some-> t parse-double rationalize) (fail (str "Expected a number, got " (pr-str t)) {:token t})))
@@ -92,12 +91,12 @@
 
 (defn- parse-atom [[t & more]]
   (case t
-    "[" (let [[node rest] (parse-sequence more "]")] [node rest])
-    "<" (let [[node rest] (parse-sequence more ">")]
+    "[" (parse-sequence more "]")
+    "<" (let [[node toks] (parse-sequence more ">")]
           [(if (= :stack (first node))
              (fail "',' is not supported inside < >" {})
              [:alt (mapv second (second node))])
-           rest])
+           toks])
     ("~" "-") [[:rest] more]
     (nil "]" ">" "," ")") (fail (str "Unexpected " (or t "end of pattern")) {:token t})
     (if (re-matches #"[\[\]<>()*/!?@]" t)
@@ -107,25 +106,23 @@
 (defn- parse-term [toks]
   (let [[node toks] (parse-atom toks)]
     (loop [node node, toks toks, weight (num 1), copies (num 1)]
-      (let [[t n & more] toks
-            num? (boolean (and n (re-matches #"\d+(?:\.\d+)?|\.\d+" n)))]
-        (case t
-          "*" (recur [:fast (number-token n) node] more weight copies)
-          "/" (recur [:fast (/ 1 (number-token n)) node] more weight copies)
-          "@" (recur node more (number-token n) copies)
-          "?" (if num?
-                (recur [:degrade (number-token n) node] more weight copies)
-                (recur [:degrade 0.5 node] (rest toks) weight copies))
-          "!" (if (and num? (re-matches #"\d+" n))
-                (recur node more weight (* copies (parse-long n)))
-                (recur node (rest toks) weight (inc copies)))
-          "(" (let [[k _ s & more2] (rest toks)
-                    [rot more3] (if (= "," (first more2)) [(second more2) (nnext more2)] ["0" more2])]
-                (when-not (= ")" (first more3))
-                  (fail "Expected ) after euclid arguments" {}))
-                (recur [:euclid (long (number-token k)) (long (number-token s)) (long (number-token rot)) node]
-                       (rest more3) weight copies))
-          [(repeat copies [weight node]) toks])))))
+      (let [[t & more] toks
+            [_ op n] (when t (re-matches modifier t))]
+        (cond
+          (= op "*") (recur [:fast (number-token n) node] more weight copies)
+          (= op "/") (recur [:fast (/ 1 (number-token n)) node] more weight copies)
+          (= op "@") (recur node more (number-token n) copies)
+          (= op "?") (recur [:degrade (number-token n) node] more weight copies)
+          (= op "!") (recur node more weight (* copies (long (number-token n))))
+          (= t "?") (recur [:degrade 0.5 node] more weight copies)
+          (= t "!") (recur node more weight (inc copies))
+          (= t "(") (let [[k _ s & more2] more
+                          [rot more3] (if (= "," (first more2)) [(second more2) (nnext more2)] ["0" more2])]
+                      (when-not (= ")" (first more3))
+                        (fail "Expected ) after euclid arguments" {}))
+                      (recur [:euclid (long (number-token k)) (long (number-token s)) (long (number-token rot)) node]
+                             (rest more3) weight copies))
+          :else [(repeat copies [weight node]) toks])))))
 
 (defn- parse-sequence [toks close]
   (loop [toks toks, layer [], layers []]
@@ -145,12 +142,25 @@
   (when-not (string? s) (fail "A cycle pattern must be a string" {:pattern s}))
   (first (parse-sequence (tokenize s) nil)))
 
+(defn- bjorklund [k n]
+  (loop [as (vec (repeat k [true])), bs (vec (repeat (- n k) [false]))]
+    (if (<= (min (count as) (count bs)) 1)
+      (vec (apply concat (concat as bs)))
+      (let [m (min (count as) (count bs))
+            paired (mapv into (subvec as 0 m) (subvec bs 0 m))]
+        (if (> (count as) (count bs))
+          (recur paired (subvec as m))
+          (recur paired (subvec bs m)))))))
+
 (defn euclid
   ([k n] (euclid k n 0))
   ([k n rotation]
-   (mapv #(< (mod (* (+ % rotation) k) n) k) (range n))))
+   (when-not (and (<= 0 k n) (pos? n))
+     (fail (str "Euclidean rhythm needs 0 <= k <= n and n > 0, got (" k "," n ")") {:k k :n n}))
+   (let [p (bjorklund k n)]
+     (vec (take n (drop (mod rotation n) (cycle p)))))))
 
-(defn- chance [& xs]
+(defn chance [& xs]
   (/ (double (bit-and (hash xs) 0xffffff)) 0x1000000))
 
 (defn- query-mini [node lo hi]
@@ -159,10 +169,10 @@
     :word (for [k (range (long (Math/ceil (double lo))) (long (Math/ceil (double hi))))]
             {:t k :dur 1 :event (second node)})
     :seq (let [terms (second node)
-               total (reduce + (map first terms))]
+               total (reduce + (map first terms))
+               starts (reductions + 0 (map first terms))]
            (when (pos? total)
              (for [k (range (long (Math/floor (double lo))) (long (Math/ceil (double hi))))
-                   :let [starts (reductions + 0 (map first terms))]
                    [[w child] start] (map vector terms starts)
                    :let [s (+ k (/ start total))
                          e (+ s (/ w total))

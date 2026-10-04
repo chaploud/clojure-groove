@@ -1,5 +1,6 @@
 (ns chaploud.groove.io
-  (:require [clojure.edn :as edn]
+  (:require [chaploud.groove.session :as session]
+            [clojure.edn :as edn]
             [clojure.java.io :as jio]
             [clojure.pprint :as pprint]))
 
@@ -11,8 +12,7 @@
   (apply array-map
          :groove/format format-version
          (mapcat (fn [k]
-                   (let [v (cond-> (get session k)
-                             (= k :tracks) (update-vals :node))]
+                   (let [v (if (= k :tracks) (session/track-nodes session) (get session k))]
                      (when (seq v)
                        [k (if (map? v) (into (sorted-map) v) v)])))
                  song-keys)))
@@ -22,24 +22,33 @@
        (catch Exception e
          (throw (ex-info (str "Cannot read " path ": " (ex-message e)) {:path path} e)))))
 
-(defn read-song [path]
-  (let [song (read-file path)
-        dir (.getParentFile (jio/file path))
-        included (for [inc-path (:include song)]
-                   (read-song (str (jio/file dir inc-path))))]
+(defn- read-song* [path seen]
+  (let [file (.getCanonicalFile (jio/file path))
+        song (read-file path)]
+    (when (seen file)
+      (throw (ex-info (str "Include cycle through " path) {:path path})))
     (when-not (map? song)
       (throw (ex-info (str path " does not contain a map") {:path path})))
-    (when-let [v (:groove/format song)]
-      (when (> v format-version)
-        (throw (ex-info (str path " needs a newer version of groove (format " v ")") {:path path}))))
-    (reduce (fn [acc lib]
-              (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:instruments :defs :scenes]))
-            (dissoc song :include)
-            included)))
+    (let [version (:groove/format song 1)
+          includes (:include song [])]
+      (when-not (pos-int? version)
+        (throw (ex-info (str path ": :groove/format must be a positive integer") {:path path})))
+      (when (> version format-version)
+        (throw (ex-info (str path " needs a newer version of groove (format " version ")") {:path path})))
+      (when-not (and (vector? includes) (every? string? includes))
+        (throw (ex-info (str path ": :include must be a vector of paths") {:path path})))
+      (reduce (fn [acc inc-path]
+                (let [lib (read-song* (str (jio/file (.getParentFile file) inc-path)) (conj seen file))]
+                  (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:instruments :defs :scenes])))
+              (dissoc song :include)
+              includes))))
 
-(defn song->session [song empty-session]
-  (-> (merge empty-session (select-keys song song-keys))
-      (update :globals #(merge (:globals empty-session) %))
+(defn read-song [path]
+  (read-song* path #{}))
+
+(defn song->session [song]
+  (-> (merge session/empty-session (select-keys song song-keys))
+      (update :globals #(merge (:globals session/empty-session) %))
       (update :tracks update-vals (fn [node] {:node node}))))
 
 (defn write-song! [session path]

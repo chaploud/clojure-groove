@@ -21,7 +21,7 @@
         (aset buf (+ j 3) (unchecked-byte (bit-shift-right sr 8)))))
     buf))
 
-(defn start-line! [mixer]
+(defn start-line! [mixer on-error]
   (let [^SourceDataLine line (AudioSystem/getSourceDataLine (audio-format))
         render! (:render! mixer)
         ^doubles l (:out-l mixer)
@@ -34,8 +34,9 @@
                (while @running
                  (render!)
                  (.write line (block->bytes l r buf) 0 (alength buf)))
+               (catch Throwable e
+                 (on-error (str "audio stopped: " e) e))
                (finally
-                 (.drain line)
                  (.close line))))
                    "groove-audio")]
     (.open line (audio-format) (* 4 2048))
@@ -43,7 +44,8 @@
     (.setPriority t Thread/MAX_PRIORITY)
     (.setDaemon t true)
     (.start t)
-    (fn [] (vreset! running false) (.join t 1000))))
+    {:alive? #(.isAlive t)
+     :stop (fn [] (vreset! running false) (.join t 1000))}))
 
 (defn render-blocks! [mixer ^long frames ^ByteArrayOutputStream out]
   (let [render! (:render! mixer)

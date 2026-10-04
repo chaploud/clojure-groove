@@ -2,7 +2,6 @@
   (:require [chaploud.groove.engine.output :as output]
             [chaploud.groove.io :as io]
             [chaploud.groove.live :as live]
-            [chaploud.groove.session :as session]
             [clojure.string :as str]))
 
 (defn song-bars [{:keys [arrangement]}]
@@ -11,11 +10,8 @@
     8))
 
 (defn render-file [path bars out]
-  (let [sess (-> (io/read-song path)
-                 (io/song->session session/empty-session)
-                 (cond-> (:arrangement (io/read-song path)) (assoc :arrangement-start 0)))
-        st {:session sess :compiled (session/validate! sess)}]
-    (output/write-wav! (live/render st (or bars (song-bars sess))) out)))
+  (let [session (io/song->session (io/read-song path))]
+    (output/write-wav! (live/render session (or bars (song-bars session))) out)))
 
 (defn -main [path & [bars out]]
   (let [out (or out (str "out/" (str/replace (.getName (java.io.File. ^String path)) #"\.edn$" "") ".wav"))]
