@@ -91,3 +91,7 @@
                  s/rewind)]
     (is (nil? (get-in sess [:tracks :k :launch])))
     (is (= [0 #{} nil] [(:arrangement-start sess) (:fill sess) (:current-scene sess)]))))
+
+(deftest chords-take-the-octave-of-the-instrument
+  (let [sess (session :b [:notes {:inst :synth/bass} [:w #{0 2 4}]])]
+    (is (= [36 40 43] (sort (map :midi (events (s/begin-bar sess 0) 0)))))))

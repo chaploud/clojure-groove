@@ -77,6 +77,19 @@ Per-step attributes follow the vocabulary of hardware sequencers:
 
 Integers are scale degrees, resolved through `:root`, `:scale` and `:octave` from the cascade. A length applies until the next length keyword, but never outside its vector.
 
+### Chords
+
+Roman numerals build a chord on a scale degree: uppercase is major, lowercase minor, with optional suffixes `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug` and a `b`/`#` prefix for borrowed chords.
+
+```clojure
+(g/synth :pad  [:w :i :VI :III :VII] :inst :synth/pad :octave 3)
+(g/play  :keys [:notes {:inst :synth/keys :voicing :drop2} [:h :ii7 :V7 :w :Imaj7]])
+(g/play  :arp  [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck}]])
+(g/play  :bass [:prog/epic {:inst :synth/bass :voicing :root}])
+```
+
+`:voicing` is `:close` (default), `:open`, `:drop2` or `:root`, and `:inv n` inverts. `[:arp order rate]` plays each chord one note at a time (`:up :down :up-down :random`), so one progression can drive a pad, an arpeggio and a bassline. Mini-notation accepts the same numerals: `"<i VI III VII>"`.
+
 ### Cycles: mini-notation
 
 For dense rhythms, a TidalCycles-style string fits a pattern into one bar:
@@ -107,6 +120,7 @@ A library of ready-made parts ships with the code, so a groove can start from a 
 | `:beat/` | drum patterns: four-floor, house, deep-house, disco, techno, trance, electro, breakbeat, two-step, dnb, jungle, boom-bap, trap, dembow, afrobeat, halftime, lofi |
 | `:fill/` | one-bar fills: snare-roll, toms, crash, stutter |
 | `:bass/` | basslines in scale degrees: offbeat, rolling, acid, octave, root-fifth, sub, tr808, reese, funk |
+| `:prog/` | chord progressions: axis, sensitive, epic, andalusian, ii-v-i, royal-road, komuro, canon, blues, dorian-vamp, deep-house |
 | `:kit/` | drum kits: default, tr808, tr909, lofi, hard |
 
 Drum parts are written with roles (`:bd :sd :cp :hh :oh :rim :lt :mt :ht :cb :cr :rd`), and the `:kit` attribute decides which instrument plays each role, so one pattern works with every kit. Mini-notation words like `bd` are the same roles. Your own definitions win over bundled ones of the same name, and `save!` writes only yours. Define a kit of your own with `(g/kit! :my/kit {:base :kit/tr808 :bd :my/kick})`.
@@ -122,7 +136,7 @@ A node is a Hiccup-style vector, `[tag attributes? & body]`:
 | `[:cycle attrs "..."]` | mini-notation, one bar per cycle |
 | `[:seq & nodes]` / `[:par & nodes]` | one after another / all together |
 | `[:rep n node]` | repeat |
-| `[:fx transforms node]` | `[:rev]` `[:fast n]` `[:slow n]` (whole n) `[:every n transform]` `[:transpose semitones]` `[:degrade p]` |
+| `[:fx transforms node]` | `[:rev]` `[:fast n]` `[:slow n]` (whole n) `[:every n transform]` `[:transpose semitones]` `[:degrade p]` `[:arp order rate]` |
 | `:clip/name` or `[:clip/name attrs]` | a reference to a definition |
 
 Attributes cascade: they flow from `:globals` and parent nodes to their children, a definition's own attributes override what it inherits, and attributes written at a reference site override the definition.
@@ -177,7 +191,7 @@ The kick ducks the bass and synth buses (sidechain), and synths go through a tem
  :tracks {...}}
 ```
 
-`:include` merges instruments, definitions and scenes from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
+`:include` merges instruments, definitions and scenes from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
 
 ## Development
 

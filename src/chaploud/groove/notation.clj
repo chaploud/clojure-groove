@@ -47,6 +47,7 @@
 (defn- pitch-of [v]
   (cond
     (integer? v) {:degree v}
+    (and (keyword? v) (pitch/parse-roman v)) {:roman v}
     (and (keyword? v) (pitch/parse-note v)) {:note v}
     (set? v) {:chord (mapv pitch-of v)}
     (map? v) v
@@ -75,6 +76,7 @@
   (cond
     (re-matches #"-?\d+" w) {:degree (parse-long w)}
     (sound-aliases w) {:inst (sound-aliases w)}
+    (pitch/parse-roman w) {:roman (keyword w)}
     (pitch/parse-note w) {:note (keyword w)}
     :else (fail (str "Unknown word in pattern: " w) {:word w})))
 

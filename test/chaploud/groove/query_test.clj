@@ -53,3 +53,11 @@
   (let [node [:notes [:q 0 1 2 3 4]]
         degrees (mapcat #(map :degree (q/bar-events (x/expand node {}) % {})) (range 5))]
     (is (= {0 4 1 4 2 4 3 4 4 4} (frequencies degrees)))))
+
+(deftest arpeggios-walk-the-chord
+  (let [arp (fn [order] (mapv :arp-index (q/bar-events (x/expand [:fx [:arp order 1/8] [:notes [:w :I7]]] {}) 0 {})))]
+    (is (= [0 1 2 3 0 1 2 3] (arp :up)))
+    (is (= [3 2 1 0 3 2 1 0] (arp :down)))
+    (is (= [0 1 2 3 2 1 0 1] (arp :up-down)))
+    (is (every? #(<= 0 % 3) (arp :random)))
+    (is (= [0 1/8] (take 2 (map :t (q/bar-events (x/expand [:fx [:arp :up 1/8] [:notes [:w :I7]]] {}) 0 {})))))))

@@ -56,3 +56,63 @@
 
 (defn midi->hz ^double [midi]
   (* 440.0 (Math/pow 2.0 (/ (- (double midi) 69.0) 12.0))))
+
+;; ---------------------------------------------------------------- chords
+
+(def ^:private numerals {"i" 0 "ii" 1 "iii" 2 "iv" 3 "v" 4 "vi" 5 "vii" 6})
+
+(def ^:private qualities
+  {"" [[0 4 7] [0 3 7]]
+   "7" [[0 4 7 10] [0 3 7 10]]
+   "maj7" [[0 4 7 11] [0 3 7 11]]
+   "6" [[0 4 7 9] [0 3 7 9]]
+   "9" [[0 4 7 10 14] [0 3 7 10 14]]
+   "add9" [[0 4 7 14] [0 3 7 14]]
+   "sus2" [[0 2 7] [0 2 7]]
+   "sus4" [[0 5 7] [0 5 7]]
+   "dim" [[0 3 6] [0 3 6]]
+   "dim7" [[0 3 6 9] [0 3 6 9]]
+   "m7b5" [[0 3 6 10] [0 3 6 10]]
+   "aug" [[0 4 8] [0 4 8]]})
+
+(defn parse-roman [x]
+  (when (or (keyword? x) (string? x))
+    (when-let [[_ acc numeral suffix] (re-matches #"([b#]?)(VII|VI|V|IV|III|II|I|vii|vi|v|iv|iii|ii|i)(.*)" (name x))]
+      (when-let [[major minor] (qualities suffix)]
+        {:degree (numerals (.toLowerCase ^String numeral))
+         :shift ({"b" -1 "#" 1} acc 0)
+         :intervals (if (Character/isUpperCase (.charAt ^String numeral 0)) major minor)}))))
+
+(defn chord-size [{:keys [roman chord]}]
+  (cond
+    roman (count (:intervals (parse-roman roman)))
+    chord (count chord)
+    :else 1))
+
+(defn- voice [midis {:keys [voicing inv]}]
+  (let [sorted (vec (sort midis))
+        sorted (reduce (fn [ms _] (vec (sort (conj (subvec ms 1) (+ 12 (first ms))))))
+                       sorted
+                       (range (or inv 0)))
+        n (count sorted)]
+    (case (or voicing :close)
+      :close sorted
+      :root [(first sorted)]
+      :open (if (>= n 3) (vec (sort (update sorted 1 + 12))) sorted)
+      :drop2 (if (>= n 3) (vec (sort (update sorted (- n 2) - 12))) sorted)
+      (throw (ex-info (str "Unknown :voicing " (pr-str voicing) "; use :close :open :drop2 or :root")
+                      {:voicing voicing})))))
+
+(defn resolve-pitches [{:keys [roman chord arp-index transpose] :as event}]
+  (if-let [midis (cond
+                   roman (let [{:keys [degree shift intervals]}
+                               (or (parse-roman roman)
+                                   (throw (ex-info (str "Not a chord symbol: " (pr-str roman)) {:roman roman})))
+                               base (+ (degree->midi degree event) shift (or transpose 0))]
+                           (map #(+ base %) intervals))
+                   chord (map #(:midi (resolve-midi (merge event %))) chord))]
+    (let [voiced (voice midis event)
+          picked (if arp-index [(voiced (mod arp-index (count voiced)))] voiced)]
+      (for [m picked]
+        (assoc (dissoc event :roman :chord :arp-index) :midi m)))
+    [(resolve-midi event)]))

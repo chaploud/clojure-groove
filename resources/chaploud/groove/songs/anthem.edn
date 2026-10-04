@@ -1,0 +1,12 @@
+;; Built almost entirely from bundled parts: one progression drives the pad, the arpeggio and the bass.
+{:globals {:tempo 128 :root :d :scale :minor}
+ :defs
+ {:anthem/chords [:prog/epic {:octave 3}]
+  :anthem/arp [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck :octave 4 :vel 0.7}]]
+  :anthem/bass [:fx [:arp :up 1/8] [:prog/epic {:inst :synth/bass :voicing :root :gate 0.5}]]}
+ :scenes
+ {:intro {:arp :anthem/arp :pad :anthem/chords}
+  :drop {:drums [:beat/trance {:kit :kit/tr909}] :bass :anthem/bass}
+  :break {:drums nil :bass nil :fill [:fill/snare-roll {:kit :kit/tr909}]}
+  :outro {:fill nil :drums [:beat/trance {:kit :kit/tr909}] :bass :anthem/bass}}
+ :arrangement [[:intro 4] [:drop 8] [:break 1] [:outro 8]]}

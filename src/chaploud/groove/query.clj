@@ -1,5 +1,6 @@
 (ns chaploud.groove.query
-  (:require [chaploud.groove.notation :as notation]))
+  (:require [chaploud.groove.notation :as notation]
+            [chaploud.groove.pitch :as pitch]))
 
 (defn- floor [x] (long (Math/floor (double x))))
 (defn- ceil [x] (long (Math/ceil (double x))))
@@ -16,6 +17,17 @@
 
 (defn- shift [events dt]
   (map #(update % :t + dt) events))
+
+(defn- arp-index [order n k seed]
+  (case order
+    :up (mod k n)
+    :down (- n 1 (mod k n))
+    :up-down (if (= n 1)
+               0
+               (let [period (- (* 2 n) 2)
+                     p (mod k period)]
+                 (if (< p n) p (- period p))))
+    :random (long (* n (notation/chance :arp seed k)))))
 
 (defn- apply-transform [[op & args] q len]
   (case op
@@ -42,12 +54,20 @@
     :transpose (fn [lo hi iter]
                  (map #(update-in % [:event :transpose] (fnil + 0) (first args)) (q lo hi iter)))
     :degrade (fn [lo hi iter]
-               (remove #(< (notation/chance :degrade iter (:t %)) (first args)) (q lo hi iter)))))
-
-(defn- expand-chord [{:keys [event] :as ev}]
-  (if-let [notes (:chord event)]
-    (map #(assoc ev :event (merge (dissoc event :chord) %)) notes)
-    [ev]))
+               (remove #(< (notation/chance :degrade iter (:t %)) (first args)) (q lo hi iter)))
+    :arp (let [[order rate] args
+               rate (or rate 1/16)]
+           (fn [lo hi iter]
+             (for [{:keys [t dur event] :as ev} (q 0 len iter)
+                   :let [n (pitch/chord-size event)]
+                   [k start] (if (> n 1)
+                               (map vector (range) (range t (+ t dur) rate))
+                               [[nil t]])
+                   :when (and (<= lo start) (< start hi))]
+               (if k
+                 {:t start :dur (min rate (- (+ t dur) start))
+                  :event (assoc event :arp-index (arp-index order n k [iter t]))}
+                 ev))))))
 
 (defn query [node lo hi iter]
   (case (:kind node)
@@ -57,9 +77,8 @@
                    :when s]
                {:t (* i step) :dur step :event (merge attrs s)}))
     :notes (for [{:keys [t dur event]} (:items node)
-                 :when (and event (<= lo t) (< t hi))
-                 ev (expand-chord {:t t :dur dur :event (merge (:attrs node) event)})]
-             ev)
+                 :when (and event (<= lo t) (< t hi))]
+             {:t t :dur dur :event (merge (:attrs node) event)})
     :cycle (for [{:keys [t dur event]} (notation/mini-events (:ast node) (+ iter lo) (+ iter hi))]
              {:t (- t iter) :dur dur :event (merge (:attrs node) event)})
     :seq (loop [[c & cs] (:children node), offset (num 0), out []]
