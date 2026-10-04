@@ -24,7 +24,15 @@
               (fail sig "[:ramp from to bars] needs numbers and a positive length"))
             (+ from (* (- to from) (mod (/ (double pos) bars) 1.0))))))
 
+(def ^:private whole-number-keys #{:degree :transpose :octave :midi})
+
 (defn resolve-signals [event pos]
-  (reduce-kv (fn [m k v] (if (signal? v) (assoc m k (double (value v pos))) m))
+  (reduce-kv (fn [m k v]
+               (cond
+                 (signal? v) (let [x (value v pos)]
+                               (assoc m k (if (whole-number-keys k) (Math/round (double x)) (double x))))
+                 (and (= k :chord) (sequential? v)) (assoc m k (mapv #(resolve-signals % pos) v))
+                 (and (= k :glide-from) (map? v)) (assoc m k (resolve-signals v pos))
+                 :else m))
              event
              event))
