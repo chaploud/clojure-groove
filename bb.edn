@@ -1,0 +1,30 @@
+{:tasks
+ {:requires ([babashka.fs :as fs]
+             [clojure.string :as str])
+  :init (def source-dirs (str/join " " (filter fs/exists? ["src" "test" "dev" "examples"])))
+
+  nrepl {:doc "Start an nREPL server (cider-nrepl) with the dev classpath"
+         :task (clojure "-M:dev:nrepl")}
+
+  test {:doc "Run the test suite"
+        :task (apply clojure "-M:test" *command-line-args*)}
+
+  lint {:doc "Lint with clj-kondo"
+        :task (when (seq source-dirs) (clojure (str "-M:lint --lint " source-dirs)))}
+
+  fmt {:doc "Format all sources in place"
+       :task (clojure (str "-M:fmt fix " source-dirs " bb.edn deps.edn"))}
+
+  fmt:check {:doc "Check formatting"
+             :task (clojure (str "-M:fmt check " source-dirs " bb.edn deps.edn"))}
+
+  ci {:doc "Everything CI runs"
+      :depends [fmt:check lint test]}
+
+  render {:doc "Render a song file to WAV: bb render examples/acid.edn [bars] [out.wav]"
+          :task (apply clojure "-M:dev -m chaploud.groove.render" *command-line-args*)}
+
+  examples {:doc "Render every example song to out/ (smoke test)"
+            :task (doseq [f (sort (map str (fs/glob "examples" "*.edn")))]
+                    (println "rendering" f)
+                    (clojure "-M:dev -m chaploud.groove.render" f))}}}
