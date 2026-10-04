@@ -155,11 +155,22 @@
   (def-key! k)
   (if (nil? node)
     (update session :defs dissoc k)
-    (assoc-in session [:defs k] node)))
+    (let [s (assoc-in session [:defs k] node)]
+      (try (expand/expand k (:defs (library/catalog s)))
+           (catch clojure.lang.ExceptionInfo e
+             (when (:cycle (ex-data e))
+               (fail (str (ex-message e)
+                          (when (contains? (:defs @library/library) k)
+                            "; a bundled part cannot be extended under its own name, use a new one"))
+                     (ex-data e)))))
+      s)))
 
 (defn put-kit [session k roles]
   (def-key! k)
-  (assoc-in session [:kits k] roles))
+  (cond
+    (nil? roles) (update session :kits dissoc k)
+    (map? roles) (assoc-in session [:kits k] roles)
+    :else (fail (str "A kit is a map of roles to instruments, got " (pr-str roles)) {:kit k})))
 
 (defn put-instrument [session k params]
   (def-key! k)

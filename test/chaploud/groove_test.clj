@@ -2,6 +2,7 @@
   (:require [chaploud.groove :as g]
             [chaploud.groove.live :as live]
             [chaploud.groove.session :as s]
+            [clojure.edn]
             [clojure.test :refer [deftest is use-fixtures]]))
 
 (use-fixtures :each (fn [t]
@@ -40,3 +41,18 @@
   (is (= #{:hh} (set (keys (:tracks (g/session))))))
   (g/clear)
   (is (empty? (:tracks (g/session)))))
+
+(deftest auditions-are-not-saved
+  (g/drum :kick "x")
+  (g/play :audition :beat/house)
+  (let [path (str (java.io.File/createTempFile "song" ".edn"))]
+    (g/save! path)
+    (is (= #{:kick} (set (keys (:tracks (clojure.edn/read-string (slurp path)))))))))
+
+(deftest kits-and-definitions-are-checked-when-put
+  (is (thrown-with-msg? Exception #"A kit is a map" (g/kit! :my/kit [:bd])))
+  (g/kit! :my/kit {:bd :drum/tom-low})
+  (g/kit! :my/kit nil)
+  (is (empty? (:kits (g/session))))
+  (is (thrown-with-msg? Exception #"Circular reference.*use a new one" (g/put! :beat/house [:beat/house {:swing 0.1}])))
+  (is (= :clip/later (g/put! :clip/later [:par :clip/not-yet]))))

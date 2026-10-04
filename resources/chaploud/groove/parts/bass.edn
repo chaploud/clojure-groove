@@ -2,19 +2,19 @@
 {:defs
  {:bass/offbeat [:notes {:inst :synth/bass} [:e :_ 0 :_ 0 :_ 0 :_ 0]]
   :bass/rolling [:notes {:inst :synth/bass} [:s :_ 0 0 0 :_ 0 0 0 :_ 0 0 0 :_ 0 0 0]]
-  :bass/acid [:notes {:inst :synth/acid} [:s 0 0 {:degree 7 :vel 1.0} 0 3 0 {:degree 10 :vel 1.0} 0
-                                          0 5 0 3 {:degree 12 :vel 1.0} 0 7 3]]
+  :bass/acid [:notes {:inst :synth/acid} [:s 0 0 {:degree 4 :vel 1.0} 0 2 0 {:degree 6 :vel 1.0} 0
+                                          0 3 0 2 {:degree 7 :vel 1.0} 0 4 2]]
   :bass/octave [:notes {:inst :synth/bass} [:e 0 7 0 7 0 7 0 7]]
   :bass/root-fifth [:notes {:inst :synth/bass} [:q 0 4 0 4]]
   :bass/sub [:notes {:inst :synth/sub} [:q 0 0 0 0]]
-  :bass/tr808 [:notes {:inst :synth/sub :gate 1.0} [:q. 0 :e :_ :q :_ :e 3 -2]]
-  :bass/reese [:notes {:inst :synth/reese} [:h 0 -2]]
+  :bass/tr808 [:notes {:inst :synth/sub :gate 1.0} [:q. 0 :e :_ :q :_ :e 3 4]]
+  :bass/reese [:notes {:inst :synth/reese} [:h 0 5]]
   :bass/funk [:notes {:inst :synth/bass} [:s 0 :_ :_ 0 7 :_ 0 :_ :_ 0 :_ 4 :_ 5 6 :_]]}
  :about
  {:bass/offbeat {:tags #{:bass :house :trance :disco} :doc "Root on every offbeat 8th"}
   :bass/rolling {:tags #{:bass :trance :psytrance} :doc "Three 16ths after each kick"}
   :bass/acid {:tags #{:bass :acid :techno :303} :doc "303-style line with accents"}
-  :bass/octave {:tags #{:bass :disco :funk} :doc "Octave-jumping 8ths"}
+  :bass/octave {:tags #{:bass :disco :funk} :doc "Octave-jumping 8ths (degree 7 is the octave only in seven-note scales)"}
   :bass/root-fifth {:tags #{:bass :simple} :doc "Root and fifth on quarters"}
   :bass/sub {:tags #{:bass :sub} :doc "Quarter-note sine sub"}
   :bass/tr808 {:tags #{:bass :808 :trap} :doc "Long 808 with a pickup"}

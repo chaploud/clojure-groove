@@ -5,5 +5,5 @@
   :hat [:steps {:inst :drum/open-hat :vel 0.5} "..x. ..x. ..x. ..x."]
   :clap [:steps {:inst :drum/clap} ".... x... .... x..."]
   :acid [:fx [:every 4 [:rev]]
-         [:notes {:inst :synth/acid} [:s 0 0 {:degree 7 :vel 1.0} 0 3 0 {:degree 10 :vel 1.0} 0
-                                      0 5 0 3 {:degree 12 :vel 1.0} 0 7 3]]]}}
+         [:notes {:inst :synth/acid} [:s 0 0 {:degree 4 :vel 1.0} 0 2 0 {:degree 6 :vel 1.0} 0
+                                      0 3 0 2 {:degree 7 :vel 1.0} 0 4 2]]]}}

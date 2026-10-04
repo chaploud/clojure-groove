@@ -12,7 +12,7 @@ Live-code grooves from your Clojure REPL. Patterns are plain EDN data: write a d
 (g/drum :kick "x... x... x... x...")
 (g/drum :clap ".... x... .... x...")
 (g/drum :hat  "..x. ..x. ..x. ..xX")
-(g/synth :acid [:s 0 0 7 0 3 0 10 0 0 5 0 3 12 0 7 3])
+(g/synth :acid [:s 0 0 4 0 2 0 6 0 0 3 0 2 7 0 4 2])
 ```
 
 Everything runs on the JVM with no dependencies besides Clojure: drums and synths are synthesized in pure Clojure and played through Java Sound. A failed edit is rejected in the REPL with a pointed error, and the music keeps playing.
