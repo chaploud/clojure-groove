@@ -35,3 +35,14 @@
     (spit (jio/file dir "c.edn") (pr-str {:include "a.edn"}))
     (is (thrown-with-msg? Exception #"Include cycle" (io/read-song (str dir "/a.edn"))))
     (is (thrown-with-msg? Exception #":include must be a vector" (io/read-song (str dir "/c.edn"))))))
+
+(deftest bundled-songs-load-by-name-and-play
+  (doseq [{:keys [name]} (io/bundled-songs)]
+    (let [session (io/song->session (io/read-song name))]
+      (is (map? (s/validate! session)) name))))
+
+(deftest includes-resolve-inside-resources
+  (is (contains? (:defs (io/read-song "house")) :groove/house)))
+
+(deftest unknown-songs-say-so
+  (is (thrown-with-msg? Exception #"No song file, resource or bundled song named nope" (io/read-song "nope"))))

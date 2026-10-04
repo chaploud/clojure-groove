@@ -21,8 +21,30 @@
         (aset buf (+ j 3) (unchecked-byte (bit-shift-right sr 8)))))
     buf))
 
-(defn start-line! [mixer on-error]
-  (let [^SourceDataLine line (AudioSystem/getSourceDataLine (audio-format))
+(defn devices []
+  (vec (for [^javax.sound.sampled.Mixer$Info info (AudioSystem/getMixerInfo)
+             :when (.isLineSupported (AudioSystem/getMixer info)
+                                     (javax.sound.sampled.DataLine$Info. SourceDataLine (audio-format)))]
+         (.getName info))))
+
+(defn- open-line ^SourceDataLine [device]
+  (try
+    (if device
+      (let [info (or (first (filter #(.contains (.toLowerCase (.getName ^javax.sound.sampled.Mixer$Info %))
+                                                (.toLowerCase ^String device))
+                                    (AudioSystem/getMixerInfo)))
+                     (throw (ex-info (str "No audio device matching " (pr-str device) "; available: " (devices))
+                                     {:device device})))]
+        (AudioSystem/getSourceDataLine (audio-format) info))
+      (AudioSystem/getSourceDataLine (audio-format)))
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Exception e
+      (throw (ex-info (str "No audio output is available (" (ex-message e) "). "
+                           "Render to a file instead, e.g. (render! \"out/song.wav\" 8) or bb render <song>.")
+                      {} e)))))
+
+(defn start-line! [mixer {:keys [device]} on-error]
+  (let [line (open-line device)
         render! (:render! mixer)
         ^doubles l (:out-l mixer)
         ^doubles r (:out-r mixer)

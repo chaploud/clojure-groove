@@ -17,34 +17,47 @@
                        [k (if (map? v) (into (sorted-map) v) v)])))
                  song-keys)))
 
-(defn- read-file [path]
-  (try (edn/read-string (slurp path))
-       (catch Exception e
-         (throw (ex-info (str "Cannot read " path ": " (ex-message e)) {:path path} e)))))
+(def bundled-prefix "chaploud/groove/songs/")
 
-(defn- read-song* [path seen]
-  (let [file (.getCanonicalFile (jio/file path))
-        song (read-file path)]
-    (when (seen file)
-      (throw (ex-info (str "Include cycle through " path) {:path path})))
+(defn locate ^java.net.URL [path]
+  (let [f (jio/file path)]
+    (cond
+      (.isFile f) (jio/as-url (.getCanonicalFile f))
+      (jio/resource path) (jio/resource path)
+      (jio/resource (str bundled-prefix path ".edn")) (jio/resource (str bundled-prefix path ".edn"))
+      :else (throw (ex-info (str "No song file, resource or bundled song named " path) {:path path})))))
+
+(defn- read-url [^java.net.URL url]
+  (try (edn/read-string (slurp url))
+       (catch Exception e
+         (throw (ex-info (str "Cannot read " url ": " (ex-message e)) {:url (str url)} e)))))
+
+(defn- read-song* [^java.net.URL url seen]
+  (let [where (str url)
+        song (read-url url)]
+    (when (seen where)
+      (throw (ex-info (str "Include cycle through " where) {:url where})))
     (when-not (map? song)
-      (throw (ex-info (str path " does not contain a map") {:path path})))
+      (throw (ex-info (str where " does not contain a map") {:url where})))
     (let [version (:groove/format song 1)
           includes (:include song [])]
       (when-not (pos-int? version)
-        (throw (ex-info (str path ": :groove/format must be a positive integer") {:path path})))
+        (throw (ex-info (str where ": :groove/format must be a positive integer") {:url where})))
       (when (> version format-version)
-        (throw (ex-info (str path " needs a newer version of groove (format " version ")") {:path path})))
+        (throw (ex-info (str where " needs a newer version of groove (format " version ")") {:url where})))
       (when-not (and (vector? includes) (every? string? includes))
-        (throw (ex-info (str path ": :include must be a vector of paths") {:path path})))
+        (throw (ex-info (str where ": :include must be a vector of paths") {:url where})))
       (reduce (fn [acc inc-path]
-                (let [lib (read-song* (str (jio/file (.getParentFile file) inc-path)) (conj seen file))]
+                (let [lib (read-song* (java.net.URL. url ^String inc-path) (conj seen where))]
                   (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:instruments :defs :scenes])))
               (dissoc song :include)
               includes))))
 
 (defn read-song [path]
-  (read-song* path #{}))
+  (read-song* (locate path) #{}))
+
+(defn bundled-songs []
+  (edn/read-string (slurp (jio/resource (str bundled-prefix "index.edn")))))
 
 (defn song->session [song]
   (-> (merge session/empty-session (select-keys song song-keys))

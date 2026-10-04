@@ -19,19 +19,31 @@ Everything runs on the JVM with no dependencies besides Clojure: drums and synth
 
 > Status: early. The data format is versioned (`:groove/format 1`) but may still change.
 
-## Requirements
+## Install
 
-- JDK 21+ (tested on JDK 25) and the Clojure CLI
-- [Babashka](https://babashka.org) for the project tasks
+You need a JDK (21 or newer) and [Babashka](https://babashka.org). Babashka runs the project tasks and fetches Clojure dependencies by itself, so the Clojure CLI is optional.
 
-## Quick start
+| | JDK | Babashka |
+|---|---|---|
+| macOS | `brew install --cask temurin` | `brew install borkdude/brew/babashka` |
+| Windows | `winget install EclipseAdoptium.Temurin.21.JDK` | `scoop install babashka` |
+| Linux | `sudo apt install openjdk-21-jdk` (or your distribution's equivalent) | `bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)` |
+
+On Linux, playback goes through ALSA, which PipeWire and PulseAudio both provide. Machines without any audio output can still render WAV files.
+
+## Try it
 
 ```sh
-bb nrepl                       # start an nREPL server with cider-nrepl
-bb render examples/trance.edn  # render a song to out/trance.wav without opening an audio device
+git clone https://github.com/chaploud/clojure-groove && cd clojure-groove
+bb songs               # list the bundled songs
+bb play trance         # play one (Ctrl+C stops); --device NAME picks an output, see bb devices
+bb render lofi         # or render it to out/lofi.wav without touching an audio device
+bb nrepl               # start an nREPL server for live coding
 ```
 
-Then open [`examples/jam.clj`](examples/jam.clj) and evaluate the forms one at a time.
+With the REPL connected, open [`examples/jam.clj`](examples/jam.clj) and evaluate the forms one at a time.
+
+Without Babashka, the same commands run through the Clojure CLI: `clojure -M -m chaploud.groove.cli play trance`, and `clojure -M:dev:nrepl` for the REPL.
 
 ## Writing patterns
 
@@ -106,7 +118,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 
 | | |
 |---|---|
-| `start!` `stop!` `status` | audio transport; `status` lists errors reported while playing |
+| `start!` `stop!` `status` `devices` | audio transport; `(start! {:device "USB"})` picks an output, `status` lists errors reported while playing |
 | `drum` `synth` `mini` `play` | set a track; edits are picked up at the next bar |
 | `clear` `hush` | remove some or all tracks |
 | `mute` `unmute` `solo` `unsolo` | |
@@ -141,7 +153,7 @@ The kick ducks the bass and synth buses (sidechain), and synths go through a tem
  :tracks {...}}
 ```
 
-`:include` merges instruments, definitions and scenes from other files; the including file wins. See [`examples/`](examples) for house, acid, techno, trance, drum and bass, lo-fi, trap, polymeter and Euclidean examples.
+`:include` merges instruments, definitions and scenes from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
 
 ## Development
 
@@ -151,7 +163,8 @@ The kick ducks the bass and synth buses (sidechain), and synths go through a tem
 | `bb test` | run the test suite |
 | `bb lint` / `bb fmt` / `bb fmt:check` | clj-kondo and cljfmt |
 | `bb ci` | everything CI runs |
-| `bb render FILE [bars] [out.wav]` / `bb examples` | offline rendering |
+| `bb play SONG` / `bb render SONG [bars] [out.wav]` / `bb songs` / `bb devices` | the command line |
+| `bb examples` | render every bundled song (smoke test) |
 
 The design notes are in [`docs/design.md`](docs/design.md).
 

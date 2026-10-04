@@ -45,7 +45,7 @@
 
   ;; 8. Files
   (g/save! "out/jam.edn")
-  (g/load! "examples/trance.edn")
+  (g/load! "trance")
   (g/render! "out/jam.wav" 8)
 
   (g/hush)

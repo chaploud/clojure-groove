@@ -3,5 +3,5 @@
 
 (comment
   (g/start!)
-  (g/load! "examples/acid.edn")
+  (g/load! "acid")
   (g/stop!))
