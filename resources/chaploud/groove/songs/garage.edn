@@ -1,0 +1,9 @@
+;; UK garage at 132 BPM: the skippy two-step from the parts library, swung minor-seventh stabs
+;; and a bassline that slides.
+{:globals {:tempo 132 :root :f :scale :minor}
+ :tracks
+ {:drums [:beat/two-step {:kit :kit/tr909}]
+  :stabs [:notes {:inst :synth/keys :octave 4 :swing 0.2 :reverb 0.4}
+          [:e :_ :i7 :_ :s :_ :i7 :e :_ :q :_ :e :VImaj7]]
+  :bass [:notes {:inst :synth/bass :swing 0.2}
+         [:e 0 :_ :s :_ 0 {:degree 4 :glide true} :_ :e :_ 3 :_ {:degree 2 :glide true}]]}}

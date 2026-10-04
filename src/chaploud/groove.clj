@@ -170,3 +170,26 @@
           (start!))
         part)
     (clear :audition)))
+
+(defn describe [k]
+  (let [{:keys [defs kits instruments]} (library/catalog (session))
+        about (library/about k)]
+    (when about
+      (println (str k "  " (:doc about)
+                    (when (:tempo about) (str "  (" (:tempo about) " BPM)"))
+                    (when (seq (:tags about)) (str "  " (str/join " " (sort (map name (:tags about)))))))))
+    (cond
+      (contains? defs k)
+      (do (println (pr-str (defs k)))
+          (show k))
+
+      (or (= k :kit/default) (contains? kits k))
+      (doseq [[role inst] (sort-by key (instruments/resolve-kit kits k))]
+        (println (format "  %-4s %s" (name role) inst)))
+
+      (or (contains? instruments k) (contains? instruments/builtin k))
+      (doseq [[p v] (sort-by key (instruments/resolve-instrument instruments k))]
+        (println (format "  %-12s %-10s %s" p (pr-str v) (instruments/param-docs p ""))))
+
+      :else
+      (throw (ex-info (str "Nothing named " k "; try (browse)") {:name k})))))

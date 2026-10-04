@@ -77,3 +77,38 @@
   (let [inst (or (:inst event) (throw (ex-info "Event has no :inst" {:event event})))
         m (merge (resolve-instrument instruments (instrument-key kits (assoc event :inst inst))) event)]
     (merge (bus-sends (:bus m) (:synth bus-sends)) m)))
+
+(def param-docs
+  {:voice "which synthesis voice plays it (:synth or a drum voice)"
+   :bus ":drums are not ducked; :bass and :synth are ducked by the kick"
+   :duck "true on an instrument that ducks the other buses (the kick)"
+   :choke "voices in the same group cut each other off"
+   :gain "output level"
+   :pan "-1 left .. 1 right"
+   :delay "send to the tempo-synced delay, 0-1"
+   :reverb "send to the reverb, 0-1"
+   :length "longest a drum hit can ring, seconds"
+   :decay "decay time, seconds"
+   :pitch "base frequency in Hz (kick, toms)"
+   :punch "how far the kick's pitch sweeps above :pitch, Hz"
+   :pitch-decay "how fast the kick's sweep falls, per second"
+   :click "level of the kick's transient"
+   :drive "saturation; 1 is clean"
+   :tone "body frequency of the snare, Hz"
+   :snappy "level of the snare's noise"
+   :tune "pitch multiplier of metallic cymbals"
+   :cutoff "filter frequency, Hz (lowpass on synths, highpass on cymbals)"
+   :osc ":saw :square :sine :tri or :supersaw"
+   :unison "number of detuned oscillators for :supersaw"
+   :detune "spread of the unison oscillators, cents"
+   :spread "stereo width of the unison oscillators, 0-1"
+   :sub "level of a sine one octave below"
+   :env "how far the filter envelope opens above :cutoff, Hz"
+   :fdecay "filter envelope decay, seconds"
+   :res "filter resonance, 0-1"
+   :attack "amplitude attack, seconds"
+   :sustain "amplitude sustain level, 0-1"
+   :release "amplitude release, seconds"
+   :octave "default octave for scale degrees"
+   :gate "fraction of the note length the note is held"
+   :glide-time "how long a {:glide true} slide takes, seconds"})
