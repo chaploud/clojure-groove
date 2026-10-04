@@ -129,7 +129,7 @@ Drum parts are written with roles (`:bd :sd :cp :hh :oh :rim :lt :mt :ht :cb :cr
 
 ## Movement
 
-Any numeric attribute can be a signal instead of a number. It is evaluated at each note's onset, counted in bars from when the track started, and repeats with its length:
+Any numeric attribute can be a signal instead of a number. It is evaluated at each note's written position (before swing, nudge or humanize), counted in bars from when the track started, and repeats with its length. Signals on `:degree`, `:transpose`, `:octave` and `:midi` are rounded to whole numbers:
 
 ```clojure
 (g/play :acid [:bass/acid {:cutoff [:lfo :tri 8 180.0 900.0]}])        ; sweep the filter over 8 bars

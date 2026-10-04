@@ -1,6 +1,7 @@
 (ns chaploud.groove.query
   (:require [chaploud.groove.notation :as notation]
-            [chaploud.groove.pitch :as pitch]))
+            [chaploud.groove.pitch :as pitch]
+            [chaploud.groove.signal :as signal]))
 
 (defn- floor [x] (long (Math/floor (double x))))
 (defn- ceil [x] (long (Math/ceil (double x))))
@@ -132,7 +133,7 @@
       t)))
 
 (defn- finish [ev ctx]
-  (let [e (:event ev)
+  (let [e (signal/resolve-signals (:event ev) (+ (:since ctx) (:t ev)))
         h (:humanize e)
         t (cond-> (swung (:t ev) e)
             (:nudge e) (+ (* (:nudge e) (:dur ev)))
@@ -154,5 +155,5 @@
              (for [[k start a b] (loop-windows len lo (inc lo))
                    ev (query node a b k)
                    out (finish (update ev :t + (- start lo))
-                               {:iter k :fill? fill? :all? all? :seed [seed bars-since-launch]})]
+                               {:iter k :fill? fill? :all? all? :since bars-since-launch :seed [seed bars-since-launch]})]
                out))))
