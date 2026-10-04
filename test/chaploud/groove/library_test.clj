@@ -34,3 +34,10 @@
 (deftest misspelled-references-suggest-the-closest-name
   (is (thrown-with-msg? Exception #"did you mean :beat/house\?"
                         (s/validate! (s/play s/empty-session :t :beat/hous)))))
+
+(deftest progressions-sound-the-same-under-any-global-scale
+  (doseq [k (filter #(= "prog" (namespace %)) (keys (:defs catalog)))]
+    (let [midis (fn [scale]
+                  (let [sess (-> (s/play s/empty-session :t k) (assoc :globals {:tempo 120 :scale scale}))]
+                    (map :midi (s/bar-events (s/begin-bar sess 0) (s/validate! sess) 0))))]
+      (is (= (midis :major) (midis :minor)) (str k)))))

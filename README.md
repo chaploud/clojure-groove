@@ -79,9 +79,10 @@ Integers are scale degrees, resolved through `:root`, `:scale` and `:octave` fro
 
 ### Chords
 
-Roman numerals build a chord on a scale degree: uppercase is major, lowercase minor, with optional suffixes `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug` and a `b`/`#` prefix for borrowed chords.
+Roman numerals build a chord on a degree of the current scale: uppercase is major, lowercase minor, with optional suffixes `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug`. A `b` or `#` prefix counts from the major scale instead, as in `:bVII` for a borrowed chord. Each `:prog/` part fixes the scale it is written in.
 
 ```clojure
+(g/globals! {:root :d :scale :minor})
 (g/synth :pad  [:w :i :VI :III :VII] :inst :synth/pad :octave 3)
 (g/play  :keys [:notes {:inst :synth/keys :voicing :drop2} [:h :ii7 :V7 :w :Imaj7]])
 (g/play  :arp  [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck}]])

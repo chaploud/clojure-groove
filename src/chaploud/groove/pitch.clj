@@ -108,7 +108,8 @@
                    roman (let [{:keys [degree shift intervals]}
                                (or (parse-roman roman)
                                    (throw (ex-info (str "Not a chord symbol: " (pr-str roman)) {:roman roman})))
-                               base (+ (degree->midi degree event) shift (or transpose 0))]
+                               base (+ (degree->midi degree (cond-> event (not (zero? shift)) (assoc :scale :major)))
+                                       shift (or transpose 0))]
                            (map #(+ base %) intervals))
                    chord (map #(:midi (resolve-midi (merge event %))) chord))]
     (let [voiced (voice midis event)
