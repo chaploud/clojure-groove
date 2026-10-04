@@ -2,12 +2,12 @@
 ;; and a pad that drifts across the stereo field.
 {:globals {:tempo 100 :root :a :scale :minor}
  :defs
- {:wave/chords [:prog/epic {:octave 3 :pan [:lfo :sine 8 -0.5 0.5]}]}
+ {:wave/chords [:prog/epic {:octave 3}]}
  :tracks
  {:drums [:par {:kit :kit/tr808}
           [:steps {:inst :bd} "x... .... x... ...."]
           [:steps {:inst :sd :reverb 0.6} ".... x... .... x..."]
           [:steps {:inst :hh :vel 0.4} "x.x. x.x. x.x. x.x."]]
-  :pad :wave/chords
+  :pad [:wave/chords {:pan [:lfo :sine 8 -0.5 0.5]}]
   :arp [:fx [:arp :up 1/16] [:wave/chords {:inst :synth/pluck :octave 4 :vel 0.55 :delay 0.6}]]
   :bass [:fx [:arp :up 1/8] [:wave/chords {:inst :synth/bass :voicing :root :octave 2 :gate 0.6}]]}}
