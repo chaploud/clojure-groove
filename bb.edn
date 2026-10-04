@@ -33,6 +33,13 @@
   devices {:doc "List audio outputs"
            :task (clojure "-M -m chaploud.groove.cli devices")}
 
+  jar {:doc "Build the library jar into target/"
+       :task (clojure "-T:build jar")}
+
+  deploy {:doc "Deploy the jar to Clojars (needs CLOJARS_USERNAME and CLOJARS_PASSWORD set to a deploy token)"
+          :depends [jar]
+          :task (clojure "-T:build deploy")}
+
   examples {:doc "Render every bundled song to out/ (smoke test)"
             :task (doseq [song (map :name (clojure.edn/read-string (slurp "resources/chaploud/groove/songs/index.edn")))]
                     (println "rendering" song)

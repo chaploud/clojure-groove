@@ -1,4 +1,4 @@
-(ns chaploud.groove.engine.mixer
+(ns ^:no-doc chaploud.groove.engine.mixer
   (:require [chaploud.groove.engine.voices :as voices])
   (:import [chaploud.groove.engine.voices Voice]
            [clojure.lang IFn$DD IFn$OLDD]

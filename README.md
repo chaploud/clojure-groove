@@ -17,7 +17,7 @@ Live-code grooves from your Clojure REPL. Patterns are plain EDN data: write a d
 
 Everything runs on the JVM with no dependencies besides Clojure: drums and synths are synthesized in pure Clojure and played through Java Sound. A failed edit is rejected in the REPL with a pointed error, and the music keeps playing.
 
-> Status: early. The data format is versioned (`:groove/format 1`) but may still change.
+> Status: 0.1.0, early. The data format is versioned (`:groove/format 1`) but may still change; see [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
@@ -44,6 +44,20 @@ bb nrepl               # start an nREPL server for live coding
 With the REPL connected, follow [docs/guide.md](docs/guide.md) (an empty bar to an arranged track in about fifteen minutes), or open [`examples/jam.clj`](examples/jam.clj) and evaluate the forms one at a time. [docs/reference.md](docs/reference.md) lists everything a song can contain.
 
 Without Babashka, the same commands run through the Clojure CLI: `clojure -M -m chaploud.groove.cli play trance`, and `clojure -M:dev:nrepl` for the REPL.
+
+## Use it in your project
+
+Add it as a git dependency in `deps.edn`:
+
+```clojure
+{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "SHA"}}}
+```
+
+Then `(require '[chaploud.groove :as g])` from any REPL, or play a bundled song without cloning anything:
+
+```sh
+clojure -Sdeps '{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "SHA"}}}' -M -m chaploud.groove.cli play anthem
+```
 
 ## Writing patterns
 
@@ -218,6 +232,7 @@ The kick ducks the bass and synth buses (sidechain). Every track has `:delay` an
 | `bb ci` | everything CI runs |
 | `bb play SONG` / `bb render SONG [bars] [out.wav]` / `bb songs` / `bb devices` | the command line |
 | `bb examples` | render every bundled song (smoke test) |
+| `bb jar` / `bb deploy` | build the jar / deploy it to Clojars |
 
 The design notes are in [`docs/design.md`](docs/design.md).
 

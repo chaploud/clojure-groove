@@ -1,4 +1,4 @@
-(ns chaploud.groove.cli
+(ns ^:no-doc chaploud.groove.cli
   (:require [chaploud.groove :as g]
             [chaploud.groove.io :as io]
             [chaploud.groove.render :as render]

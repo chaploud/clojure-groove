@@ -1,4 +1,4 @@
-(ns chaploud.groove.io
+(ns ^:no-doc chaploud.groove.io
   (:require [chaploud.groove.session :as session]
             [clojure.edn :as edn]
             [clojure.java.io :as jio]

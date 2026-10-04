@@ -1,4 +1,4 @@
-(ns chaploud.groove.live
+(ns ^:no-doc chaploud.groove.live
   (:require [chaploud.groove.engine.mixer :as mixer]
             [chaploud.groove.engine.output :as output]
             [chaploud.groove.session :as session])

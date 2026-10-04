@@ -1,4 +1,4 @@
-(ns chaploud.groove.render
+(ns ^:no-doc chaploud.groove.render
   (:require [chaploud.groove.engine.output :as output]
             [chaploud.groove.io :as io]
             [chaploud.groove.live :as live]

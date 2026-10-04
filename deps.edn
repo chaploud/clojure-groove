@@ -13,4 +13,7 @@
   :lint {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2026.08.04"}}
          :main-opts ["-m" "clj-kondo.main"]}
   :fmt {:replace-deps {dev.weavejester/cljfmt {:mvn/version "0.16.6"}}
-        :main-opts ["-m" "cljfmt.main"]}}}
+        :main-opts ["-m" "cljfmt.main"]}
+  :build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.14" :git/sha "1176afd"}
+                 slipset/deps-deploy {:mvn/version "0.2.5"}}
+          :ns-default build}}}

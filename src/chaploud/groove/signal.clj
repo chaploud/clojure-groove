@@ -1,4 +1,4 @@
-(ns chaploud.groove.signal)
+(ns ^:no-doc chaploud.groove.signal)
 
 (defn signal? [v]
   (and (vector? v) (#{:lfo :ramp} (first v))))

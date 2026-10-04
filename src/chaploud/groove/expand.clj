@@ -1,4 +1,4 @@
-(ns chaploud.groove.expand
+(ns ^:no-doc chaploud.groove.expand
   (:require [chaploud.groove.notation :as notation]))
 
 (defn- fail [msg path data]

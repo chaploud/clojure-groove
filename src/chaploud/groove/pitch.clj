@@ -1,4 +1,4 @@
-(ns chaploud.groove.pitch
+(ns ^:no-doc chaploud.groove.pitch
   (:require [clojure.string :as str]))
 
 (def scales
