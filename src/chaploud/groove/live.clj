@@ -52,7 +52,7 @@
       (when (and @running (alive?))
         (let [st (swap! !state advance bar on-error)
               next-frame (double (schedule-bar! mixer st bar frame on-error))]
-          (swap! !transport assoc :bar bar)
+          (swap! !transport #(if (identical? running (:running %)) (assoc % :bar bar) %))
           (while (and @running (alive?) (< (double (position)) (- next-frame lookahead)))
             (Thread/sleep 2))
           (recur (inc bar) next-frame))))))
