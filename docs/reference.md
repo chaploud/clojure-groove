@@ -1,6 +1,6 @@
 # Reference
 
-Everything a song can contain, in one place. `(g/browse)` and `(g/describe k)` show the same information from the REPL.
+Everything a song can contain, in one place. From the REPL, `(g/browse)` and `(g/describe k)` list the bundled parts, kits and instruments and their parameters.
 
 ## Nodes
 
@@ -40,14 +40,14 @@ Attributes cascade: `:globals` < parent nodes < a node's own attributes < attrib
 | `:w :h :q :e :s :t` | whole, half, quarter, eighth, sixteenth, thirty-second; applies to what follows |
 | `:q.` `:e.` | dotted |
 | `:qt` `:et` `:st` | triplet |
-| `1/8` | length as a fraction of a bar |
+| `1/8` | length as a fraction of a bar; applies to what follows |
 | `{:degree 4 :vel 1.0 :glide true}` | note with attributes |
 
 Chord suffixes: `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug`. Uppercase numerals are major, lowercase minor. A `b`/`#` prefix counts from the major scale.
 
 ## Mini-notation
 
-`~` rest, `[a b]` subdivide, `<a b>` one per cycle, `a, b` layer, `a*2` faster, `a/2` slower, `a!3` repeat, `a@3` weight, `a?` or `a?0.3` drop by chance, `a(3,8,2)` Euclidean rhythm (Bjorklund) with rotation. Words: drum roles (`bd sd cp hh oh rim lt mt ht cb cr rd`, also `kick snare clap hat ride crash`), degrees, note names and chord symbols.
+`~` or `-` rest, `[a b]` subdivide, `<a b>` one per cycle, `a, b` layer, `a*2` faster, `a/2` slower, `a!3` repeat, `a@3` weight, `a?` or `a?0.3` drop by chance, `a(3,8,2)` Euclidean rhythm (Bjorklund) with rotation. Words: drum roles (`bd sd cp hh oh rim lt mt ht cb cr rd`, also `kick snare clap hat ch rs ride crash`), degrees, note names and chord symbols.
 
 ## Transforms
 
@@ -57,7 +57,7 @@ Chord suffixes: `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug`. Uppercase numeral
 | `[:fast n]` / `[:slow n]` | play n times per loop / one nth per loop (whole n) |
 | `[:every n transform]` | apply on every nth loop, starting with the first |
 | `[:transpose n]` | semitones |
-| `[:degrade p]` | drop events with probability p (seeded) |
+| `[:degrade p]` | drop events with probability p (deterministic: the same loop drops the same events) |
 | `[:arp order rate]` | play chords one note at a time; order `:up :down :up-down :random`, rate default 1/16 |
 
 ## Attributes

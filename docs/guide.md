@@ -65,10 +65,10 @@ Name what you like so you can reuse it:
 ```clojure
 (g/put! :my/arp [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck :vel 0.6}]])
 (g/play :arp :my/arp)
-(g/play :echo [:my/arp {:octave 6 :vel 0.3 :delay 0.8}])
+(g/play :echo [:my/arp {:octave 5 :vel 0.3}])
 ```
 
-Attributes at a reference win over the definition, so `:echo` is the same arpeggio an octave up, quieter and wetter.
+Attributes at a reference win over the definition, so `:echo` is the same arpeggio an octave up and quieter.
 
 ## 6. Arrange
 
