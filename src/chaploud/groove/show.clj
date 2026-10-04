@@ -3,6 +3,7 @@
             [chaploud.groove.instruments :as instruments]
             [chaploud.groove.pitch :as pitch]
             [chaploud.groove.query :as query]
+            [chaploud.groove.signal :as signal]
             [clojure.string :as str]))
 
 (def ^:private note-names ["C" "C#" "D" "D#" "E" "F" "F#" "G" "G#" "A" "A#" "B"])
@@ -17,7 +18,8 @@
         bars (or bars (max 1 (long (Math/ceil (double (:len expanded))))))
         events (for [bar (range bars)
                      e (query/bar-events expanded bar {:seed [:show bar]})
-                     p (pitch/resolve-pitches (instruments/resolve-event catalog e))]
+                     p (pitch/resolve-pitches (signal/resolve-signals (instruments/resolve-event catalog e)
+                                                                      (+ bar (:t e))))]
                  (assoc p :col (+ (* 16 bar) (long (Math/floor (* 16 (double (:t e))))))
                         :label (row-label p (:inst e))))
         rows (->> (group-by :label events)

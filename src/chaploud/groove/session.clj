@@ -4,7 +4,8 @@
             [chaploud.groove.instruments :as instruments]
             [chaploud.groove.library :as library]
             [chaploud.groove.pitch :as pitch]
-            [chaploud.groove.query :as query]))
+            [chaploud.groove.query :as query]
+            [chaploud.groove.signal :as signal]))
 
 (def empty-session
   {:globals {:tempo 120}
@@ -38,7 +39,8 @@
   p)
 
 (defn params [catalog event bar-seconds]
-  (for [p (pitch/resolve-pitches (instruments/resolve-event catalog event))
+  (for [p (pitch/resolve-pitches (signal/resolve-signals (instruments/resolve-event catalog event)
+                                                         (:pos event (:t event))))
         :let [p (check-params! (merge {:vel 0.8 :gate 1} p))]]
     (do
       (when (and (= :synth (:voice p)) (nil? (:midi p)))
@@ -79,7 +81,7 @@
        (for [e (query/bar-events node since (merge {:fill? (contains? (:fill session) bar)
                                                     :seed [track bar]}
                                                    opts))]
-         (assoc e :track track))))))
+         (assoc e :track track :pos (+ since (:t e))))))))
 
 (defn bar-events [session compiled bar]
   (let [secs (bar-seconds session)]
