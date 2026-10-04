@@ -117,7 +117,7 @@
 ;; ---------------------------------------------------------------- files & views
 
 (defn save! [path]
-  (io/write-song! (session) path))
+  (io/write-song! (update (session) :tracks dissoc :audition) path))
 
 (defn load! [path]
   (let [song (io/read-song path)
@@ -165,6 +165,8 @@
 (defn audition [part]
   (if part
     (do (play :audition (if (keyword? part) [part] part))
-        (when-not (live/current-bar) (start!))
+        (when-not (live/current-bar)
+          (some-> (library/about part) :tempo tempo)
+          (start!))
         part)
     (clear :audition)))

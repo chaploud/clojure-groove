@@ -83,7 +83,7 @@
        (if (qualified-keyword? tag)
          (do
            (when (seen tag)
-             (fail (str "Circular reference through " tag) path {:ref tag}))
+             (fail (str "Circular reference through " tag) path {:ref tag :cycle true}))
            (when-not (contains? defs tag)
              (fail (str "Undefined reference " tag (suggestion tag defs)) path {:ref tag}))
            (when (seq children)

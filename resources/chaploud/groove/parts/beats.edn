@@ -9,10 +9,10 @@
   :beat/disco [:par :beat/four-floor
                [:steps {:inst :sd} ".... x... .... x..."]
                [:steps {:inst :oh :vel 0.5} "..x. ..x. ..x. ..x."]
-               [:steps {:inst :hh :vel 0.35} "x.x. x.x. x.x. x.x."]]
+               [:steps {:inst :hh :vel 0.35} "xx.x xx.x xx.x xx.x"]]
   :beat/techno [:par :beat/four-floor
                 [:steps {:inst :oh :vel 0.45} "..x. ..x. ..x. ..x."]
-                [:steps {:inst :hh :vel 0.3} "xxxx xxxx xxxx xxxx"]
+                [:steps {:inst :hh :vel 0.3} "xx.x xx.x xx.x xx.x"]
                 [:cycle {:vel 0.5} "rim(3,8,2)"]]
   :beat/trance [:par :beat/four-floor
                 [:steps {:inst :oh :vel 0.5} "..x. ..x. ..x. ..x."]
@@ -26,7 +26,7 @@
   :beat/two-step [:par {:swing 0.2}
                   [:steps {:inst :bd} "x... .... ..x. ..x."]
                   [:steps {:inst :sd} ".... x... .... x..."]
-                  [:steps {:inst :hh :vel 0.5} "..x. ..x. ..x. ..xx"]]
+                  [:steps {:inst :hh :vel 0.5} "..xx ..x. ..xx ..x."]]
   :beat/dnb [:par [:steps {:inst :bd} "x... .... ..x. ...."]
              [:steps {:inst :sd} ".... x... .... x..."]
              [:steps {:inst :hh :vel 0.45 :prob 0.85} "x.x. x.x. x.x. x.x."]]

@@ -27,5 +27,5 @@
  {:kit/default {:tags #{:kit} :doc "The built-in drums"}
   :kit/tr808 {:tags #{:kit :808 :hip-hop :trap :electro} :doc "Long boomy kick, soft snare, crisp hats"}
   :kit/tr909 {:tags #{:kit :909 :house :techno} :doc "Punchy kick with a click, bright snare and hats"}
-  :kit/lofi {:tags #{:kit :lofi :hip-hop} :doc "Soft and dark; the clap is a rim"}
+  :kit/lofi {:tags #{:kit :lofi :hip-hop} :doc "Soft and dusty; the clap is a rim"}
   :kit/hard {:tags #{:kit :techno :hard} :doc "Distorted kick, tight clap and hats"}}}

@@ -15,11 +15,11 @@
   (g/show :hat)
 
   ;; 2. Melody as scale degrees. :s :e :q :h :w set the length for what follows.
-  (g/synth :acid [:s 0 0 7 0 3 0 10 0 0 5 0 3 12 0 7 3])
+  (g/synth :acid [:s 0 0 4 0 2 0 6 0 0 3 0 2 7 0 4 2])
   (g/synth :pad [:w #{0 2 4} #{-2 0 2}] :octave 3)
 
   ;; 3. Tweak sounds by overriding parameters, the same way as any other attribute.
-  (g/synth :acid [:s 0 0 7 0 3 0 10 0] :cutoff 600.0 :res 0.9)
+  (g/synth :acid [:s 0 0 4 0 2 0 6 0] :cutoff 600.0 :res 0.9)
 
   ;; 4. Mini-notation for denser rhythms.
   (g/mini :perc "rim(5,16,3), cb(3,8)" :vel 0.5)
