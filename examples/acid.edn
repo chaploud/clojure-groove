@@ -1,0 +1,9 @@
+;; Acid techno at 132 BPM. Accents (X) open the filter, :every flips the line every fourth bar.
+{:globals {:tempo 132 :root :a :scale :minor}
+ :tracks
+ {:kick [:steps {:inst :drum/kick} "x... x... x... x..."]
+  :hat [:steps {:inst :drum/open-hat :vel 0.5} "..x. ..x. ..x. ..x."]
+  :clap [:steps {:inst :drum/clap} ".... x... .... x..."]
+  :acid [:fx [:every 4 [:rev]]
+         [:notes {:inst :synth/acid} [:s 0 0 {:degree 7 :vel 1.0} 0 3 0 {:degree 10 :vel 1.0} 0
+                                      0 5 0 3 {:degree 12 :vel 1.0} 0 7 3]]]}}
