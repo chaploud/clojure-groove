@@ -11,7 +11,7 @@
 
 (deftest the-guide-runs-as-written
   (let [saved @live/!state
-        dir (str (java.nio.file.Files/createTempDirectory "guide" (make-array java.nio.file.attribute.FileAttribute 0)))]
+        dir (str/replace (str (java.nio.file.Files/createTempDirectory "guide" (make-array java.nio.file.attribute.FileAttribute 0))) "\\" "/")]
     (reset! live/!state {:session s/empty-session :compiled {}})
     (try
       (with-redefs [g/start! (constantly :playing)]
