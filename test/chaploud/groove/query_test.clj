@@ -34,3 +34,22 @@
     (is (= [0 1/8 1/4 7/16 1/2 3/4 15/16] (ts node 0 {:fill? true}))))
   (is (= [] (ts [:steps (into [{:prob 0}] (repeat 15 nil))] 0)))
   (is (= [0] (ts [:steps (into [{:prob 1}] (repeat 15 nil))] 0))))
+
+(deftest queries-compose-across-window-splits
+  (doseq [node [[:steps "x.x x..x."]
+                [:fx [[:rev] [:fast 2]] [:notes [:e 0 2 :s 3 4 5]]]
+                [:fx [:slow 2] [:seq [:steps "x..."] [:notes [:q 1 2]]]]
+                [:rep 3 [:cycle "bd [sd sd] <hh oh>"]]]
+          :let [e (x/expand node {})
+                len (:len e)
+                whole (vec (q/query e 0 len 3))]
+          [a b] [[1/7 2/3] [1/16 1/2] [1/3 3/4]]
+          :let [cuts [0 (* a len) (* b len) len]]]
+    (is (= (sort-by :t whole)
+           (sort-by :t (mapcat (fn [[lo hi]] (q/query e lo hi 3)) (partition 2 1 cuts))))
+        (pr-str node))))
+
+(deftest a-five-quarter-loop-plays-every-note-once-per-loop
+  (let [node [:notes [:q 0 1 2 3 4]]
+        degrees (mapcat #(map :degree (q/bar-events (x/expand node {}) % {})) (range 5))]
+    (is (= {0 4 1 4 2 4 3 4 4 4} (frequencies degrees)))))

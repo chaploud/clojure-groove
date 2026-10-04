@@ -1,4 +1,5 @@
 (ns chaploud.groove.engine.voices
+  (:require [chaploud.groove.pitch :as pitch])
   (:import [clojure.lang IFn$DDD IFn$LD]))
 
 (set! *warn-on-reflection* true)
@@ -87,12 +88,14 @@
         gl (* gain (double gl))
         gr (* gain (double gr))
         n (long-array 1)
-        end (long (* length sr))]
+        end (long (* length sr))
+        fade (* 0.005 sr)]
     (reify Voice
       (render [_ l r from to]
         (loop [i from, j (aget n 0)]
           (if (and (< i to) (< j end))
-            (let [s (.invokePrim sample-fn (/ (double j) sr) (.invokePrim noise j))]
+            (let [s (* (.invokePrim sample-fn (/ (double j) sr) (.invokePrim noise j))
+                       (Math/min 1.0 (/ (double (- end j)) fade)))]
               (aset l i (+ (aget l i) (* gl s)))
               (aset r i (+ (aget r i) (* gr s)))
               (recur (inc i) (inc j)))
@@ -195,7 +198,7 @@
   (let [sr (double sr)
         kind (osc-kind osc)
         n-osc (long (if (= osc :supersaw) (max 1 (long unison)) 1))
-        hz (* 440.0 (Math/pow 2.0 (/ (- (double midi) 69.0) 12.0)))
+        hz (pitch/midi->hz midi)
         detune (double detune)
         incs (double-array (for [i (range n-osc)
                                  :let [x (if (= 1 n-osc) 0.0 (- (/ (* 2.0 (double i)) (double (dec n-osc))) 1.0))]]

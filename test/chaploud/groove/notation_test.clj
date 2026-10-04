@@ -37,6 +37,16 @@
   (is (thrown-with-msg? Exception #"Missing \]" (n/parse-mini "[bd sd")))
   (is (thrown-with-msg? Exception #"Unknown word" (n/parse-mini "bd zz"))))
 
-(deftest euclid
+(deftest bare-modifiers-do-not-swallow-the-next-number
+  (is (= [[0 0] [1/2 2] [3/4 3]] (remove #(= 1 (second %)) (onsets "0 1? 2 3" 0 1))))
+  (is (= [[0 0] [1/4 2] [1/2 2] [3/4 4]] (onsets "0 2! 4" 0 1))))
+
+(deftest euclid-matches-bjorklund
   (is (= [true false false true false false true false] (n/euclid 3 8)))
-  (is (= 5 (count (filter true? (n/euclid 5 16 2))))))
+  (is (= [true false true true false true true false] (n/euclid 5 8)))
+  (is (= (vec (take 8 (drop 2 (cycle (n/euclid 3 8))))) (n/euclid 3 8 2)))
+  (is (thrown? Exception (n/euclid 9 8))))
+
+(deftest triplets-do-not-shadow-note-names
+  (is (= [[0 1/12 {:degree 0}] [1/12 1/12 {:note :e3}]]
+         (mapv (juxt :t :dur :event) (n/parse-notes [:et 0 :e3] 1/16)))))

@@ -36,3 +36,7 @@
   (is (= ["Unexpected character \\q at column 2 of step string" [:seq 0 :steps]] (err [:seq [:steps "xq"]])))
   (is (re-find #"Unknown transform" (first (err [:fx [[:wobble]] :clip/kick]))))
   (is (re-find #"Unknown node type" (first (err [:drums "x..."])))))
+
+(deftest speed-factors-are-whole-numbers
+  (is (re-find #":slow needs a positive integer" (first (err [:fx [:slow 0.5] :clip/kick]))))
+  (is (re-find #":fast needs a positive integer" (first (err [:fx [:fast 3/2] :clip/kick])))))

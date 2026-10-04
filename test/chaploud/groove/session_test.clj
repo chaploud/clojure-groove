@@ -57,3 +57,37 @@
 (deftest snapshots-are-scenes
   (let [sess (session :k [:steps {:inst :drum/kick} "x"])]
     (is (= {:k [:steps {:inst :drum/kick} "x"]} (get-in (s/snapshot sess :one) [:scenes :one])))))
+
+(deftest validation-builds-every-voice
+  (doseq [[label inst] [["an unknown voice type" {:voice :boing :bus :drums :gain 1.0 :length 0.5}]
+                        ["a missing parameter" {:voice :kick :bus :drums :gain 1.0 :length 0.5}]
+                        ["a zero decay" {:base :drum/kick :decay 0}]
+                        ["a zero filter decay" {:base :synth/acid :fdecay 0.0}]
+                        ["a zero drive" {:base :synth/acid :drive 0}]]]
+    (is (thrown? Exception
+                 (s/validate! (-> (s/put-instrument s/empty-session :my/x inst)
+                                  (s/play :x [:notes {:inst :my/x} [0]]))))
+        label)))
+
+(deftest validation-sees-past-the-first-bars-and-past-chance
+  (is (thrown? Exception (s/validate! (session :x [:seq [:rep 40 [:steps {:inst :drum/kick} "x"]]
+                                                   [:steps {:inst :nope/x} "x"]]))))
+  (is (thrown? Exception (s/validate! (session :x [:steps {:inst :nope/x :prob 0.01} "x"]))))
+  (is (thrown? Exception (s/validate! (session :x [:steps {:inst :nope/x :if :fill} "x"]))))
+  (is (thrown-with-msg? Exception #":ratchet" (s/validate! (session :x [:steps {:inst :drum/kick :ratchet 0} "x"]))))
+  (is (thrown-with-msg? Exception #"Unknown :if" (s/validate! (session :x [:steps {:inst :drum/kick :if [1 0]} "x"])))))
+
+(deftest validation-covers-tempo-scenes-and-arrangement
+  (is (thrown-with-msg? Exception #":tempo" (s/validate! (assoc-in s/empty-session [:globals :tempo] 0))))
+  (is (thrown-with-msg? Exception #"Scene :c: Track :k"
+                        (s/validate! (assoc s/empty-session :scenes {:c {:k [:steps {:inst :nope/x} "x"]}}))))
+  (is (thrown-with-msg? Exception #"Arrangement step"
+                        (s/validate! (assoc s/empty-session :scenes {:a {}} :arrangement [[:a 4] [:nope 2]])))))
+
+(deftest rewinding-restarts-the-timeline
+  (let [sess (-> (session :k [:steps {:inst :drum/kick} "x"])
+                 (assoc :arrangement [[:a 1]] :arrangement-start 37 :fill #{40} :current-scene :a)
+                 (s/begin-bar 3)
+                 s/rewind)]
+    (is (nil? (get-in sess [:tracks :k :launch])))
+    (is (= [0 #{} nil] [(:arrangement-start sess) (:fill sess) (:current-scene sess)]))))

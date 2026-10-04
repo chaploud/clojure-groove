@@ -1,11 +1,13 @@
 (ns chaploud.groove.render-test
-  (:require [chaploud.groove.live :as live]
+  (:require [chaploud.groove.engine.mixer :as mixer]
+            [chaploud.groove.instruments :as instruments]
+            [chaploud.groove.live :as live]
             [chaploud.groove.session :as s]
             [clojure.test :refer [deftest is]]))
 
 (defn- render [& tracks]
   (let [sess (reduce (fn [acc [k node]] (s/play acc k node)) s/empty-session (partition 2 tracks))]
-    (live/render {:session sess :compiled (s/validate! sess)} 1)))
+    (live/render sess 1)))
 
 (defn- rms [^bytes pcm from to]
   (let [bb (.order (java.nio.ByteBuffer/wrap pcm) java.nio.ByteOrder/LITTLE_ENDIAN)
@@ -24,4 +26,34 @@
 (deftest rendering-is-deterministic
   (let [tracks [:h [:steps {:inst :drum/hat :prob 0.5} "xxxx xxxx xxxx xxxx"]
                 :b [:notes {:inst :synth/supersaw} [:q 0 2 4 7]]]]
-    (is (java.util.Arrays/equals ^bytes (apply render tracks) ^bytes (apply render tracks)))))
+    (is (java.util.Arrays/equals ^bytes (apply render tracks) ^bytes (apply render tracks)))
+    (is (> (rms (apply render tracks) 0 48000) 500))))
+
+(deftest a-non-finite-voice-does-not-silence-the-mix
+  (let [mx (mixer/make-mixer 48000)
+        kick (instruments/resolve-instrument {} :drum/kick)
+        broken (assoc (instruments/resolve-instrument {} :synth/acid) :fdecay 0.0 :midi 45 :vel 0.8 :dur-s 0.2)
+        ^doubles l (:out-l mx)]
+    (mixer/submit! mx 0 broken 1)
+    (mixer/submit! mx 48000 (assoc kick :vel 0.9 :dur-s 0.1) 2)
+    (let [peak (volatile! 0.0)
+          non-finite (volatile! 0)]
+      (dotimes [b 300]
+        ((:render! mx))
+        (dotimes [i (alength l)]
+          (when-not (Double/isFinite (aget l i)) (vswap! non-finite inc))
+          (when (> b 187) (vswap! peak max (Math/abs (aget l i))))))
+      (is (zero? @non-finite))
+      (is (> @peak 0.1) "the kick after the broken voice is audible"))))
+
+(deftest downbeats-are-sample-accurate-offline
+  (let [sess (-> (s/play s/empty-session :k [:steps {:inst :drum/kick :click 0.0} "x... .... .... ...."])
+                 (assoc-in [:globals :tempo] 137))
+        pcm (live/render sess 3)
+        bb (.order (java.nio.ByteBuffer/wrap pcm) java.nio.ByteOrder/LITTLE_ENDIAN)
+        bar-frames (/ (* 4 60.0 48000) 137)]
+    (doseq [bar [1 2]
+            :let [expected (Math/round (* bar bar-frames))
+                  onset (first (filter #(not (zero? (.getShort bb (int (* 4 %)))))
+                                       (range (- expected 300) (+ expected 300))))]]
+      (is (<= (Math/abs (- onset expected)) 1) (str "bar " bar)))))

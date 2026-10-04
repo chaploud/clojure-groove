@@ -1,6 +1,7 @@
 (ns chaploud.groove.engine.mixer
   (:require [chaploud.groove.engine.voices :as voices])
   (:import [chaploud.groove.engine.voices Voice]
+           [clojure.lang IFn$DD IFn$OLDD]
            [java.util ArrayList Iterator PriorityQueue]
            [java.util.concurrent ConcurrentLinkedQueue]))
 
@@ -16,45 +17,34 @@
 (defn- bus-index ^long [k]
   (case k :drums 0 :bass 1 :synth 2 2))
 
-(defn- comb-lengths [^double sr]
-  (mapv #(long (* sr (/ (double %) 44100.0))) [1116 1188 1277 1356]))
-
-(defn- allpass-lengths [^double sr]
-  (mapv #(long (* sr (/ (double %) 44100.0))) [556 441]))
-
-(defn- reverb-channel [^double sr ^long stereo-offset]
-  {:combs (mapv #(double-array (+ (long %) stereo-offset)) (comb-lengths sr))
-   :comb-idx (long-array 4)
-   :comb-lp (double-array 4)
-   :allpasses (mapv #(double-array (+ (long %) stereo-offset)) (allpass-lengths sr))
-   :ap-idx (long-array 2)})
-
-(defn- reverb-sample ^double [ch ^double x]
-  (let [{:keys [combs ^longs comb-idx ^doubles comb-lp allpasses ^longs ap-idx]} ch
-        feedback 0.84
-        damp 0.25
-        input (* x 0.015)
-        sum (loop [i 0 acc 0.0]
-              (if (< i 4)
-                (let [^doubles buf (combs i)
-                      idx (aget comb-idx i)
-                      y (aget buf idx)
-                      lp (+ (* y (- 1.0 damp)) (* (aget comb-lp i) damp))]
-                  (aset comb-lp i lp)
-                  (aset buf idx (+ input (* lp feedback)))
-                  (aset comb-idx i (let [n (inc idx)] (if (>= n (alength buf)) 0 n)))
-                  (recur (inc i) (+ acc y)))
-                acc))]
-    (loop [i 0 s (double sum)]
-      (if (< i 2)
-        (let [^doubles buf (allpasses i)
-              idx (aget ap-idx i)
-              b (aget buf idx)
-              out (- b s)]
-          (aset buf idx (+ s (* b 0.5)))
-          (aset ap-idx i (let [n (inc idx)] (if (>= n (alength buf)) 0 n)))
-          (recur (inc i) out))
-        s))))
+(defn- make-reverb [^double sr ^long stereo-offset]
+  (let [scale (fn [n] (+ (long (* sr (/ (double n) 44100.0))) stereo-offset))
+        c0 (double-array (scale 1116)) c1 (double-array (scale 1188))
+        c2 (double-array (scale 1277)) c3 (double-array (scale 1356))
+        a0 (double-array (scale 556)) a1 (double-array (scale 441))
+        idx (long-array 6)
+        lp (double-array 4)
+        comb (fn ^double [^doubles buf ^long i ^double input]
+               (let [k (aget idx i)
+                     y (aget buf k)
+                     f (+ (* y 0.75) (* (aget lp i) 0.25))]
+                 (aset lp i f)
+                 (aset buf k (+ input (* f 0.84)))
+                 (aset idx i (let [n (inc k)] (if (>= n (alength buf)) 0 n)))
+                 y))
+        allpass (fn ^double [^doubles buf ^long i ^double x]
+                  (let [k (aget idx i)
+                        b (aget buf k)]
+                    (aset buf k (+ x (* b 0.5)))
+                    (aset idx i (let [n (inc k)] (if (>= n (alength buf)) 0 n)))
+                    (- b x)))]
+    [(fn ^double [^double x]
+       (let [in (* x 0.015)
+             sum (+ (.invokePrim ^IFn$OLDD comb c0 0 in) (.invokePrim ^IFn$OLDD comb c1 1 in)
+                    (.invokePrim ^IFn$OLDD comb c2 2 in) (.invokePrim ^IFn$OLDD comb c3 3 in))]
+         (.invokePrim ^IFn$OLDD allpass a1 5 (.invokePrim ^IFn$OLDD allpass a0 4 sum))))
+     (fn []
+       (doseq [^doubles a [c0 c1 c2 c3 a0 a1 lp]] (java.util.Arrays/fill a 0.0)))]))
 
 (defn make-mixer [sample-rate]
   (let [sr (double sample-rate)
@@ -72,8 +62,9 @@
         delay-r (double-array delay-len)
         delay-idx (long-array 1)
         delay-frames (long-array [(long (* sr 0.35))])
-        rev-l (reverb-channel sr 0)
-        rev-r (reverb-channel sr 23)
+        [^IFn$DD rev-l reset-l] (make-reverb sr 0)
+        [^IFn$DD rev-r reset-r] (make-reverb sr 23)
+        resets (long-array 1)
         duck-release (* sr 0.16)
         duck-attack (* sr 0.004)]
     {:sample-rate sr
@@ -81,6 +72,7 @@
      :out-l out-l
      :out-r out-r
      :position (fn ^long [] (aget position 0))
+     :non-finite-resets (fn ^long [] (aget resets 0))
      :set-tempo! (fn [bpm]
                    (aset delay-frames 0 (long (min (dec delay-len) (* sr (/ 60.0 (double bpm)) 0.75)))))
      :render!
@@ -99,7 +91,7 @@
                  (.add active (Active. (.bus s) (.voice s) (long-array [from])))
                  (when (.duck s) (.add duck-queue (max (.frame s) start))))
                (recur))))
-         (doseq [^doubles b buses] (java.util.Arrays/fill b 0.0))
+         (dotimes [b 6] (java.util.Arrays/fill ^doubles (buses b) 0.0))
          (let [^Iterator it (.iterator active)]
            (loop []
              (when (.hasNext it)
@@ -136,12 +128,20 @@
                      _ (aset delay-r widx (* 0.38 dl*))
                      _ (aset delay-idx 0 (let [n (inc widx)] (if (>= n delay-len) 0 n)))
                      verb-in (+ synth-l synth-r (* 0.3 (+ (aget bl i) (aget br i))) (* 0.15 (+ (aget dl i) (aget dr i))))
-                     vl (reverb-sample rev-l verb-in)
-                     vr (reverb-sample rev-r verb-in)
+                     vl (.invokePrim rev-l verb-in)
+                     vr (.invokePrim rev-r verb-in)
                      ml (+ (aget dl i) (* duck (+ (aget bl i) synth-l (* 0.22 dl*))) (* 0.9 vl))
                      mr (+ (aget dr i) (* duck (+ (aget br i) synth-r (* 0.22 dr*))) (* 0.9 vr))]
-                 (aset out-l i (Math/tanh (* 0.9 ml)))
-                 (aset out-r i (Math/tanh (* 0.9 mr)))))))
+                 (if (and (Double/isFinite ml) (Double/isFinite mr))
+                   (do (aset out-l i (Math/tanh (* 0.9 ml)))
+                       (aset out-r i (Math/tanh (* 0.9 mr))))
+                   (do (java.util.Arrays/fill delay-l 0.0)
+                       (java.util.Arrays/fill delay-r 0.0)
+                       (reset-l)
+                       (reset-r)
+                       (aset resets 0 (inc (aget resets 0)))
+                       (aset out-l i 0.0)
+                       (aset out-r i 0.0)))))))
          (aset position 0 end)))}))
 
 (defn submit! [mixer ^long frame params seed]

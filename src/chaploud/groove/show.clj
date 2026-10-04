@@ -13,7 +13,7 @@
     (name inst)))
 
 (defn grid [node {:keys [defs globals instruments bars]}]
-  (let [expanded (expand/expand node defs globals {} [] #{})
+  (let [expanded (expand/expand node defs globals [])
         bars (or bars (max 1 (long (Math/ceil (double (:len expanded))))))
         events (for [bar (range bars)
                      e (query/bar-events expanded bar {:seed [:show bar]})]

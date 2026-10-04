@@ -13,7 +13,7 @@
                  (s/put-def :clip/a [:notes {:inst :synth/keys} [:e 0 #{0 2} :_ 1/16 3]])
                  (s/play :a [:clip/a {:octave 3}])
                  (assoc-in [:globals :root] :a))
-        loaded (io/song->session (io/read-song (io/write-song! sess path)) s/empty-session)]
+        loaded (io/song->session (io/read-song (io/write-song! sess path)))]
     (is (= (select-keys sess [:defs :tracks :globals]) (select-keys loaded [:defs :tracks :globals])))))
 
 (deftest includes-merge-with-local-precedence
@@ -27,3 +27,11 @@
   (let [path (str (tmp-dir) "/song.edn")]
     (spit path (pr-str {:groove/format 99}))
     (is (thrown-with-msg? Exception #"newer version" (io/read-song path)))))
+
+(deftest include-errors-name-the-file
+  (let [dir (tmp-dir)]
+    (spit (jio/file dir "a.edn") (pr-str {:include ["b.edn"]}))
+    (spit (jio/file dir "b.edn") (pr-str {:include ["a.edn"]}))
+    (spit (jio/file dir "c.edn") (pr-str {:include "a.edn"}))
+    (is (thrown-with-msg? Exception #"Include cycle" (io/read-song (str dir "/a.edn"))))
+    (is (thrown-with-msg? Exception #":include must be a vector" (io/read-song (str dir "/c.edn"))))))
