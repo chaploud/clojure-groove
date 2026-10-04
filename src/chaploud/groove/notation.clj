@@ -53,7 +53,7 @@
     (map? v) v
     :else nil))
 
-(defn parse-notes [items default-dur]
+(defn- parse-notes* [items default-dur]
   (when-not (vector? items) (fail "Notes must be a vector" {:notes items}))
   (loop [[x & more :as xs] items, dur default-dur, t (num 0), out []]
     (cond
@@ -64,6 +64,22 @@
       :else (let [ev (or (pitch-of x) (fail (str "Invalid note: " (pr-str x)) {:note x}))
                   d (or (:dur ev) dur)]
               (recur more dur (+ t d) (conj out {:t t :dur d :event (dissoc ev :dur)}))))))
+
+(declare link-glides)
+
+(defn parse-notes [items default-dur]
+  (link-glides (parse-notes* items default-dur)))
+
+(def ^:private pitch-keys [:degree :note :midi :roman :chord])
+
+(defn- link-glides [items]
+  (let [notes (filterv :event items)
+        previous (zipmap (map :t notes) (cons (peek notes) notes))]
+    (mapv (fn [{:keys [t event] :as item}]
+            (if (:glide event)
+              (assoc-in item [:event :glide-from] (select-keys (:event (previous t)) pitch-keys))
+              item))
+          items)))
 
 ;; ---------------------------------------------------------------- mini-notation
 

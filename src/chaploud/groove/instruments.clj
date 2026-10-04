@@ -5,8 +5,8 @@
                :pitch 46.0 :punch 170.0 :pitch-decay 30.0 :decay 0.28 :click 0.35 :drive 2.4}
    :drum/snare {:voice :snare :bus :drums :gain 0.55 :length 0.6 :tone 190.0 :snappy 0.9 :decay 0.16}
    :drum/clap {:voice :clap :bus :drums :gain 0.6 :length 0.7 :decay 0.16 :pan 0.05}
-   :drum/hat {:voice :metal :bus :drums :gain 0.8 :length 0.2 :decay 0.035 :tune 1.0 :cutoff 7500.0 :pan 0.2}
-   :drum/open-hat {:voice :metal :bus :drums :gain 0.6 :length 1.0 :decay 0.28 :tune 1.0 :cutoff 7000.0 :pan 0.2}
+   :drum/hat {:voice :metal :bus :drums :choke :hats :gain 0.8 :length 0.2 :decay 0.035 :tune 1.0 :cutoff 7500.0 :pan 0.2}
+   :drum/open-hat {:voice :metal :bus :drums :choke :hats :gain 0.6 :length 1.0 :decay 0.28 :tune 1.0 :cutoff 7000.0 :pan 0.2}
    :drum/ride {:voice :metal :bus :drums :gain 0.4 :length 2.0 :decay 0.7 :tune 1.6 :cutoff 5000.0 :pan -0.25}
    :drum/crash {:voice :metal :bus :drums :gain 0.5 :length 3.0 :decay 1.2 :tune 1.2 :cutoff 4000.0 :pan -0.1}
    :drum/rim {:voice :rim :bus :drums :gain 0.4 :length 0.1 :pan -0.15}
@@ -68,6 +68,12 @@
           (throw (ex-info (str "Kit " k " has no " inst) {:kit k :role inst}))))
     inst))
 
+(def ^:private bus-sends
+  {:drums {:delay 0.0 :reverb 0.15}
+   :bass {:delay 0.0 :reverb 0.3}
+   :synth {:delay 1.0 :reverb 1.0}})
+
 (defn resolve-event [{:keys [instruments kits]} event]
-  (let [inst (or (:inst event) (throw (ex-info "Event has no :inst" {:event event})))]
-    (merge (resolve-instrument instruments (instrument-key kits (assoc event :inst inst))) event)))
+  (let [inst (or (:inst event) (throw (ex-info "Event has no :inst" {:event event})))
+        preset (resolve-instrument instruments (instrument-key kits (assoc event :inst inst)))]
+    (merge (bus-sends (:bus preset)) preset event)))

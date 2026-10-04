@@ -10,12 +10,14 @@
 
 (def ^:const block 256)
 
-(deftype Scheduled [^long frame ^long bus ^boolean duck ^Voice voice])
+(deftype Scheduled [^long frame ^long bus ^boolean duck choke ^double delay ^double reverb ^Voice voice])
 
-(deftype Active [^long bus ^Voice voice ^longs from])
+(deftype Active [^long bus ^Voice voice choke ^double delay ^double reverb ^longs from ^longs fade])
+
+(def ^:private ^:const choke-frames 240)
 
 (defn- bus-index ^long [k]
-  (case k :drums 0 :bass 1 :synth 2 2))
+  (if (= k :drums) 0 1))
 
 (defn- make-reverb [^double sr ^long stereo-offset]
   (let [scale (fn [n] (+ (long (* sr (/ (double n) 44100.0))) stereo-offset))
@@ -51,7 +53,11 @@
         inbox (ConcurrentLinkedQueue.)
         pending (PriorityQueue. 64 (comparator (fn [^Scheduled a ^Scheduled b] (< (.frame a) (.frame b)))))
         active (ArrayList.)
-        buses (vec (repeatedly 6 #(double-array block)))
+        dry (vec (repeatedly 4 #(double-array block)))
+        ^doubles scratch-l (double-array block)
+        ^doubles scratch-r (double-array block)
+        ^doubles delay-in (double-array block)
+        ^doubles verb-in (double-array block)
         out-l (double-array block)
         out-r (double-array block)
         position (long-array 1)
@@ -89,22 +95,52 @@
              (when (and s (< (.frame s) end))
                (.poll pending)
                (let [from (max 0 (- (.frame s) start))]
-                 (.add active (Active. (.bus s) (.voice s) (long-array [from])))
+                 (when-let [group (.choke s)]
+                   (doseq [^Active other active
+                           :when (and (= group (.choke other)) (neg? (aget ^longs (.fade other) 0)))]
+                     (aset ^longs (.fade other) 0 (+ choke-frames (max 0 (- (.frame s) start))))))
+                 (.add active (Active. (.bus s) (.voice s) (.choke s) (.delay s) (.reverb s)
+                                       (long-array [from]) (long-array [-1])))
                  (when (.duck s) (.add duck-queue (max (.frame s) start))))
                (recur))))
-         (dotimes [b 6] (java.util.Arrays/fill ^doubles (buses b) 0.0))
+         (dotimes [b 4] (java.util.Arrays/fill ^doubles (dry b) 0.0))
+         (java.util.Arrays/fill delay-in 0.0)
+         (java.util.Arrays/fill verb-in 0.0)
          (let [^Iterator it (.iterator active)]
            (loop []
              (when (.hasNext it)
                (let [^Active a (.next it)
+                     from (aget ^longs (.from a) 0)
+                     ^longs fade (.fade a)
+                     _ (java.util.Arrays/fill scratch-l 0.0)
+                     _ (java.util.Arrays/fill scratch-r 0.0)
+                     alive (.render ^Voice (.voice a) scratch-l scratch-r from block)
                      bi (* 2 (.bus a))
-                     alive (.render ^Voice (.voice a) (buses bi) (buses (inc bi)) (aget ^longs (.from a) 0) block)]
+                     ^doubles out-l* (dry bi)
+                     ^doubles out-r* (dry (inc bi))
+                     send-d (* 0.5 (.delay a))
+                     send-r (.reverb a)
+                     faded (loop [i from]
+                             (if (< i block)
+                               (let [f (aget fade 0)
+                                     g (double (cond
+                                                 (neg? f) 1.0
+                                                 (> f choke-frames) 1.0
+                                                 :else (/ (double f) choke-frames)))
+                                     l (* g (aget scratch-l i))
+                                     r (* g (aget scratch-r i))]
+                                 (when (pos? f) (aset fade 0 (dec f)))
+                                 (aset out-l* i (+ (aget out-l* i) l))
+                                 (aset out-r* i (+ (aget out-r* i) r))
+                                 (aset delay-in i (+ (aget delay-in i) (* send-d (+ l r))))
+                                 (aset verb-in i (+ (aget verb-in i) (* send-r (+ l r))))
+                                 (recur (inc i)))
+                               (zero? (aget fade 0))))]
                  (aset ^longs (.from a) 0 0)
-                 (when-not alive (.remove it)))
+                 (when (or (not alive) faded) (.remove it)))
                (recur))))
-         (let [^doubles dl (buses 0) ^doubles dr (buses 1)
-               ^doubles bl (buses 2) ^doubles br (buses 3)
-               ^doubles sl (buses 4) ^doubles sr* (buses 5)
+         (let [^doubles dl (dry 0) ^doubles dr (dry 1)
+               ^doubles bl (dry 2) ^doubles br (dry 3)
                dframes (aget delay-frames 0)]
            (dotimes [i block]
              (let [frame (+ start i)]
@@ -123,16 +159,14 @@
                      ridx (let [x (- widx dframes)] (if (neg? x) (+ x delay-len) x))
                      dl* (aget delay-l ridx)
                      dr* (aget delay-r ridx)
-                     synth-l (aget sl i)
-                     synth-r (aget sr* i)
-                     _ (aset delay-l widx (+ (* 0.5 (+ synth-l synth-r)) (* 0.38 dr*)))
+                     _ (aset delay-l widx (+ (aget delay-in i) (* 0.38 dr*)))
                      _ (aset delay-r widx (* 0.38 dl*))
                      _ (aset delay-idx 0 (let [n (inc widx)] (if (>= n delay-len) 0 n)))
-                     verb-in (+ synth-l synth-r (* 0.3 (+ (aget bl i) (aget br i))) (* 0.15 (+ (aget dl i) (aget dr i))))
-                     vl (.invokePrim rev-l verb-in)
-                     vr (.invokePrim rev-r verb-in)
-                     ml (+ (aget dl i) (* duck (+ (aget bl i) synth-l (* 0.22 dl*))) (* 0.9 vl))
-                     mr (+ (aget dr i) (* duck (+ (aget br i) synth-r (* 0.22 dr*))) (* 0.9 vr))]
+                     vin (aget verb-in i)
+                     vl (.invokePrim rev-l vin)
+                     vr (.invokePrim rev-r vin)
+                     ml (+ (aget dl i) (* duck (+ (aget bl i) (* 0.22 dl*))) (* 0.9 vl))
+                     mr (+ (aget dr i) (* duck (+ (aget br i) (* 0.22 dr*))) (* 0.9 vr))]
                  (if (and (Double/isFinite ml) (Double/isFinite mr))
                    (do (aset out-l i (Math/tanh (* 0.9 ml)))
                        (aset out-r i (Math/tanh (* 0.9 mr))))
@@ -151,4 +185,5 @@
 (defn submit! [mixer ^long frame params seed]
   (let [voice (voices/make-voice params (:sample-rate mixer) seed)]
     (.add ^ConcurrentLinkedQueue (:inbox mixer)
-          (Scheduled. frame (bus-index (:bus params)) (boolean (:duck params)) voice))))
+          (Scheduled. frame (bus-index (:bus params)) (boolean (:duck params)) (:choke params)
+                      (double (:delay params 0.0)) (double (:reverb params 0.0)) voice))))

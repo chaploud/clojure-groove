@@ -44,7 +44,7 @@
       (when (and (= :synth (:voice p)) (nil? (:midi p)))
         (fail (str "Synth event for " (:inst event) " has no pitch") {:event event}))
       (assoc p
-             :vel (double (:vel p))
+             :vel (* (double (:vel p)) (double (:vel-scale p 1.0)))
              :dur-s (* (double (:dur p)) (double (:gate p)) bar-seconds)))))
 
 (defn tempo [session]

@@ -103,6 +103,13 @@
       (throw (ex-info (str "Unknown :voicing " (pr-str voicing) "; use :close :open :drop2 or :root")
                       {:voicing voicing})))))
 
+(defn- glide-source [{:keys [glide-from] :as event}]
+  (if glide-from
+    (let [from (resolve-midi (merge (apply dissoc event :glide-from :midi :note :degree :roman :chord [])
+                                    glide-from))]
+      (assoc (dissoc event :glide-from) :glide-from-midi (:midi from)))
+    event))
+
 (defn resolve-pitches [{:keys [roman chord arp-index transpose] :as event}]
   (if-let [midis (cond
                    roman (let [{:keys [degree shift intervals]}
@@ -115,5 +122,5 @@
     (let [voiced (voice midis event)
           picked (if arp-index [(voiced (mod arp-index (count voiced)))] voiced)]
       (for [m picked]
-        (assoc (dissoc event :roman :chord :arp-index) :midi m)))
-    [(resolve-midi event)]))
+        (glide-source (assoc (dissoc event :roman :chord :arp-index) :midi m))))
+    [(glide-source (resolve-midi event))]))

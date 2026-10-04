@@ -54,7 +54,7 @@ Without Babashka, the same commands run through the Clojure CLI: `clojure -M -m 
 (g/drum :snare [:_ :_ :_ :_ :x :_ {:vel 1 :if :fill} :x])   ; or a vector, with per-step attributes
 ```
 
-Every step is a 16th note unless the cascade sets `:step`. A pattern of 12 steps loops every 12 steps, so mixing lengths gives you polymeter.
+Every step is a 16th note unless the cascade sets `:step`. A pattern of 12 steps loops every 12 steps, so mixing lengths gives you polymeter. `:swing` (0–1) delays every second step by that fraction of a step; `:swing-step 1/8` swings eighths instead. In MPC terms, 58% is about `0.16` and a triplet feel (66%) about `0.33`.
 
 Per-step attributes follow the vocabulary of hardware sequencers:
 
@@ -65,6 +65,7 @@ Per-step attributes follow the vocabulary of hardware sequencers:
 | `:if` | condition: `:fill`, `:!fill`, `:1st`, `:!1st`, or `[a b]` (play on the a-th of every b loops) |
 | `:ratchet` | repeat the hit n times within the step |
 | `:nudge` | shift by a fraction of the step |
+| `:humanize` | 0–1: small, repeatable random shifts of timing and velocity |
 | any synth parameter | a parameter lock for that step, e.g. `{:cutoff 900.0}` |
 
 ### Notes: melodies
@@ -75,7 +76,7 @@ Per-step attributes follow the vocabulary of hardware sequencers:
 (g/synth :lead [1/8 0 2 1/16 4 5 :c5 :_])     ; ratios set the length; keywords like :c5 are note names
 ```
 
-Integers are scale degrees, resolved through `:root`, `:scale` and `:octave` from the cascade. A length applies until the next length keyword, but never outside its vector.
+Integers are scale degrees, resolved through `:root`, `:scale` and `:octave` from the cascade. A length applies until the next length keyword, but never outside its vector. A note written as `{:degree 4 :glide true}` slides into its pitch from the note before it, like a 303 slide (`:glide-time` sets how long, default 0.06 s).
 
 ### Chords
 
@@ -173,7 +174,7 @@ Built-in instruments are synthesized, so they need no sample downloads:
 - Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high`
 - Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys`
 
-The kick ducks the bass and synth buses (sidechain), and synths go through a tempo-synced delay and a small reverb. Define your own instruments as data on top of a built-in one:
+The kick ducks the bass and synth buses (sidechain). Every track has `:delay` and `:reverb` send levels (0–1) that default by bus: drums are dry with a little reverb, synths go through a tempo-synced delay and the reverb. A closed hat cuts off a ringing open hat, because both are in the `:choke :hats` group. Define your own instruments as data on top of a built-in one:
 
 ```clojure
 (g/instrument! :my/bass {:base :synth/acid :cutoff 500.0 :res 0.6 :octave 1})
