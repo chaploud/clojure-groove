@@ -50,13 +50,13 @@ Without Babashka, the same commands run through the Clojure CLI: `clojure -M -m 
 Add it as a git dependency in `deps.edn`:
 
 ```clojure
-{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "SHA"}}}
+{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "5dbd390"}}}
 ```
 
 Then `(require '[chaploud.groove :as g])` from any REPL, or play a bundled song without cloning anything:
 
 ```sh
-clojure -Sdeps '{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "SHA"}}}' -M -m chaploud.groove.cli play anthem
+clojure -Sdeps '{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "5dbd390"}}}' -M -m chaploud.groove.cli play anthem
 ```
 
 ## Writing patterns
