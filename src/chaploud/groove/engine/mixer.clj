@@ -65,6 +65,7 @@
         [^IFn$DD rev-l reset-l] (make-reverb sr 0)
         [^IFn$DD rev-r reset-r] (make-reverb sr 23)
         resets (long-array 1)
+        poisoned (boolean-array 1)
         duck-release (* sr 0.16)
         duck-attack (* sr 0.004)]
     {:sample-rate sr
@@ -135,13 +136,16 @@
                  (if (and (Double/isFinite ml) (Double/isFinite mr))
                    (do (aset out-l i (Math/tanh (* 0.9 ml)))
                        (aset out-r i (Math/tanh (* 0.9 mr))))
-                   (do (java.util.Arrays/fill delay-l 0.0)
-                       (java.util.Arrays/fill delay-r 0.0)
-                       (reset-l)
-                       (reset-r)
-                       (aset resets 0 (inc (aget resets 0)))
+                   (do (aset poisoned 0 true)
                        (aset out-l i 0.0)
-                       (aset out-r i 0.0)))))))
+                       (aset out-r i 0.0))))))
+           (when (aget poisoned 0)
+             (java.util.Arrays/fill delay-l 0.0)
+             (java.util.Arrays/fill delay-r 0.0)
+             (reset-l)
+             (reset-r)
+             (aset poisoned 0 false)
+             (aset resets 0 (inc (aget resets 0)))))
          (aset position 0 end)))}))
 
 (defn submit! [mixer ^long frame params seed]
