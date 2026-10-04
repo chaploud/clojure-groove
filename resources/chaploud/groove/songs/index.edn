@@ -1,5 +1,5 @@
 [{:name "house" :genre "house" :about "Swung drums from a shared library, an organ-ish stab and a round bass"}
- {:name "acid" :genre "techno" :about "A 303-style line whose accents open the filter, reversed every fourth bar"}
+ {:name "acid" :genre "techno" :about "A 303-style line with an LFO on the cutoff, reversed every fourth bar"}
  {:name "techno" :genre "techno" :about "Rumbling reese, Euclidean rims and an offbeat ride"}
  {:name "trance" :genre "trance" :about "A full arrangement: intro, build, drop, breakdown, drop"}
  {:name "dnb" :genre "drum and bass" :about "A two-step break and a moving reese in mini-notation"}

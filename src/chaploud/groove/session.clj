@@ -1,4 +1,4 @@
-(ns chaploud.groove.session
+(ns ^:no-doc chaploud.groove.session
   (:require [chaploud.groove.engine.voices :as voices]
             [chaploud.groove.expand :as expand]
             [chaploud.groove.instruments :as instruments]

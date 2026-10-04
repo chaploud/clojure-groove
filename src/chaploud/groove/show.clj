@@ -1,4 +1,4 @@
-(ns chaploud.groove.show
+(ns ^:no-doc chaploud.groove.show
   (:require [chaploud.groove.expand :as expand]
             [chaploud.groove.instruments :as instruments]
             [chaploud.groove.pitch :as pitch]

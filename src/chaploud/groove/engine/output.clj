@@ -1,4 +1,4 @@
-(ns chaploud.groove.engine.output
+(ns ^:no-doc chaploud.groove.engine.output
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream File]
            [javax.sound.sampled AudioFileFormat$Type AudioFormat AudioInputStream AudioSystem SourceDataLine]))
 

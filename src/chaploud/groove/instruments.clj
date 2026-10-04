@@ -1,4 +1,4 @@
-(ns chaploud.groove.instruments)
+(ns ^:no-doc chaploud.groove.instruments)
 
 (def builtin
   {:drum/kick {:voice :kick :bus :drums :duck true :gain 1.0 :length 0.9

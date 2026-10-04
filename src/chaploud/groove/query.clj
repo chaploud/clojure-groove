@@ -1,4 +1,4 @@
-(ns chaploud.groove.query
+(ns ^:no-doc chaploud.groove.query
   (:require [chaploud.groove.notation :as notation]
             [chaploud.groove.pitch :as pitch]
             [chaploud.groove.signal :as signal]))

@@ -1,4 +1,4 @@
-(ns chaploud.groove.library
+(ns ^:no-doc chaploud.groove.library
   (:require [clojure.edn :as edn]
             [clojure.java.io :as jio]))
 

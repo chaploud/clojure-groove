@@ -1,4 +1,4 @@
-(ns chaploud.groove.notation
+(ns ^:no-doc chaploud.groove.notation
   (:require [chaploud.groove.pitch :as pitch]))
 
 (defn- fail [msg data] (throw (ex-info msg data)))
