@@ -1,0 +1,58 @@
+(ns chaploud.groove.pitch
+  (:require [clojure.string :as str]))
+
+(def scales
+  {:major [0 2 4 5 7 9 11]
+   :minor [0 2 3 5 7 8 10]
+   :dorian [0 2 3 5 7 9 10]
+   :phrygian [0 1 3 5 7 8 10]
+   :lydian [0 2 4 6 7 9 11]
+   :mixolydian [0 2 4 5 7 9 10]
+   :locrian [0 1 3 5 6 8 10]
+   :harmonic-minor [0 2 3 5 7 8 11]
+   :melodic-minor [0 2 3 5 7 9 11]
+   :major-pentatonic [0 2 4 7 9]
+   :minor-pentatonic [0 3 5 7 10]
+   :blues [0 3 5 6 7 10]
+   :chromatic [0 1 2 3 4 5 6 7 8 9 10 11]})
+
+(def ^:private letter->pc {"c" 0 "d" 2 "e" 4 "f" 5 "g" 7 "a" 9 "b" 11})
+
+(defn parse-note [x]
+  (when (or (keyword? x) (string? x) (symbol? x))
+    (when-let [[_ letter acc octave] (re-matches #"(?i)([a-g])(#|s|b)?(-?\d+)?" (name x))]
+      {:pc (mod (+ (letter->pc (str/lower-case letter))
+                   (case acc ("#" "s") 1 "b" -1 0))
+                12)
+       :octave (some-> octave parse-long)})))
+
+(defn note->midi [x default-octave]
+  (let [{:keys [pc octave]} (or (parse-note x)
+                                (throw (ex-info (str "Not a note name: " (pr-str x)) {:note x})))]
+    (+ pc (* 12 (inc (or octave default-octave))))))
+
+(defn- scale-steps [scale]
+  (cond
+    (keyword? scale) (or (scales scale)
+                         (throw (ex-info (str "Unknown scale: " scale) {:scale scale :known (keys scales)})))
+    (and (sequential? scale) (seq scale)) (vec scale)
+    :else (throw (ex-info (str "Invalid scale: " (pr-str scale)) {:scale scale}))))
+
+(defn degree->midi [degree {:keys [root scale octave] :or {root :c scale :major octave 4}}]
+  (let [steps (scale-steps scale)
+        n (count steps)
+        d (long degree)]
+    (+ (:pc (or (parse-note root) (throw (ex-info (str "Invalid root: " (pr-str root)) {:root root}))))
+       (steps (Math/floorMod d n))
+       (* 12 (+ 1 octave (Math/floorDiv d n))))))
+
+(defn resolve-midi [{:keys [midi note degree transpose octave] :or {octave 4} :as event}]
+  (let [m (cond
+            midi midi
+            note (note->midi note octave)
+            degree (degree->midi degree event))]
+    (cond-> event
+      m (assoc :midi (+ m (or transpose 0))))))
+
+(defn midi->hz ^double [midi]
+  (* 440.0 (Math/pow 2.0 (/ (- (double midi) 69.0) 12.0))))
