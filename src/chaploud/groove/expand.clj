@@ -22,6 +22,24 @@
                (fail ":degrade needs a probability between 0 and 1" path {:transform tf})))
   tf)
 
+(defn- distance [^String a ^String b]
+  (let [n (count b)]
+    (peek (reduce (fn [prev [i ca]]
+                    (reduce (fn [row j]
+                              (conj row (min (inc (peek row))
+                                             (inc (prev (inc j)))
+                                             (+ (prev j) (if (= ca (.charAt b j)) 0 1)))))
+                            [(inc i)]
+                            (range n)))
+                  (vec (range (inc n)))
+                  (map-indexed vector a)))))
+
+(defn- suggestion [k defs]
+  (let [target (str k)
+        [best d] (first (sort-by second (map (fn [c] [c (distance target (str c))]) (keys defs))))]
+    (when (and best (<= d (max 2 (quot (count target) 4))))
+      (str " (did you mean " best "?)"))))
+
 (defn- split-node [node]
   (let [[tag & more] node]
     (if (map? (first more))
@@ -67,7 +85,7 @@
            (when (seen tag)
              (fail (str "Circular reference through " tag) path {:ref tag}))
            (when-not (contains? defs tag)
-             (fail (str "Undefined reference " tag) path {:ref tag}))
+             (fail (str "Undefined reference " tag (suggestion tag defs)) path {:ref tag}))
            (when (seq children)
              (fail (str "A reference takes only an attribute map: " (pr-str node)) path {}))
            (expand* (defs tag) defs ctx (merge attrs overrides) path (conj seen tag)))

@@ -42,11 +42,32 @@
                 :cutoff 2200.0 :env 800.0 :fdecay 0.3 :res 0.05
                 :attack 0.003 :decay 0.6 :sustain 0.3 :release 0.3 :gate 0.9}})
 
-(defn resolve-instrument [instruments k]
+(def default-kit
+  {:bd :drum/kick :sd :drum/snare :cp :drum/clap :hh :drum/hat :oh :drum/open-hat :rim :drum/rim
+   :lt :drum/tom-low :mt :drum/tom-mid :ht :drum/tom-high :cb :drum/cowbell :cr :drum/crash :rd :drum/ride})
+
+(defn- resolve-with-base [defs builtins k what]
   (loop [k k, seen #{}, acc {}]
     (cond
       (nil? k) acc
-      (seen k) (throw (ex-info (str "Circular instrument :base through " k) {:inst k}))
-      :else (let [m (or (get instruments k) (get builtin k)
-                        (throw (ex-info (str "Unknown instrument " k) {:inst k})))]
+      (seen k) (throw (ex-info (str "Circular " what " :base through " k) {what k}))
+      :else (let [m (or (get defs k) (get builtins k)
+                        (throw (ex-info (str "Unknown " what " " k) {what k})))]
               (recur (:base m) (conj seen k) (merge (dissoc m :base) acc))))))
+
+(defn resolve-instrument [instruments k]
+  (resolve-with-base instruments builtin k "instrument"))
+
+(defn resolve-kit [kits k]
+  (resolve-with-base kits {:kit/default default-kit} k "kit"))
+
+(defn instrument-key [kits {:keys [inst kit]}]
+  (if (simple-keyword? inst)
+    (let [k (or kit :kit/default)]
+      (or (get (resolve-kit kits k) inst)
+          (throw (ex-info (str "Kit " k " has no " inst) {:kit k :role inst}))))
+    inst))
+
+(defn resolve-event [{:keys [instruments kits]} event]
+  (let [inst (or (:inst event) (throw (ex-info "Event has no :inst" {:event event})))]
+    (merge (resolve-instrument instruments (instrument-key kits (assoc event :inst inst))) event)))

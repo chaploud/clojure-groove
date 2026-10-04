@@ -7,19 +7,19 @@
 
 (def ^:private note-names ["C" "C#" "D" "D#" "E" "F" "F#" "G" "G#" "A" "A#" "B"])
 
-(defn- row-label [{:keys [inst midi]}]
-  (if midi
+(defn- row-label [{:keys [midi voice]} role]
+  (if (and midi (= voice :synth))
     (str (note-names (mod midi 12)) (dec (quot midi 12)))
-    (name inst)))
+    (name role)))
 
-(defn grid [node {:keys [defs globals instruments bars]}]
+(defn grid [node {:keys [defs globals bars] :as catalog}]
   (let [expanded (expand/expand node defs globals [])
         bars (or bars (max 1 (long (Math/ceil (double (:len expanded))))))
         events (for [bar (range bars)
                      e (query/bar-events expanded bar {:seed [:show bar]})]
-                 (let [p (pitch/resolve-midi (merge (instruments/resolve-instrument instruments (:inst e)) e))]
+                 (let [p (pitch/resolve-midi (instruments/resolve-event catalog e))]
                    (assoc p :col (+ (* 16 bar) (long (Math/floor (* 16 (double (:t e))))))
-                          :label (row-label p))))
+                          :label (row-label p (:inst e)))))
         rows (->> (group-by :label events)
                   (sort-by (fn [[_ es]] (- (or (:midi (first es)) 1000)))))
         width (reduce max 4 (map (comp count first) rows))]

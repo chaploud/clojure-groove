@@ -2,10 +2,12 @@
   (:require [chaploud.groove.engine.output :as output]
             [chaploud.groove.instruments :as instruments]
             [chaploud.groove.io :as io]
+            [chaploud.groove.library :as library]
             [chaploud.groove.live :as live]
             [chaploud.groove.notation :as notation]
             [chaploud.groove.session :as session]
-            [chaploud.groove.show :as show]))
+            [chaploud.groove.show :as show]
+            [clojure.string :as str]))
 
 ;; Naming: gestures you make while playing (drum, play, mute, launch, fill, tempo …) have no
 ;; bang; definitions, files and the transport (put!, scene!, save!, start! …) do.
@@ -37,9 +39,9 @@
 
 (defn- default-drum [track]
   (let [k (keyword "drum" (name track))]
-    (or (when (contains? instruments/builtin k) k)
-        (notation/sound-aliases (name track))
-        (throw (ex-info (str "No drum named " track "; pass :inst, e.g. (drum " track " \"x...\" :inst :drum/rim)")
+    (or (notation/sound-aliases (name track))
+        (when (contains? instruments/builtin k) k)
+        (throw (ex-info (str "No drum named " track "; pass :inst, e.g. (drum " track " \"x...\" :inst :rim)")
                         {:track track})))))
 
 (defn- default-synth [track]
@@ -67,6 +69,10 @@
 
 (defn put! [k node]
   (commit! #(session/put-def % k node))
+  k)
+
+(defn kit! [k roles]
+  (commit! #(session/put-kit % k roles))
   k)
 
 (defn instrument! [k params]
@@ -128,4 +134,37 @@
   ([x bars]
    (let [s (session)
          node (or (and (simple-keyword? x) (get-in s [:tracks x :node])) x)]
-     (println (show/grid node (assoc (select-keys s [:defs :globals :instruments]) :bars bars))))))
+     (println (show/grid node (assoc (library/catalog s) :globals (:globals s) :bars bars))))))
+
+;; ---------------------------------------------------------------- discovery
+
+(defn- entries []
+  (let [{:keys [defs kits instruments]} (library/catalog (session))]
+    (concat
+     (for [k (keys defs)] (merge {:name k :kind :part} (library/about k)))
+     (for [k (cons :kit/default (keys kits))] (merge {:name k :kind :kit} (library/about k)))
+     (for [[k v] (merge instruments/builtin instruments)]
+       {:name k :kind :instrument :doc (name (:voice v (:base v)))}))))
+
+(defn browse
+  ([]
+   (doseq [[ns es] (sort-by key (group-by (comp namespace :name) (entries)))]
+     (println (format "  %-12s %3d  %s" ns (count es)
+                      (str/join " " (take 6 (sort (map (comp name :name) es)))))))
+   (println "\n(browse \"term\") searches names, tags and descriptions; (audition :beat/house) plays one."))
+  ([term]
+   (let [t (str/lower-case (name term))
+         hits (filter (fn [{:keys [name tags doc]}]
+                        (some #(str/includes? (str/lower-case (str %)) t)
+                              (concat [name doc] tags)))
+                      (entries))]
+     (doseq [{:keys [name tags doc tempo]} (sort-by (comp str :name) hits)]
+       (println (format "  %-20s %-34s %s" name (str/join " " (sort (map clojure.core/name tags)))
+                        (str (or doc "") (when tempo (str " (" tempo " BPM)")))))))))
+
+(defn audition [part]
+  (if part
+    (do (play :audition (if (keyword? part) [part] part))
+        (when-not (live/current-bar) (start!))
+        part)
+    (clear :audition)))

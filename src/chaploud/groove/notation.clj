@@ -67,10 +67,9 @@
 ;; ---------------------------------------------------------------- mini-notation
 
 (def sound-aliases
-  {"bd" :drum/kick "kick" :drum/kick "sd" :drum/snare "snare" :drum/snare
-   "cp" :drum/clap "clap" :drum/clap "hh" :drum/hat "ch" :drum/hat "oh" :drum/open-hat
-   "rim" :drum/rim "rs" :drum/rim "lt" :drum/tom-low "mt" :drum/tom-mid "ht" :drum/tom-high
-   "cb" :drum/cowbell "cr" :drum/crash "rd" :drum/ride})
+  {"bd" :bd "kick" :bd "sd" :sd "snare" :sd "cp" :cp "clap" :cp "hh" :hh "ch" :hh "hat" :hh
+   "oh" :oh "rim" :rim "rs" :rim "lt" :lt "mt" :mt "ht" :ht "cb" :cb "cr" :cr "crash" :cr
+   "rd" :rd "ride" :rd})
 
 (defn- word->event [w]
   (cond

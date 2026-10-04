@@ -21,14 +21,14 @@
   (is (thrown-with-msg? Exception #"Invalid note" (n/parse-notes [0 :zz] 1/16))))
 
 (deftest mini-notation
-  (is (= [[0 :drum/kick] [1/4 :drum/snare] [1/2 :drum/kick] [3/4 :drum/snare]] (onsets "bd sd bd sd" 0 1)))
-  (is (= [[0 :drum/kick] [1/2 :drum/snare] [3/4 :drum/snare]] (onsets "bd [sd sd]" 0 1)))
-  (is (= [[0 :drum/hat] [1/4 :drum/hat] [1/2 :drum/hat] [3/4 :drum/hat]] (onsets "hh*4" 0 1)))
+  (is (= [[0 :bd] [1/4 :sd] [1/2 :bd] [3/4 :sd]] (onsets "bd sd bd sd" 0 1)))
+  (is (= [[0 :bd] [1/2 :sd] [3/4 :sd]] (onsets "bd [sd sd]" 0 1)))
+  (is (= [[0 :hh] [1/4 :hh] [1/2 :hh] [3/4 :hh]] (onsets "hh*4" 0 1)))
   (testing "alternation advances once per cycle, nested alternation per visit"
-    (is (= [[0 :drum/kick] [1 :drum/snare] [2 :drum/kick]] (onsets "<bd sd>" 0 3)))
+    (is (= [[0 :bd] [1 :sd] [2 :bd]] (onsets "<bd sd>" 0 3)))
     (is (= [1 2 3 2] (map second (onsets "<<1 3> 2>" 0 4)))))
-  (is (= [[0 :drum/kick] [3/8 :drum/kick] [3/4 :drum/kick]] (onsets "bd(3,8)" 0 1)))
-  (is (= #{[0 :drum/kick] [0 :drum/hat] [1/2 :drum/hat]} (set (onsets "bd, hh*2" 0 1))))
+  (is (= [[0 :bd] [3/8 :bd] [3/4 :bd]] (onsets "bd(3,8)" 0 1)))
+  (is (= #{[0 :bd] [0 :hh] [1/2 :hh]} (set (onsets "bd, hh*2" 0 1))))
   (is (= [[0 1] [1/3 1] [2/3 2]] (onsets "1!2 2" 0 1)))
   (is (= [[0 1] [3/4 2]] (onsets "1@3 2" 0 1)))
   (is (= [] (onsets "hh*8?1" 0 1)))

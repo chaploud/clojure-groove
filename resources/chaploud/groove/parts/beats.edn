@@ -1,0 +1,74 @@
+;; Drum patterns written with roles, so any kit plays them. One bar unless noted.
+{:defs
+ {:beat/four-floor [:steps {:inst :bd} "x... x... x... x..."]
+  :beat/house [:par :beat/four-floor
+               [:steps {:inst :cp} ".... x... .... x..."]
+               [:steps {:inst :hh :vel 0.6} "..x. ..x. ..x. ..x."]]
+  :beat/deep-house [:par {:swing 0.12} :beat/house
+                    [:steps {:inst :hh :vel 0.3} "xxxx xxxx xxxx xxXx"]]
+  :beat/disco [:par :beat/four-floor
+               [:steps {:inst :sd} ".... x... .... x..."]
+               [:steps {:inst :oh :vel 0.5} "..x. ..x. ..x. ..x."]
+               [:steps {:inst :hh :vel 0.35} "x.x. x.x. x.x. x.x."]]
+  :beat/techno [:par :beat/four-floor
+                [:steps {:inst :oh :vel 0.45} "..x. ..x. ..x. ..x."]
+                [:steps {:inst :hh :vel 0.3} "xxxx xxxx xxxx xxxx"]
+                [:cycle {:vel 0.5} "rim(3,8,2)"]]
+  :beat/trance [:par :beat/four-floor
+                [:steps {:inst :oh :vel 0.5} "..x. ..x. ..x. ..x."]
+                [:steps {:inst :cp} ".... x... .... x..."]]
+  :beat/electro [:par [:steps {:inst :bd} "x..x ..x. ..x. ...."]
+                 [:steps {:inst :sd} ".... x... .... x..."]
+                 [:steps {:inst :hh :vel 0.5} "x.x. x.x. x.x. x.xx"]]
+  :beat/breakbeat [:par [:steps {:inst :bd} "x.x. .... ..x. ...."]
+                   [:steps {:inst :sd} ".... x... .x.. x..."]
+                   [:steps {:inst :hh :vel 0.5} "x.x. x.x. x.x. x.x."]]
+  :beat/two-step [:par {:swing 0.2}
+                  [:steps {:inst :bd} "x... .... ..x. ..x."]
+                  [:steps {:inst :sd} ".... x... .... x..."]
+                  [:steps {:inst :hh :vel 0.5} "..x. ..x. ..x. ..xx"]]
+  :beat/dnb [:par [:steps {:inst :bd} "x... .... ..x. ...."]
+             [:steps {:inst :sd} ".... x... .... x..."]
+             [:steps {:inst :hh :vel 0.45 :prob 0.85} "x.x. x.x. x.x. x.x."]]
+  :beat/jungle [:par [:steps {:inst :bd} "x.x. .... ..xx .... x... .... ..x. ...."]
+                [:steps {:inst :sd} ".... x..x .x.. x..x .... x... .x.. xx.x"]
+                [:steps {:inst :hh :vel 0.4} "x.xx x.xx x.xx x.xx x.xx x.xx x.xx x.xx"]]
+  :beat/boom-bap [:par {:swing 0.22}
+                  [:steps {:inst :bd} "x... ...x ..x. ...."]
+                  [:steps {:inst :sd} ".... x... .... x..."]
+                  [:steps {:inst :hh :vel 0.5} "x.x. x.x. x.x. x.x."]]
+  :beat/trap [:par [:steps {:inst :bd} "x... .... ..x. ...x"]
+              [:steps {:inst :cp} ".... .... x... ...."]
+              [:steps {:inst :hh :vel 0.5}
+               [:x :x {:ratchet 2} :x :x {:ratchet 3} :x :x :x :x {:ratchet 2} :x :x {:ratchet 4} :x :x]]]
+  :beat/dembow [:par :beat/four-floor
+                [:steps {:inst :sd} "...x ..x. ...x ..x."]]
+  :beat/afrobeat [:par [:steps {:inst :bd} "x... ..x. x... ..x."]
+                  [:steps {:inst :sd} ".... x... ..x. x..."]
+                  [:steps {:inst :hh :vel 0.45} "x.xx x.xx x.xx x.xx"]
+                  [:cycle {:vel 0.4} "cb(5,8,2)"]]
+  :beat/halftime [:par [:steps {:inst :bd} "x... .... .... ..x."]
+                  [:steps {:inst :sd} ".... .... x... ...."]
+                  [:steps {:inst :hh :vel 0.45} "x.x. x.x. x.x. x.x."]]
+  :beat/lofi [:par {:swing 0.28 :kit :kit/lofi}
+              [:steps {:inst :bd} "x... ...x ..x. ...."]
+              [:steps {:inst :sd} ".... x... .... x..."]
+              [:steps {:inst :hh :vel 0.5} "x.xx x.x. x.xx x.xx"]]}
+ :about
+ {:beat/four-floor {:tags #{:house :techno :trance :disco} :tempo 124 :doc "Kick on every beat"}
+  :beat/house {:tags #{:house} :tempo 124 :doc "Four on the floor, claps on 2 and 4, offbeat hats"}
+  :beat/deep-house {:tags #{:house :swing} :tempo 120 :doc "Swung house with a 16th shaker"}
+  :beat/disco {:tags #{:disco :house} :tempo 118 :doc "Snare backbeat, offbeat open hats over 8th hats"}
+  :beat/techno {:tags #{:techno} :tempo 130 :doc "Offbeat open hat, driving 16ths, Euclidean rim"}
+  :beat/trance {:tags #{:trance} :tempo 138 :doc "Four on the floor with offbeat open hats"}
+  :beat/electro {:tags #{:electro :808} :tempo 128 :doc "Syncopated electro-funk kick"}
+  :beat/breakbeat {:tags #{:breakbeat :big-beat} :tempo 130 :doc "A straight breakbeat"}
+  :beat/two-step {:tags #{:garage :uk :swing} :tempo 132 :doc "Skippy UK garage two-step"}
+  :beat/dnb {:tags #{:dnb} :tempo 174 :doc "Two-step drum and bass"}
+  :beat/jungle {:tags #{:jungle :dnb :breakbeat} :tempo 168 :doc "Two bars of chopped-break style jungle"}
+  :beat/boom-bap {:tags #{:hip-hop :swing} :tempo 90 :doc "Swung boom bap"}
+  :beat/trap {:tags #{:trap :hip-hop} :tempo 140 :doc "Half-time trap with ratcheted hats"}
+  :beat/dembow {:tags #{:reggaeton :latin} :tempo 95 :doc "The dembow rhythm"}
+  :beat/afrobeat {:tags #{:afrobeat :afro} :tempo 110 :doc "Afrobeat groove with a Euclidean cowbell"}
+  :beat/halftime {:tags #{:dubstep :halftime} :tempo 140 :doc "Snare on beat 3"}
+  :beat/lofi {:tags #{:lofi :hip-hop :swing} :tempo 84 :doc "Lazy, heavily swung, on the lofi kit"}}}
