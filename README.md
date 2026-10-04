@@ -41,7 +41,7 @@ bb render lofi         # or render it to out/lofi.wav without touching an audio 
 bb nrepl               # start an nREPL server for live coding
 ```
 
-With the REPL connected, open [`examples/jam.clj`](examples/jam.clj) and evaluate the forms one at a time.
+With the REPL connected, follow [docs/guide.md](docs/guide.md) (an empty bar to an arranged track in about fifteen minutes), or open [`examples/jam.clj`](examples/jam.clj) and evaluate the forms one at a time. [docs/reference.md](docs/reference.md) lists everything a song can contain.
 
 Without Babashka, the same commands run through the Clojure CLI: `clojure -M -m chaploud.groove.cli play trance`, and `clojure -M:dev:nrepl` for the REPL.
 
@@ -112,6 +112,7 @@ A library of ready-made parts ships with the code, so a groove can start from a 
 (g/browse "garage")             ; search names, tags and descriptions
 (g/audition :beat/two-step)     ; hear one (on the :audition track; (g/audition nil) stops)
 (g/show :beat/two-step)         ; see it as a grid
+(g/describe :synth/acid)        ; an instrument's parameters and what they do
 
 (g/play :drums [:beat/house {:kit :kit/tr909 :swing 0.1}])
 (g/play :bass  [:bass/offbeat {:root :f :scale :minor}])
@@ -175,7 +176,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 | `mute` `unmute` `solo` `unsolo` | |
 | `fill` | make `:if :fill` steps play for the next n bars |
 | `put!` `instrument!` `kit!` `globals!` `tempo` | definitions and the root of the cascade |
-| `browse` `audition` | find and hear bundled parts |
+| `browse` `audition` `describe` | find, hear and inspect bundled parts, kits and instruments |
 | `scene!` `snap!` `launch` `arrange!` | scenes (track → node maps) and a scene timeline |
 | `save!` `load!` `render!` `show` | song files, offline WAV rendering, a text grid of any node |
 
@@ -205,7 +206,7 @@ The kick ducks the bass and synth buses (sidechain). Every track has `:delay` an
  :tracks {...}}
 ```
 
-`:include` merges instruments, definitions and scenes from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
+`:include` merges instruments, definitions and scenes from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
 
 ## Development
 

@@ -1,0 +1,11 @@
+;; Dub techno at 120 BPM: one dorian chord stab drowned in delay and reverb, a sub on the offbeats
+;; and a filter that slowly opens and closes.
+{:globals {:tempo 120 :root :d :scale :dorian}
+ :tracks
+ {:drums [:par [:beat/four-floor {:kit :kit/tr909}]
+          [:steps {:inst :hh :vel 0.3} "..x. ..x. ..x. ..x."]
+          [:steps {:inst :rim :vel 0.4 :delay 0.7} ".... .... ...x ...."]]
+  :stab [:notes {:inst :synth/keys :octave 4 :delay 1.0 :reverb 1.0 :vel 0.6
+                 :cutoff [:lfo :sine 16 600.0 3000.0]}
+         [:e :_ :_ :_ :_ :i7 :_ :_ :_]]
+  :sub [:notes {:inst :synth/sub :octave 1} [:e :_ 0 :_ 0 :_ 0 :_ 0]]}}

@@ -8,4 +8,7 @@
  {:name "polymeter" :genre "study" :about "Loops of 16, 12, 10 and 7 steps drifting against each other"}
  {:name "euclid" :genre "study" :about "Euclidean rhythms from around the world"}
  {:name "cascade" :genre "study" :about "References and the attribute cascade, one motif reused four ways"}
- {:name "anthem" :genre "trance" :about "Bundled parts only: one progression drives pad, arpeggio and bass"}]
+ {:name "anthem" :genre "trance" :about "Bundled parts only: one progression drives pad, arpeggio and bass"}
+ {:name "garage" :genre "uk garage" :about "Two-step drums, swung minor-seventh stabs and a sliding bass"}
+ {:name "synthwave" :genre "synthwave" :about "Gated bass, arpeggio and a drifting pad over one progression"}
+ {:name "dub" :genre "dub techno" :about "A dorian chord stab drowned in delay, offbeat sub, slow filter LFO"}]
