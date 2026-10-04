@@ -9,4 +9,4 @@
   :drop {:drums [:beat/trance {:kit :kit/tr909}] :bass :anthem/bass}
   :break {:drums nil :bass nil :fill [:fill/snare-roll {:kit :kit/tr909}]}
   :outro {:fill nil :drums [:beat/trance {:kit :kit/tr909}] :bass :anthem/bass}}
- :arrangement [[:intro 4] [:drop 8] [:break 1] [:outro 8]]}
+ :arrangement [[:intro 4] [:drop 8] [:break 4] [:outro 8]]}

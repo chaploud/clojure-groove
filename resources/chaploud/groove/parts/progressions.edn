@@ -1,17 +1,18 @@
-;; Chord progressions in Roman numerals, one chord per bar. Uppercase is major, lowercase minor;
-;; they follow :root and :scale, and :inst, :voicing and :octave can be set where they are used.
+;; Chord progressions in Roman numerals, one chord per bar. Uppercase is major, lowercase minor.
+;; Each fixes the scale its numerals are written in and follows :root; :inst, :voicing and :octave
+;; can be set where they are used.
 {:defs
- {:prog/axis [:notes {:inst :synth/pad} [:w :I :V :vi :IV]]
-  :prog/sensitive [:notes {:inst :synth/pad} [:w :vi :IV :I :V]]
-  :prog/epic [:notes {:inst :synth/pad} [:w :i :VI :III :VII]]
-  :prog/andalusian [:notes {:inst :synth/pad} [:w :i :VII :VI :V]]
-  :prog/ii-v-i [:notes {:inst :synth/keys} [:w :ii7 :V7 :Imaj7 :Imaj7]]
-  :prog/royal-road [:notes {:inst :synth/pad} [:w :IVmaj7 :V7 :iii7 :vi]]
-  :prog/komuro [:notes {:inst :synth/pad} [:w :vi :IV :V :I]]
-  :prog/canon [:notes {:inst :synth/pad} [:w :I :V :vi :iii :IV :I :IV :V]]
-  :prog/blues [:notes {:inst :synth/keys} [:w :I7 :IV7 :I7 :I7 :IV7 :IV7 :I7 :I7 :V7 :IV7 :I7 :V7]]
-  :prog/dorian-vamp [:notes {:inst :synth/keys} [:w :i7 :IV7]]
-  :prog/deep-house [:notes {:inst :synth/keys} [:w :i7 :VImaj7 :iv7 :v7]]}
+ {:prog/axis [:notes {:inst :synth/pad :scale :major} [:w :I :V :vi :IV]]
+  :prog/sensitive [:notes {:inst :synth/pad :scale :major} [:w :vi :IV :I :V]]
+  :prog/epic [:notes {:inst :synth/pad :scale :minor} [:w :i :VI :III :VII]]
+  :prog/andalusian [:notes {:inst :synth/pad :scale :minor} [:w :i :VII :VI :V]]
+  :prog/ii-v-i [:notes {:inst :synth/keys :scale :major} [:w :ii7 :V7 :Imaj7 :Imaj7]]
+  :prog/royal-road [:notes {:inst :synth/pad :scale :major} [:w :IVmaj7 :V7 :iii7 :vi]]
+  :prog/komuro [:notes {:inst :synth/pad :scale :major} [:w :vi :IV :V :I]]
+  :prog/canon [:notes {:inst :synth/pad :scale :major} [:w :I :V :vi :iii :IV :I :IV :V]]
+  :prog/blues [:notes {:inst :synth/keys :scale :major} [:w :I7 :IV7 :I7 :I7 :IV7 :IV7 :I7 :I7 :V7 :IV7 :I7 :V7]]
+  :prog/dorian-vamp [:notes {:inst :synth/keys :scale :dorian} [:w :i7 :IV7]]
+  :prog/deep-house [:notes {:inst :synth/keys :scale :minor} [:w :i7 :VImaj7 :iv7 :v7]]}
  :about
  {:prog/axis {:tags #{:progression :pop :major :edm} :doc "I-V-vi-IV, the most common pop progression"}
   :prog/sensitive {:tags #{:progression :pop :edm} :doc "vi-IV-I-V, the same chords starting from the minor"}
@@ -22,5 +23,5 @@
   :prog/komuro {:tags #{:progression :j-pop :eurobeat} :doc "vi-IV-V-I"}
   :prog/canon {:tags #{:progression :classical :pop} :doc "Pachelbel's eight-chord canon"}
   :prog/blues {:tags #{:progression :blues} :doc "Twelve-bar blues with dominant sevenths"}
-  :prog/dorian-vamp {:tags #{:progression :funk :house :dorian} :doc "i7-IV7, best with :scale :dorian or :minor"}
+  :prog/dorian-vamp {:tags #{:progression :funk :house :dorian} :doc "i7-IV7 in dorian"}
   :prog/deep-house {:tags #{:progression :house :minor} :doc "i7-VImaj7-iv7-v7 minor-seventh chords"}}}

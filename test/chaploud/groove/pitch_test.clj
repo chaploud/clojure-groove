@@ -41,3 +41,7 @@
     (is (= [55 60 64 70] (midis (assoc c7 :voicing :drop2))))
     (is (= [60] (midis (assoc c7 :voicing :root))))
     (is (= [67] (midis (assoc c7 :arp-index 2))))))
+
+(deftest accidentals-count-from-the-major-scale
+  (is (= [70 74 77] (midis {:root :c :scale :minor :octave 4 :roman :bVII})))
+  (is (= [70 74 77] (midis {:root :c :scale :major :octave 4 :roman :bVII}))))
