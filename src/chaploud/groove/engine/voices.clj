@@ -236,7 +236,7 @@
                   _ (loop [o 0 al 0.0 ar 0.0]
                       (if (< o n-osc)
                         (let [p (aget phases o)
-                              dt (aget incs o)
+                              dt (* bend (aget incs o))
                               s (oscillator kind p dt)
                               p2 (+ p dt)
                               w (aget pans o)]

@@ -75,5 +75,5 @@
 
 (defn resolve-event [{:keys [instruments kits]} event]
   (let [inst (or (:inst event) (throw (ex-info "Event has no :inst" {:event event})))
-        preset (resolve-instrument instruments (instrument-key kits (assoc event :inst inst)))]
-    (merge (bus-sends (:bus preset)) preset event)))
+        m (merge (resolve-instrument instruments (instrument-key kits (assoc event :inst inst))) event)]
+    (merge (bus-sends (:bus m) (:synth bus-sends)) m)))
