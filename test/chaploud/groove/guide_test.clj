@@ -2,6 +2,7 @@
   (:require [chaploud.groove :as g]
             [chaploud.groove.live :as live]
             [chaploud.groove.session :as s]
+            [clojure.java.io :as jio]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]))
 
@@ -28,7 +29,7 @@
 
 (deftest the-jam-scratchpad-runs
   (let [saved @live/!state
-        forms (with-open [r (java.io.PushbackReader. (clojure.java.io/reader "examples/jam.clj"))]
+        forms (with-open [r (java.io.PushbackReader. (jio/reader "examples/jam.clj"))]
                 (doall (take-while some? (repeatedly #(read {:eof nil} r)))))
         body (rest (first (filter #(and (seq? %) (= 'comment (first %))) forms)))]
     (reset! live/!state {:session s/empty-session :compiled {}})
