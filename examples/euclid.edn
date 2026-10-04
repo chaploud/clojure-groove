@@ -1,0 +1,8 @@
+;; Euclidean rhythms from around the world, layered in mini-notation.
+;; (3,8) tresillo  (5,8) cinquillo  (7,16) samba-ish  (4,12,2) a shifted triplet pulse
+{:globals {:tempo 110 :root :c :scale :major-pentatonic}
+ :tracks
+ {:low [:cycle "bd(3,8)"]
+  :mid [:cycle "lt(5,8,2), cb(4,12,2)"]
+  :high [:cycle {:vel 0.5} "hh(7,16)"]
+  :melody [:cycle {:inst :synth/pluck :octave 5} "<0 2 4 [7 9]>(5,8)"]}}

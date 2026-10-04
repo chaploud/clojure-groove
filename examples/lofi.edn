@@ -1,0 +1,10 @@
+;; Lo-fi hip hop at 84 BPM: heavy swing, lazy keys with seventh chords and a soft sub.
+{:globals {:tempo 84 :root :eb :scale :major :swing 0.28}
+ :tracks
+ {:kick [:steps {:inst :drum/kick :decay 0.22 :drive 1.2} "x... ...x ..x. ...."]
+  :snare [:steps {:inst :drum/rim :vel 0.9} ".... x... .... x..."]
+  :hat [:steps {:inst :drum/hat :vel 0.35} "x.xx x.x. x.xx x.xx"]
+  :keys [:seq [:notes {:inst :synth/keys :octave 4} [:h #{1 3 5 7} :q :_ :e :_ #{1 3 5 7}]]
+         [:notes {:inst :synth/keys :octave 4} [:h #{4 6 8 10} :h :_]]]
+  :sub [:seq [:notes {:inst :synth/sub} [:q. 1 :e :_ :h :_]]
+        [:notes {:inst :synth/sub} [:q. 4 :e :_ :h :_]]]}}

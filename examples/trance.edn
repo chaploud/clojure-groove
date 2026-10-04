@@ -1,0 +1,20 @@
+;; Uplifting trance at 138 BPM, arranged with scenes: intro -> build -> drop -> breakdown -> drop.
+{:globals {:tempo 138 :root :g :scale :minor}
+ :defs
+ {:clip/kick [:steps {:inst :drum/kick} "x... x... x... x..."]
+  :clip/roll [:fx [:every 2 [:fast 2]] [:steps {:inst :drum/snare :vel 0.6} "x.x. x.x. xxxx xxxx"]]
+  :clip/hat [:steps {:inst :drum/open-hat :vel 0.45} "..x. ..x. ..x. ..x."]
+  :clip/bass [:notes {:inst :synth/bass} [:s :_ 0 0 0 :_ 0 0 0 :_ 0 0 0 :_ 0 0 0]]
+  :clip/arp [:notes {:inst :synth/pluck :octave 5} [:s 0 4 7 4 9 4 7 4 0 4 7 4 11 4 7 4]]
+  :clip/lead [:notes {:inst :synth/supersaw}
+              [:e 7 7 :s 9 :e. 7 :e 4 4 :s 2 :e. 4 :q 7 :e 9 11 :h 9]]
+  :clip/chords [:seq [:notes {:inst :synth/pad :octave 3} [:w #{0 2 4}]]
+                [:notes {:inst :synth/pad :octave 3} [:w #{-2 0 2}]]
+                [:notes {:inst :synth/pad :octave 3} [:w #{-4 -2 0}]]
+                [:notes {:inst :synth/pad :octave 3} [:w #{-3 -1 1}]]]}
+ :scenes
+ {:intro {:kick :clip/kick :hat :clip/hat :arp :clip/arp}
+  :build {:kick nil :roll :clip/roll :chords :clip/chords}
+  :drop {:kick :clip/kick :roll nil :bass :clip/bass :lead :clip/lead}
+  :breakdown {:kick nil :hat nil :bass nil :lead nil :arp :clip/arp}}
+ :arrangement [[:intro 4] [:build 4] [:drop 8] [:breakdown 4] [:drop 8]]}

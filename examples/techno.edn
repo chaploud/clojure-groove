@@ -1,0 +1,8 @@
+;; Driving techno at 130 BPM with a rumbling reese, euclidean rims and a ride on the offbeats.
+{:globals {:tempo 130 :root :e :scale :phrygian}
+ :tracks
+ {:kick [:steps {:inst :drum/kick :decay 0.4} "x... x... x... x..."]
+  :rumble [:notes {:inst :synth/reese :gate 0.5} [:s :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 1]]
+  :rim [:cycle {:vel 0.7} "rim(5,16,3)"]
+  :ride [:steps {:inst :drum/ride :vel 0.5} "..x. ..x. ..x. ..x."]
+  :hat [:steps {:inst :drum/hat :vel 0.4} "xxxx xxxx xxxx xxxx"]}}
