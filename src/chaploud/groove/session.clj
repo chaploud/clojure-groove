@@ -2,12 +2,14 @@
   (:require [chaploud.groove.engine.voices :as voices]
             [chaploud.groove.expand :as expand]
             [chaploud.groove.instruments :as instruments]
+            [chaploud.groove.library :as library]
             [chaploud.groove.pitch :as pitch]
             [chaploud.groove.query :as query]))
 
 (def empty-session
   {:globals {:tempo 120}
    :instruments {}
+   :kits {}
    :defs {}
    :scenes {}
    :tracks {}
@@ -35,9 +37,9 @@
       (fail (str ":gate must be a positive number, got " (pr-str gate)) {:param :gate})))
   p)
 
-(defn params [instrument-defs event bar-seconds]
-  (let [inst (or (:inst event) (fail "Event has no :inst" {:event event}))
-        p (pitch/resolve-midi (merge (instruments/resolve-instrument instrument-defs inst) event))
+(defn params [catalog event bar-seconds]
+  (let [inst (:inst event)
+        p (pitch/resolve-midi (instruments/resolve-event catalog event))
         p (check-params! (merge {:vel 0.8 :gate 1} p))]
     (when (and (= :synth (:voice p)) (nil? (:midi p)))
       (fail (str "Synth event for " inst " has no pitch") {:event event}))
@@ -54,13 +56,14 @@
 (defn track-nodes [session]
   (update-vals (:tracks session) :node))
 
-(defn compile-tracks [{:keys [tracks defs globals]}]
-  (into {}
-        (for [[track {:keys [node]}] tracks]
-          [track (try (expand/expand node defs globals [track])
-                      (catch clojure.lang.ExceptionInfo e
-                        (fail (str "Track " track ": " (ex-message e))
-                              (assoc (ex-data e) :track track))))])))
+(defn compile-tracks [{:keys [tracks globals] :as session}]
+  (let [defs (:defs (library/catalog session))]
+    (into {}
+          (for [[track {:keys [node]}] tracks]
+            [track (try (expand/expand node defs globals [track])
+                        (catch clojure.lang.ExceptionInfo e
+                          (fail (str "Track " track ": " (ex-message e))
+                                (assoc (ex-data e) :track track))))]))))
 
 (defn- audible? [{:keys [mute solo]} track]
   (and (not (mute track))
@@ -83,18 +86,19 @@
     (for [track (sort (keys (:tracks session)))
           :when (audible? session track)
           e (track-events session compiled track bar)]
-      (params (:instruments session) e secs))))
+      (params (library/catalog session) e secs))))
 
 (defn- probe-bars [node]
   (min 64 (max 8 (* 4 (long (Math/ceil (double (:len node))))))))
 
 (defn- probe-track! [session compiled track]
   (let [secs (bar-seconds session)
+        catalog (library/catalog session)
         session (assoc-in session [:tracks track :launch] 0)
         voice-params (volatile! #{})]
     (doseq [bar (range (probe-bars (compiled track)))
             e (track-events session compiled track bar {:all? true})]
-      (vswap! voice-params conj (dissoc (params (:instruments session) e secs) :t :dur :dur-s :track)))
+      (vswap! voice-params conj (dissoc (params catalog e secs) :t :dur :dur-s :track)))
     (doseq [p @voice-params]
       (voices/make-voice (assoc p :dur-s 0.1) 48000 0))))
 
@@ -152,6 +156,10 @@
   (if (nil? node)
     (update session :defs dissoc k)
     (assoc-in session [:defs k] node)))
+
+(defn put-kit [session k roles]
+  (def-key! k)
+  (assoc-in session [:kits k] roles))
 
 (defn put-instrument [session k params]
   (def-key! k)

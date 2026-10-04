@@ -86,7 +86,30 @@ For dense rhythms, a TidalCycles-style string fits a pattern into one bar:
 (g/mini :melody "<0 2 4 [7 9]>(5,8)" :inst :synth/pluck)
 ```
 
-Supported: `~` rest, `[ ]` subdivide, `< >` alternate per cycle, `,` layer, `*n` `/n` speed, `!n` repeat, `@n` weight, `?p` drop with probability, `(k,n,r)` Euclidean rhythm. Words are drum names (`bd sd cp hh oh rim lt mt ht cb cr rd`), scale degrees or note names.
+Supported: `~` rest, `[ ]` subdivide, `< >` alternate per cycle, `,` layer, `*n` `/n` speed, `!n` repeat, `@n` weight, `?p` drop with probability, `(k,n,r)` Euclidean rhythm. Words are drum roles (`bd sd cp hh oh rim lt mt ht cb cr rd`, played by the current kit), scale degrees or note names.
+
+## Parts and kits
+
+A library of ready-made parts ships with the code, so a groove can start from a reference instead of an empty bar:
+
+```clojure
+(g/browse)                      ; what is there, by namespace
+(g/browse "garage")             ; search names, tags and descriptions
+(g/audition :beat/two-step)     ; hear one (on the :audition track; (g/audition nil) stops)
+(g/show :beat/two-step)         ; see it as a grid
+
+(g/play :drums [:beat/house {:kit :kit/tr909 :swing 0.1}])
+(g/play :bass  [:bass/offbeat {:root :f :scale :minor}])
+```
+
+| Namespace | |
+|---|---|
+| `:beat/` | drum patterns: four-floor, house, deep-house, disco, techno, trance, electro, breakbeat, two-step, dnb, jungle, boom-bap, trap, dembow, afrobeat, halftime, lofi |
+| `:fill/` | one-bar fills: snare-roll, toms, crash, stutter |
+| `:bass/` | basslines in scale degrees: offbeat, rolling, acid, octave, root-fifth, sub, tr808, reese, funk |
+| `:kit/` | drum kits: default, tr808, tr909, lofi, hard |
+
+Drum parts are written with roles (`:bd :sd :cp :hh :oh :rim :lt :mt :ht :cb :cr :rd`), and the `:kit` attribute decides which instrument plays each role, so one pattern works with every kit. Mini-notation words like `bd` are the same roles. Your own definitions win over bundled ones of the same name, and `save!` writes only yours. Define a kit of your own with `(g/kit! :my/kit {:base :kit/tr808 :bd :my/kick})`.
 
 ## Composing with data
 
@@ -123,7 +146,8 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 | `clear` `hush` | remove some or all tracks |
 | `mute` `unmute` `solo` `unsolo` | |
 | `fill` | make `:if :fill` steps play for the next n bars |
-| `put!` `instrument!` `globals!` `tempo` | definitions and the root of the cascade |
+| `put!` `instrument!` `kit!` `globals!` `tempo` | definitions and the root of the cascade |
+| `browse` `audition` | find and hear bundled parts |
 | `scene!` `snap!` `launch` `arrange!` | scenes (track → node maps) and a scene timeline |
 | `save!` `load!` `render!` `show` | song files, offline WAV rendering, a text grid of any node |
 
@@ -131,7 +155,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 
 Built-in instruments are synthesized, so they need no sample downloads:
 
-- Drums: `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high`
+- Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high`
 - Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys`
 
 The kick ducks the bass and synth buses (sidechain), and synths go through a tempo-synced delay and a small reverb. Define your own instruments as data on top of a built-in one:

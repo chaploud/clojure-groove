@@ -6,7 +6,7 @@
 
 (def format-version 1)
 
-(def ^:private song-keys [:globals :instruments :defs :scenes :tracks :arrangement])
+(def ^:private song-keys [:globals :kits :instruments :defs :scenes :tracks :arrangement])
 
 (defn session->song [session]
   (apply array-map
@@ -49,7 +49,7 @@
         (throw (ex-info (str where ": :include must be a vector of paths") {:url where})))
       (reduce (fn [acc inc-path]
                 (let [lib (read-song* (java.net.URL. url ^String inc-path) (conj seen where))]
-                  (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:instruments :defs :scenes])))
+                  (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:kits :instruments :defs :scenes])))
               (dissoc song :include)
               includes))))
 

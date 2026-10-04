@@ -25,7 +25,7 @@
   (g/drum :hh "x")
   (g/synth :lead [0])
   (g/synth :foo [0])
-  (is (= {:hh :drum/hat :lead :synth/lead :foo :synth/keys}
+  (is (= {:hh :hh :lead :synth/lead :foo :synth/keys}
          (update-vals (:tracks (g/session)) #(get-in % [:node 1 :inst]))))
   (is (thrown-with-msg? Exception #"No drum named :zz" (g/drum :zz "x"))))
 

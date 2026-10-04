@@ -1,0 +1,31 @@
+;; Kits map drum roles (:bd :sd :cp :hh :oh :rim :lt :mt :ht :cb :cr :rd) to instruments.
+;; Choose one anywhere in the cascade with {:kit :kit/tr808}.
+{:instruments
+ {:tr808/kick {:base :drum/kick :pitch 41.0 :punch 95.0 :pitch-decay 16.0 :decay 0.6 :click 0.12 :drive 1.5 :length 1.4}
+  :tr808/snare {:base :drum/snare :tone 235.0 :snappy 0.65 :decay 0.17}
+  :tr808/clap {:base :drum/clap :decay 0.24}
+  :tr808/hat {:base :drum/hat :decay 0.045 :tune 0.85 :cutoff 8500.0}
+  :tr808/open-hat {:base :drum/open-hat :decay 0.4 :tune 0.85}
+  :tr808/cowbell {:base :drum/cowbell :decay 0.25}
+  :tr909/kick {:base :drum/kick :pitch 52.0 :punch 210.0 :pitch-decay 38.0 :decay 0.24 :click 0.55 :drive 3.2}
+  :tr909/snare {:base :drum/snare :tone 180.0 :snappy 1.1 :decay 0.2}
+  :tr909/hat {:base :drum/hat :decay 0.03 :tune 1.15 :cutoff 9000.0}
+  :tr909/open-hat {:base :drum/open-hat :decay 0.3 :tune 1.15}
+  :lofi/kick {:base :drum/kick :pitch 50.0 :punch 90.0 :decay 0.22 :click 0.05 :drive 1.1 :gain 0.85}
+  :lofi/snare {:base :drum/snare :tone 160.0 :snappy 0.45 :decay 0.12 :gain 0.45}
+  :lofi/hat {:base :drum/hat :decay 0.025 :tune 0.7 :cutoff 5000.0 :gain 0.6}
+  :hard/kick {:base :drum/kick :pitch 47.0 :punch 260.0 :pitch-decay 45.0 :decay 0.35 :click 0.6 :drive 5.0}
+  :hard/clap {:base :drum/clap :decay 0.1 :gain 0.7}
+  :hard/hat {:base :drum/hat :decay 0.02 :tune 1.3 :cutoff 10000.0}}
+ :kits
+ {:kit/tr808 {:base :kit/default :bd :tr808/kick :sd :tr808/snare :cp :tr808/clap :hh :tr808/hat
+              :oh :tr808/open-hat :cb :tr808/cowbell}
+  :kit/tr909 {:base :kit/default :bd :tr909/kick :sd :tr909/snare :hh :tr909/hat :oh :tr909/open-hat}
+  :kit/lofi {:base :kit/default :bd :lofi/kick :sd :lofi/snare :hh :lofi/hat :cp :drum/rim}
+  :kit/hard {:base :kit/default :bd :hard/kick :cp :hard/clap :hh :hard/hat}}
+ :about
+ {:kit/default {:tags #{:kit} :doc "The built-in drums"}
+  :kit/tr808 {:tags #{:kit :808 :hip-hop :trap :electro} :doc "Long boomy kick, soft snare, crisp hats"}
+  :kit/tr909 {:tags #{:kit :909 :house :techno} :doc "Punchy kick with a click, bright snare and hats"}
+  :kit/lofi {:tags #{:kit :lofi :hip-hop} :doc "Soft and dark; the clap is a rim"}
+  :kit/hard {:tags #{:kit :techno :hard} :doc "Distorted kick, tight clap and hats"}}}

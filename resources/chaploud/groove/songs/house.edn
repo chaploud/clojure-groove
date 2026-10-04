@@ -2,7 +2,7 @@
 {:include ["lib/house-kit.edn"]
  :globals {:tempo 122 :root :f :scale :minor}
  :tracks
- {:drums [:groove/house {:swing 0.12}]
+ {:drums [:mylib/house {:swing 0.12}]
   :shaker [:steps {:inst :drum/hat :vel 0.35 :swing 0.12} "xxxx xxxx xxxx xxXx"]
   :bass [:notes {:inst :synth/bass} [:e :_ 0 :_ 0 :s :_ 0 :e 2 :_ -2]]
   :stab [:notes {:inst :synth/keys :octave 4} [:e :_ :_ #{0 2 4} :_ :_ #{0 2 4} :s :_ #{-1 1 3} :e :_]]}}

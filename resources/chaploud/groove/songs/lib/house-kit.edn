@@ -1,9 +1,9 @@
 ;; A small shared library. Songs pull it in with {:include ["lib/house-kit.edn"]}.
 {:instruments
- {:kit/kick {:base :drum/kick :decay 0.32 :punch 150.0}
-  :kit/hat {:base :drum/hat :decay 0.03 :tune 1.1}}
+ {:mylib/kick {:base :drum/kick :decay 0.32 :punch 150.0}
+  :mylib/hat {:base :drum/hat :decay 0.03 :tune 1.1}}
  :defs
- {:groove/four [:steps {:inst :kit/kick} "x... x... x... x..."]
-  :groove/backbeat [:steps {:inst :drum/clap} ".... x... .... x..."]
-  :groove/offbeat [:steps {:inst :kit/hat :vel 0.6} "..x. ..x. ..x. ..x."]
-  :groove/house [:par :groove/four :groove/backbeat :groove/offbeat]}}
+ {:mylib/four [:steps {:inst :mylib/kick} "x... x... x... x..."]
+  :mylib/backbeat [:steps {:inst :drum/clap} ".... x... .... x..."]
+  :mylib/offbeat [:steps {:inst :mylib/hat :vel 0.6} "..x. ..x. ..x. ..x."]
+  :mylib/house [:par :mylib/four :mylib/backbeat :mylib/offbeat]}}
