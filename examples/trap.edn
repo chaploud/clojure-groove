@@ -4,6 +4,6 @@
  {:kick [:steps {:inst :drum/kick :decay 0.5} "x... .... ..x. ...."]
   :clap [:steps {:inst :drum/clap} ".... .... x... ...."]
   :hat [:steps {:inst :drum/hat :vel 0.5}
-        [:x :x {:ratchet 2} :x :x :x {:ratchet 3} :x :x :x :x {:ratchet 2} :x :x {:ratchet 4} :x :x]]
+        [:x :x {:ratchet 2} :x :x {:ratchet 3} :x :x :x :x {:ratchet 2} :x :x {:ratchet 4} :x :x]]
   :808 [:notes {:inst :synth/sub :gate 1.0 :octave 1} [:q. 0 :e :_ :q :_ :e 3 -2]]
   :bell [:notes {:inst :synth/keys :octave 5 :vel 0.5} [:e 7 :_ 4 :_ 3 :_ 4 :_]]}}

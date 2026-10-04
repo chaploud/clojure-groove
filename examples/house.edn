@@ -1,4 +1,4 @@
-;; Deep house at 122 BPM: a shared drum groove, a swung organ-ish stab and a round bass.
+;; Deep house at 122 BPM: a swung drum groove from a shared library, an organ-ish stab and a round bass.
 {:include ["lib/house-kit.edn"]
  :globals {:tempo 122 :root :f :scale :minor}
  :tracks

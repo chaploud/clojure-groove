@@ -2,10 +2,10 @@
 
 ## Principles
 
-- **One data model, several notations.** Step strings, note vectors and mini-notation all normalise to the same expanded tree, and everything the REPL does is a change to plain data. Notations are an ease-of-use layer over a simple core; they never fork the meaning.
+- **One data model, several notations.** Step strings, note vectors and mini-notation all produce the same event stream, and everything the REPL does is a change to plain data. Notations are an ease-of-use layer over a simple core; they never fork the meaning.
 - **Low floor first, terseness second.** The first ten minutes need three verbs (`drum`, `synth`, `tempo`) and a step string. Mini-notation and transforms are there when density matters, not on the default path.
-- **Borrow vocabulary, don't invent it.** Step conditions, probability, ratchets and parameter locks use the names of hardware sequencers; scenes and launch-at-the-next-bar follow clip launchers; mini-notation follows TidalCycles.
-- **Validate before adopting.** Every change is expanded, checked and dry-run before it replaces what is playing. An error goes back to the REPL with the path to the offending node; the transport never sees it.
+- **Borrow vocabulary, don't invent it.** Step conditions, probability, ratchets and parameter locks use the names of hardware sequencers; scenes and launch-at-the-next-bar follow clip launchers; mini-notation follows TidalCycles, including Bjorklund Euclidean rhythms.
+- **Validate before adopting.** Every change is expanded and dry-run before it replaces what is playing: every event a track can produce over its first loops (ignoring chance and conditions) must resolve to parameters that build a voice, and every scene and arrangement step is checked the same way. An error goes back to the REPL with the path to the offending node. Whatever still fails at play time is isolated to one track or one voice, reported once, and a non-finite sample resets the effect buffers instead of silencing the mix.
 - **Data over functions over macros.** Transforms are vectors such as `[:every 4 [:rev]]`, not closures, so songs can be saved, diffed and loaded.
 
 ## Model
@@ -13,7 +13,7 @@
 ```
 song EDN ──read/include──▶ session ──expand (refs + cascade)──▶ tree ──query bar n──▶ events ──▶ voices
                               ▲
-REPL: drum / synth / play! / put! / scene! … (each a pure session → session function)
+REPL: drum / synth / play / put! / scene! … (each a pure session → session function)
 ```
 
 - **Session** (`chaploud.groove.session`): globals, instruments, defs, scenes, tracks, arrangement, mute/solo/fill. Every REPL call is a pure function on it; `live/commit!` swaps it in only after `validate!` succeeds.

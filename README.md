@@ -58,7 +58,7 @@ Per-step attributes follow the vocabulary of hardware sequencers:
 ### Notes: melodies
 
 ```clojure
-(g/synth :bass [:e 0 :_ 0 :s 3 5 :e 7 :_])   ; :s :e :q :h :w (and :q. dotted, :e3 triplet) set the length
+(g/synth :bass [:e 0 :_ 0 :s 3 5 :e 7 :_])   ; :s :e :q :h :w (and :q. dotted, :et triplet) set the length
 (g/synth :pad  [:w #{0 2 4} #{-2 0 2}])       ; a set is a chord
 (g/synth :lead [1/8 0 2 1/16 4 5 :c5 :_])     ; ratios set the length; keywords like :c5 are note names
 ```
@@ -70,7 +70,7 @@ Integers are scale degrees, resolved through `:root`, `:scale` and `:octave` fro
 For dense rhythms, a TidalCycles-style string fits a pattern into one bar:
 
 ```clojure
-(g/mini :break "[bd ~ ~ ~] [~ ~ sd ~] [~ ~ bd bd] [~ ~ sd ~], hh*8?0.2")
+(g/mini :break "[bd ~ ~ ~] [sd ~ ~ ~] [~ ~ bd ~] [sd ~ ~ ~], hh*8?0.2")
 (g/mini :melody "<0 2 4 [7 9]>(5,8)" :inst :synth/pluck)
 ```
 
@@ -87,30 +87,32 @@ A node is a Hiccup-style vector, `[tag attributes? & body]`:
 | `[:cycle attrs "..."]` | mini-notation, one bar per cycle |
 | `[:seq & nodes]` / `[:par & nodes]` | one after another / all together |
 | `[:rep n node]` | repeat |
-| `[:fx transforms node]` | `[:rev]` `[:fast n]` `[:slow n]` `[:every n transform]` `[:transpose semitones]` `[:degrade p]` |
+| `[:fx transforms node]` | `[:rev]` `[:fast n]` `[:slow n]` (whole n) `[:every n transform]` `[:transpose semitones]` `[:degrade p]` |
 | `:clip/name` or `[:clip/name attrs]` | a reference to a definition |
 
 Attributes cascade: they flow from `:globals` and parent nodes to their children, a definition's own attributes override what it inherits, and attributes written at a reference site override the definition.
 
 ```clojure
 (g/put! :clip/motif [:notes {:inst :synth/pluck} [:s 0 2 4 7 4 2 0 :_]])
-(g/play! :lead [:seq :clip/motif [:fx [:transpose 5] :clip/motif]])
-(g/play! :echo [:clip/motif {:octave 6 :vel 0.3}])
+(g/play :lead [:seq :clip/motif [:fx [:transpose 5] :clip/motif]])
+(g/play :echo [:clip/motif {:octave 6 :vel 0.3}])
 ```
 
 References are checked before anything is adopted: an undefined name, a cycle, or a bad pattern anywhere in the tree is reported with its path, e.g. `Track :lead: Undefined reference :clip/motf` at `[:lead :seq 1 :clip/motf]`.
 
 ## Live controls
 
+Gestures you make while playing have no bang; definitions, files and the transport do.
+
 | | |
 |---|---|
-| `start!` `stop!` | audio transport |
-| `drum` `synth` `mini` `play!` | set a track; edits are picked up at the next bar |
-| `clear!` `hush` | remove some or all tracks |
+| `start!` `stop!` `status` | audio transport; `status` lists errors reported while playing |
+| `drum` `synth` `mini` `play` | set a track; edits are picked up at the next bar |
+| `clear` `hush` | remove some or all tracks |
 | `mute` `unmute` `solo` `unsolo` | |
-| `fill!` | make `:if :fill` steps play for the next n bars |
+| `fill` | make `:if :fill` steps play for the next n bars |
 | `put!` `instrument!` `globals!` `tempo` | definitions and the root of the cascade |
-| `scene!` `snap!` `launch!` `arrange!` | scenes (track → node maps) and a scene timeline |
+| `scene!` `snap!` `launch` `arrange!` | scenes (track → node maps) and a scene timeline |
 | `save!` `load!` `render!` `show` | song files, offline WAV rendering, a text grid of any node |
 
 ## Sounds
