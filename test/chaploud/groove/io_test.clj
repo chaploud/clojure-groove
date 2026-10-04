@@ -46,3 +46,13 @@
 
 (deftest unknown-songs-say-so
   (is (thrown-with-msg? Exception #"No song file, resource or bundled song named nope" (io/read-song "nope"))))
+
+(deftest the-song-index-lists-every-bundled-song
+  (let [dir (jio/file (jio/resource "chaploud/groove/songs/index.edn"))
+        files (->> (.listFiles (.getParentFile dir))
+                   (map #(.getName ^java.io.File %))
+                   (filter #(re-matches #".+\.edn" %))
+                   (remove #{"index.edn"})
+                   (map #(subs % 0 (- (count %) 4)))
+                   set)]
+    (is (= files (set (map :name (io/bundled-songs)))))))

@@ -21,27 +21,36 @@
         (aset buf (+ j 3) (unchecked-byte (bit-shift-right sr 8)))))
     buf))
 
+(defn- output-mixers []
+  (filter #(.isLineSupported (AudioSystem/getMixer %)
+                             (javax.sound.sampled.DataLine$Info. SourceDataLine (audio-format)))
+          (AudioSystem/getMixerInfo)))
+
 (defn devices []
-  (vec (for [^javax.sound.sampled.Mixer$Info info (AudioSystem/getMixerInfo)
-             :when (.isLineSupported (AudioSystem/getMixer info)
-                                     (javax.sound.sampled.DataLine$Info. SourceDataLine (audio-format)))]
-         (.getName info))))
+  (mapv #(.getName ^javax.sound.sampled.Mixer$Info %) (output-mixers)))
+
+(defn pick-device [names wanted]
+  (let [lower #(.toLowerCase ^String %)
+        w (lower wanted)]
+    (or (first (filter #(= w (lower %)) names))
+        (first (filter #(.contains ^String (lower %) w) names)))))
 
 (defn- open-line ^SourceDataLine [device]
-  (try
-    (if device
-      (let [info (or (first (filter #(.contains (.toLowerCase (.getName ^javax.sound.sampled.Mixer$Info %))
-                                                (.toLowerCase ^String device))
-                                    (AudioSystem/getMixerInfo)))
-                     (throw (ex-info (str "No audio device matching " (pr-str device) "; available: " (devices))
-                                     {:device device})))]
-        (AudioSystem/getSourceDataLine (audio-format) info))
-      (AudioSystem/getSourceDataLine (audio-format)))
-    (catch clojure.lang.ExceptionInfo e (throw e))
-    (catch Exception e
-      (throw (ex-info (str "No audio output is available (" (ex-message e) "). "
-                           "Render to a file instead, e.g. (render! \"out/song.wav\" 8) or bb render <song>.")
-                      {} e)))))
+  (let [mixers (output-mixers)
+        info (when device
+               (let [name (or (pick-device (devices) device)
+                              (throw (ex-info (str "No audio output matching " (pr-str device) "; available: " (devices))
+                                              {:device device})))]
+                 (first (filter #(= name (.getName ^javax.sound.sampled.Mixer$Info %)) mixers))))]
+    (try
+      (doto (if info
+              (AudioSystem/getSourceDataLine (audio-format) info)
+              (AudioSystem/getSourceDataLine (audio-format)))
+        (.open (audio-format) (* 4 2048)))
+      (catch Exception e
+        (throw (ex-info (str "No audio output is available (" (ex-message e) "). "
+                             "Render to a file instead, e.g. (render! \"out/song.wav\" 8) or bb render <song>.")
+                        {} e))))))
 
 (defn start-line! [mixer {:keys [device]} on-error]
   (let [line (open-line device)
@@ -61,7 +70,6 @@
                (finally
                  (.close line))))
                    "groove-audio")]
-    (.open line (audio-format) (* 4 2048))
     (.start line)
     (.setPriority t Thread/MAX_PRIORITY)
     (.setDaemon t true)
