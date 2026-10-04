@@ -65,3 +65,8 @@
     (is (< (* 3 (tail [:o [:steps {:inst :drum/open-hat} "x..............."]
                        :c [:steps {:inst :drum/hat :vel 0.01} ".x.............."]]))
            (tail [:o [:steps {:inst :drum/open-hat} "x..............."]])))))
+
+(deftest a-glide-bends-the-oscillators
+  (let [plain (render :a [:notes {:inst :synth/acid} [:q 0 4 0 4]])
+        slid (render :a [:notes {:inst :synth/acid} [:q 0 {:degree 4 :glide true :glide-time 0.3} 0 4]])]
+    (is (not (java.util.Arrays/equals ^bytes plain ^bytes slid)))))

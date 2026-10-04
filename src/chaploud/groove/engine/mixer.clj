@@ -98,7 +98,7 @@
                  (when-let [group (.choke s)]
                    (doseq [^Active other active
                            :when (and (= group (.choke other)) (neg? (aget ^longs (.fade other) 0)))]
-                     (aset ^longs (.fade other) 0 (+ choke-frames (max 0 (- (.frame s) start))))))
+                     (aset ^longs (.fade other) 0 (+ choke-frames (max 0 (- (- (.frame s) start) (aget ^longs (.from other) 0)))))))
                  (.add active (Active. (.bus s) (.voice s) (.choke s) (.delay s) (.reverb s)
                                        (long-array [from]) (long-array [-1])))
                  (when (.duck s) (.add duck-queue (max (.frame s) start))))

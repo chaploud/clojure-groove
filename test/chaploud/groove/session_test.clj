@@ -115,3 +115,7 @@
           [p] (events (s/begin-bar (session :p [:notes {:inst :synth/pad :reverb 0.2} [0]]) 0) 0)]
       (is (= [0.0 0.15] [(:delay d) (:reverb d)]))
       (is (= [1.0 0.2] [(:delay p) (:reverb p)])))))
+
+(deftest sends-follow-the-effective-bus
+  (let [[e] (events (s/begin-bar (session :l [:notes {:inst :synth/lead :bus :bass} [0]]) 0) 0)]
+    (is (= [0.0 0.3] [(:delay e) (:reverb e)]))))

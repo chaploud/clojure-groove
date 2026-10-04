@@ -70,7 +70,7 @@
 (defn parse-notes [items default-dur]
   (link-glides (parse-notes* items default-dur)))
 
-(def ^:private pitch-keys [:degree :note :midi :roman :chord])
+(def ^:private pitch-keys [:degree :note :midi :roman :chord :octave :transpose])
 
 (defn- link-glides [items]
   (let [notes (filterv :event items)
