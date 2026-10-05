@@ -1,12 +1,21 @@
-;; Built almost entirely from bundled parts: one progression drives the pad, the arpeggio and the bass.
-{:globals {:tempo 128 :root :d :scale :minor}
+;; Big-room pop at 128 BPM in D major, built from bundled parts: the axis progression drives the
+;; piano, the arpeggio and the bass, and the hook comes back an octave higher in the last drop.
+{:globals {:tempo 128 :root :d}
  :defs
- {:anthem/chords [:prog/epic {:octave 3}]
-  :anthem/arp [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck :octave 4 :vel 0.7}]]
-  :anthem/bass [:fx [:arp :up 1/8] [:prog/epic {:inst :synth/bass :voicing :root :gate 0.5}]]}
+ {:song/crash [:steps {:inst :cr :kit :kit/tr909} "x..............................................................................................................................."]
+  :anthem/piano [:prog/axis {:inst :synth/keys :octave 4 :voicing :open :vel 0.7}]
+  :anthem/pad [:prog/axis {:octave 3}]
+  :anthem/bass [:notes {:inst :synth/bass :scale :major} [:e :_ 0 :_ 0 :_ 0 :_ 0 :_ 4 :_ 4 :_ 4 :_ 4 :_ 5 :_ 5 :_ 5 :_ 5 :_ 3 :_ 3 :_ 3 :_ 3]]
+  :anthem/drums [:beat/house {:kit :kit/tr909}]}
  :scenes
- {:intro {:arp :anthem/arp :pad :anthem/chords}
-  :drop {:drums [:beat/trance {:kit :kit/tr909}] :bass :anthem/bass}
-  :break {:drums nil :bass nil :fill [:fill/snare-roll {:kit :kit/tr909}]}
-  :outro {:fill nil :drums [:beat/trance {:kit :kit/tr909}] :bass :anthem/bass}}
- :arrangement [[:intro 4] [:drop 8] [:break 4] [:outro 8]]}
+ {:intro {:piano :anthem/piano}
+  :verse {:drums :beat/four-floor :bass :anthem/bass :arp [:arp/axis {:vel 0.5}]}
+  :build {:drums nil :pad :anthem/pad :arp [:arp/axis {:vel 0.6 :cutoff [:ramp 500.0 7000.0 8]}]}
+  :roll {:roll :fill/snare-roll}
+  :drop {:roll nil :drums :anthem/drums :bass :anthem/bass :lead :lead/pop :crash :song/crash}
+  :break {:drums nil :bass nil :crash nil :lead [:lead/pop {:inst :synth/pluck :vel 0.5}] :arp nil}
+  :drop2 {:roll nil :drums :anthem/drums :bass :anthem/bass :arp [:arp/axis {:vel 0.5}]
+          :lead [:lead/pop {:octave 6}] :crash :song/crash}
+  :outro {:lead nil :drums :beat/four-floor :crash nil :pad nil}}
+ :arrangement [[:intro 4] [:verse 8] [:build 7] [:roll 1] [:drop 16] [:break 8] [:build 7] [:roll 1]
+               [:drop2 16] [:outro 8]]}

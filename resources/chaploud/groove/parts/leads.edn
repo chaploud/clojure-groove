@@ -1,0 +1,35 @@
+;; Melodies in scale degrees. Each is written over one progression, fixes that progression's
+;; scale, and follows :root, so pairing it with the progression it names always agrees.
+{:defs
+ {:lead/anthem [:notes {:inst :synth/supersaw :scale :minor}
+                [:e 4 4 :q 7 :e 4 2 :q 0
+                 :e 5 5 :q 9 :e 7 5 :q 7
+                 :e 4 4 :q 9 :e 6 4 :q 2
+                 :e 6 8 :q 10 :e 8 6 :q 8]]
+  :lead/anthem-high [:notes {:inst :synth/supersaw :scale :minor}
+                     [:q 9 :e 7 9 :q 11 :q 9
+                      :q 12 :e 11 9 :h 7
+                      :q 11 :e 9 11 :q 13 :q 11
+                      :q 10 :e 8 10 :h 13]]
+  :lead/pop [:notes {:inst :synth/lead :scale :major}
+             [:e 4 4 5 4 :q 2 0
+              :e 6 6 8 6 :q 4 1
+              :e 7 7 9 7 :q 5 4
+              :e 5 5 7 5 :h 3]]
+  :lead/neon [:notes {:inst :synth/lead :scale :major}
+              [:q 9 :e 7 9 :q 11 :q 9
+               :q 10 :e 9 7 :h 5
+               :q 7 :e 9 11 :q 9 :q 7
+               :q 8 :e 6 8 :h 11]]
+  :lead/call-response [:notes {:inst :synth/lead :scale :minor}
+                       [:e 4 5 :q 7 :h :_
+                        :e 9 7 5 4 :h 2]]
+  :lead/pentatonic [:notes {:inst :synth/lead :scale :minor-pentatonic}
+                    [:e 0 2 3 2 :s 4 3 2 0 :q 2]]}
+ :about
+ {:lead/anthem {:tags #{:lead :melody :trance :edm :minor} :doc "Four-bar hook over :prog/epic"}
+  :lead/anthem-high {:tags #{:lead :melody :trance :edm :minor} :doc "Higher answer to :lead/anthem, also over :prog/epic"}
+  :lead/pop {:tags #{:lead :melody :pop :major} :doc "Four-bar hook over :prog/axis"}
+  :lead/neon {:tags #{:lead :melody :synthwave :major} :doc "Four-bar hook over :prog/sensitive"}
+  :lead/call-response {:tags #{:lead :melody :minor} :doc "Two-bar call and answer in a minor key"}
+  :lead/pentatonic {:tags #{:lead :riff :minor :pentatonic} :doc "One-bar minor-pentatonic riff that fits most minor grooves"}}}

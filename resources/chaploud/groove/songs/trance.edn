@@ -1,20 +1,21 @@
-;; Uplifting trance at 138 BPM, arranged with scenes: intro -> build -> drop -> breakdown -> drop.
-{:globals {:tempo 138 :root :g :scale :minor}
+;; Uplifting trance at 138 BPM in G minor. The arpeggio filter opens through the build, a snare
+;; roll lifts into the drop, and the second drop answers the first with a higher melody.
+{:globals {:tempo 138 :root :g}
  :defs
- {:clip/kick [:steps {:inst :drum/kick} "x... x... x... x..."]
-  :clip/roll [:fx [:every 2 [:fast 2]] [:steps {:inst :drum/snare :vel 0.6} "x.x. x.x. xxxx xxxx"]]
-  :clip/hat [:steps {:inst :drum/open-hat :vel 0.45} "..x. ..x. ..x. ..x."]
-  :clip/bass [:notes {:inst :synth/bass} [:s :_ 0 0 0 :_ 0 0 0 :_ 0 0 0 :_ 0 0 0]]
-  :clip/arp [:notes {:inst :synth/pluck :octave 5} [:s 0 4 7 4 9 4 7 4 0 4 7 4 11 4 7 4]]
-  :clip/lead [:notes {:inst :synth/supersaw}
-              [:e 7 7 :s 9 :e. 7 :e 4 4 :s 2 :e. 4 :q 7 :e 9 11 :h 9]]
-  :clip/chords [:seq [:notes {:inst :synth/pad :octave 3} [:w #{0 2 4}]]
-                [:notes {:inst :synth/pad :octave 3} [:w #{-2 0 2}]]
-                [:notes {:inst :synth/pad :octave 3} [:w #{-4 -2 0}]]
-                [:notes {:inst :synth/pad :octave 3} [:w #{-3 -1 1}]]]}
+ {:song/crash [:steps {:inst :cr :kit :kit/tr909} "x..............................................................................................................................."]
+  :trance/pad [:prog/epic {:octave 3 :reverb 1.0}]
+  :trance/arp [:arp/epic {:octave 5 :vel 0.55}]
+  :trance/bass [:notes {:inst :synth/bass :scale :minor} [:s :_ 0 0 0 :_ 0 0 0 :_ 0 0 0 :_ 0 0 0 :_ 5 5 5 :_ 5 5 5 :_ 5 5 5 :_ 5 5 5 :_ 2 2 2 :_ 2 2 2 :_ 2 2 2 :_ 2 2 2 :_ 6 6 6 :_ 6 6 6 :_ 6 6 6 :_ 6 6 6]]
+  :trance/drums [:beat/trance {:kit :kit/tr909}]}
  :scenes
- {:intro {:kick :clip/kick :hat :clip/hat :arp :clip/arp}
-  :build {:kick nil :roll :clip/roll :chords :clip/chords}
-  :drop {:kick :clip/kick :hat :clip/hat :roll nil :bass :clip/bass :lead :clip/lead}
-  :breakdown {:kick nil :hat nil :bass nil :lead nil :arp :clip/arp}}
- :arrangement [[:intro 4] [:build 4] [:drop 8] [:breakdown 4] [:drop 8]]}
+ {:intro {:drums :beat/four-floor :arp [:trance/arp {:cutoff 900.0}]}
+  :build {:drums nil :pad :trance/pad :arp [:trance/arp {:cutoff [:ramp 400.0 6000.0 8]}]}
+  :roll {:roll [:fill/snare-roll {:kit :kit/tr909}]}
+  :drop {:roll nil :drums :trance/drums :bass :trance/bass :arp :trance/arp :lead :lead/anthem
+         :crash :song/crash}
+  :break {:drums nil :bass nil :crash nil :lead [:lead/anthem-high {:inst :synth/pluck :vel 0.6 :delay 1.0}]
+          :arp nil}
+  :drop2 {:roll nil :drums :trance/drums :bass :trance/bass :arp :trance/arp :lead :lead/anthem-high
+          :crash :song/crash}
+  :outro {:lead nil :bass nil :pad nil :crash nil}}
+ :arrangement [[:intro 8] [:build 7] [:roll 1] [:drop 16] [:break 8] [:build 7] [:roll 1] [:drop2 16] [:outro 8]]}

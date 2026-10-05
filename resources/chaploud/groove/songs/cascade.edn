@@ -1,13 +1,14 @@
 ;; How references and the attribute cascade compose. Every :clip is defined once and reused:
 ;; attributes flow down from :globals and parents, and attributes at a reference site win.
-{:globals {:tempo 124 :root :a :scale :minor :octave 3}
+;; The drums come from another file through :include.
+{:include ["lib/house-kit.edn"]
+ :globals {:tempo 124 :root :a :scale :minor :octave 3}
  :defs
  {:clip/motif [:notes {:inst :synth/pluck} [:s 0 2 4 2 7 4 2 :_]]
   :clip/echo [:clip/motif {:octave 5 :vel 0.4}]
   :clip/answer [:fx [:transpose 5] :clip/motif]
   :clip/phrase [:seq :clip/motif :clip/answer]
-  :clip/drums [:par [:steps {:inst :drum/kick} "x... x... x... x..."]
-               [:steps {:inst :drum/hat :vel 0.5} "..x. ..x. ..x. ..x."]]}
+  :clip/drums [:mylib/house {:swing 0.1}]}
  :tracks
  {:drums :clip/drums
   :lead :clip/phrase

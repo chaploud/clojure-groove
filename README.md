@@ -138,6 +138,8 @@ A library of ready-made parts ships with the code, so a groove can start from a 
 | `:fill/` | one-bar fills: snare-roll, toms, crash, stutter |
 | `:bass/` | basslines in scale degrees: offbeat, rolling, acid, octave, root-fifth, sub, tr808, reese, funk |
 | `:prog/` | chord progressions: axis, sensitive, epic, andalusian, ii-v-i, royal-road, komuro, canon, blues, dorian-vamp, deep-house |
+| `:lead/` | four-bar melodies, each written over a progression: anthem, anthem-high, pop, neon, call-response, pentatonic |
+| `:arp/` | arpeggios: trance, up-down, octave-bounce, thirds, and epic, axis, sensitive that follow a progression |
 | `:kit/` | drum kits: default, tr808, tr909, lofi, hard |
 
 Drum parts are written with roles (`:bd :sd :cp :hh :oh :rim :lt :mt :ht :cb :cr :rd`), and the `:kit` attribute decides which instrument plays each role, so one pattern works with every kit. Mini-notation words like `bd` are the same roles. Your own definitions win over bundled ones of the same name, and `save!` writes only yours. Define a kit of your own with `(g/kit! :my/kit {:base :kit/tr808 :bd :my/kick})`.

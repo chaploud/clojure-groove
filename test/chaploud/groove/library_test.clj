@@ -10,9 +10,9 @@
   (doseq [k (keys (:defs catalog))]
     (is (map? (s/validate! (s/play s/empty-session :t k))) (str k))))
 
-(deftest drum-parts-fill-whole-bars
+(deftest parts-fill-whole-bars
   (doseq [k (keys (:defs catalog))
-          :when (#{"beat" "fill"} (namespace k))]
+          :when (#{"beat" "fill" "bass" "lead" "arp" "prog"} (namespace k))]
     (is (integer? (:len (expand/expand k (:defs catalog)))) (str k))))
 
 (deftest every-part-and-kit-is-described
