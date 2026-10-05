@@ -44,7 +44,7 @@ bb nrepl               # start an nREPL server for live coding
 
 With the REPL connected, follow [docs/guide.md](docs/guide.md) (an empty bar to an arranged track in about fifteen minutes), or open [`examples/jam.clj`](examples/jam.clj) and evaluate the forms one at a time. [docs/reference.md](docs/reference.md) lists everything a song can contain.
 
-Without Babashka, the same commands run through the Clojure CLI: `clojure -M -m chaploud.groove.cli play trance`, and `clojure -M:dev:nrepl` for the REPL.
+Without Babashka, the same commands run through the Clojure CLI: `clojure -J-XX:+UseZGC -M -m chaploud.groove.cli play trance`, and `clojure -M:dev:nrepl` for the REPL.
 
 ## Use it in your project
 
@@ -54,10 +54,12 @@ Add it as a git dependency in `deps.edn`:
 {:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "5dbd390"}}}
 ```
 
+This README describes the main branch. v0.1.0 predates sections, `[:struct]` and the instruments added since; see [CHANGELOG.md](CHANGELOG.md).
+
 Then `(require '[chaploud.groove :as g])` from any REPL, or play a bundled song without cloning anything:
 
 ```sh
-clojure -Sdeps '{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "5dbd390"}}}' -M -m chaploud.groove.cli play anthem
+clojure -Sdeps '{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :git/sha "5dbd390"}}}' -J-XX:+UseZGC -M -m chaploud.groove.cli play anthem
 ```
 
 ## Writing patterns
@@ -121,7 +123,7 @@ For dense rhythms, a TidalCycles-style string fits a pattern into one bar:
 (g/mini :melody "<0 2 4 [7 9]>(5,8)" :inst :synth/pluck)
 ```
 
-Supported: `~` rest, `[ ]` subdivide, `< >` alternate per cycle, `,` layer, `*n` `/n` speed, `!n` repeat, `@n` weight, `?p` drop with probability, `(k,n,r)` Euclidean rhythm. Words are drum roles (`bd sd cp hh oh rim lt mt ht cb cr rd`, played by the current kit), scale degrees or note names.
+Supported: `~` or `-` rest, `[ ]` subdivide, `< >` alternate per cycle, `,` layer, `*n` `/n` speed, `!n` repeat, `@n` weight, `?p` drop with probability, `(k,n,r)` Euclidean rhythm. Words are drum roles (`bd sd cp hh oh rim lt mt ht cb cr rd`, played by the current kit), scale degrees, note names or chord symbols.
 
 ## Parts and kits
 
@@ -140,7 +142,7 @@ A library of ready-made parts ships with the code, so a groove can start from a 
 
 | Namespace | |
 |---|---|
-| `:beat/` | drum patterns: four-floor, house, deep-house, disco, techno, trance, electro, breakbeat, two-step, dnb, jungle, boom-bap, trap, dembow, afrobeat, halftime, lofi |
+| `:beat/` | drum patterns: four-floor, house, deep-house, disco, techno, trance, electro, breakbeat, two-step, dnb, jungle, boom-bap, trap, dembow, afrobeat, one-drop, halftime, lofi |
 | `:fill/` | one-bar fills: snare-roll, toms, crash, stutter |
 | `:bass/` | basslines in scale degrees: offbeat, rolling, acid, octave, root-fifth, sub, tr808, reese, funk |
 | `:prog/` | chord progressions: axis, sensitive, epic, andalusian, ii-v-i, royal-road, komuro, canon, blues, dorian-vamp, deep-house |
@@ -173,7 +175,7 @@ A node is a Hiccup-style vector, `[tag attributes? & body]`:
 | `[:cycle attrs "..."]` | mini-notation, one bar per cycle |
 | `[:seq & nodes]` / `[:par & nodes]` | one after another / all together |
 | `[:rep n node]` | repeat |
-| `[:fx transforms node]` | `[:rev]` `[:fast n]` `[:slow n]` (whole n) `[:every n transform]` `[:transpose semitones]` `[:degrade p]` `[:arp order rate]` |
+| `[:fx transforms node]` | `[:rev]` `[:fast n]` `[:slow n]` (whole n) `[:every n transform]` `[:transpose semitones]` `[:degrade p]` `[:arp order rate]` `[:struct rhythm]` |
 | `:clip/name` or `[:clip/name attrs]` | a reference to a definition |
 
 Attributes cascade: they flow from `:globals` and parent nodes to their children, a definition's own attributes override what it inherits, and attributes written at a reference site override the definition.
@@ -200,16 +202,19 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 | `put!` `instrument!` `kit!` `globals!` `tempo` | definitions and the root of the cascade |
 | `browse` `audition` `describe` | find, hear and inspect bundled parts, kits and instruments |
 | `section!` `snap!` `launch` `arrange!` | sections (the complete set of tracks to play) and a timeline of them |
-| `save!` `load!` `render!` `show` | song files, offline WAV rendering, a text grid of any node |
+| `save!` `load!` `render!` `show` `session` | song files, offline WAV rendering, a text grid of any node, the current session map |
 
 ## Sounds
 
 Built-in instruments are synthesized, so they need no sample downloads:
 
 - Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high`
-- Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/organ` `:synth/skank` `:synth/melodica` `:synth/speaker`
+- Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys`
+- Reggae and character: `:synth/organ` (the bubble), `:synth/skank` (offbeat guitar chop), `:synth/melodica`, `:synth/speaker` (a small in-store speaker)
 
-The kick ducks the bass and synth buses (sidechain). Every track has `:delay` and `:reverb` send levels (0–1) that default by bus: drums are dry with a little reverb, synths go through a tempo-synced delay and the reverb. A closed hat cuts off a ringing open hat, because both are in the `:choke :hats` group. Define your own instruments as data on top of a built-in one:
+`(g/browse "reggae")` finds instruments and parts by tag, and `(g/describe :synth/acid)` lists every parameter with its default.
+
+The kick ducks the bass and synth buses (sidechain). Every track has `:delay` and `:reverb` send levels (0–1) that default by bus: drums are dry with a little reverb, synths go through a tempo-synced delay and the reverb. `:delay-feedback` in the globals (0–0.95, default 0.38) sets how long the delay keeps repeating, and `:hp` adds a highpass after a synth's filter. A closed hat cuts off a ringing open hat, because both are in the `:choke :hats` group. Define your own instruments as data on top of a built-in one:
 
 ```clojure
 (g/instrument! :my/bass {:base :synth/acid :cutoff 500.0 :res 0.6 :octave 1})
@@ -232,7 +237,7 @@ The kick ducks the bass and synth buses (sidechain). Every track has `:delay` an
 
 A section is the complete set of tracks it plays: entering it starts them from their first step and stops every other track, and every track stops when the arrangement ends. `:base` builds on another section and `nil` drops a track inherited from it. An arrangement step `[:drop 8 {:fill 1}]` makes `:if :fill` steps play in its last bar, and `:if :1st` steps play only in a section's first loop, which is how a crash marks the start of a drop.
 
-`:include` merges kits, instruments, definitions and sections from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): a 30-second showcase, a shop-floor future-bounce jingle, house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
+`:include` merges kits, instruments, definitions and sections from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): a 30-second showcase, a future-bounce track that grows from an in-store jingle, house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
 
 ## Development
 

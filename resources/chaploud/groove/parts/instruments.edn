@@ -1,0 +1,27 @@
+;; Descriptions of the built-in instruments for browse and describe.
+{:about
+ {:drum/kick {:tags #{:drums} :doc "Sine-sweep kick that ducks the bass and synth buses"}
+  :drum/snare {:tags #{:drums} :doc "Tuned body plus noise"}
+  :drum/clap {:tags #{:drums} :doc "Layered noise bursts"}
+  :drum/hat {:tags #{:drums} :doc "Closed hat; cuts off the open hat"}
+  :drum/open-hat {:tags #{:drums} :doc "Open hat; cut off by the closed hat"}
+  :drum/ride {:tags #{:drums} :doc "Metallic ride"}
+  :drum/crash {:tags #{:drums} :doc "Long metallic crash"}
+  :drum/rim {:tags #{:drums :reggae} :doc "Rimshot or cross-stick"}
+  :drum/cowbell {:tags #{:drums} :doc "Two-tone cowbell"}
+  :drum/tom-low {:tags #{:drums} :doc "Low tom"}
+  :drum/tom-mid {:tags #{:drums} :doc "Mid tom"}
+  :drum/tom-high {:tags #{:drums} :doc "High tom"}
+  :synth/acid {:tags #{:bass :acid} :doc "Resonant saw bass with a squelchy filter envelope"}
+  :synth/bass {:tags #{:bass} :doc "Square bass with a sub sine"}
+  :synth/sub {:tags #{:bass} :doc "Pure sine sub bass"}
+  :synth/reese {:tags #{:bass :dnb} :doc "Detuned saw bass"}
+  :synth/supersaw {:tags #{:lead :trance :edm} :doc "Seven detuned saws, wide"}
+  :synth/pad {:tags #{:pad} :doc "Slow detuned saw pad"}
+  :synth/pluck {:tags #{:lead :arp} :doc "Short saw pluck"}
+  :synth/lead {:tags #{:lead} :doc "Square lead"}
+  :synth/keys {:tags #{:keys :chords} :doc "Soft triangle keys"}
+  :synth/organ {:tags #{:keys :reggae} :doc "Square organ for the reggae bubble on the offbeat eighths"}
+  :synth/skank {:tags #{:guitar :reggae} :doc "Offbeat guitar chop: short, bright, highpassed"}
+  :synth/melodica {:tags #{:lead :reggae :dub} :doc "Reedy saw lead with a soft attack"}
+  :synth/speaker {:tags #{:lead :lofi} :doc "Small in-store speaker: highpassed, narrow, driven"}}}

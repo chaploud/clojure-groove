@@ -21,11 +21,18 @@
   ([msg data] (throw (ex-info msg data)))
   ([msg data cause] (throw (ex-info msg data cause))))
 
-(def ^:private time-constants #{:decay :fdecay :length :pitch-decay :drive})
+(def ^:private time-constants #{:decay :fdecay :length :pitch-decay :drive :glide-time})
 
 (def ^:private sends #{:delay :reverb})
 
+(def ^:private numeric-params
+  (set (remove #{:voice :bus :duck :choke :osc} (keys instruments/param-docs))))
+
 (defn- check-params! [p]
+  (doseq [k numeric-params
+          :let [v (get p k)]
+          :when (and (contains? p k) (not (number? v)))]
+    (fail (str (pr-str k) " must be a number, got " (pr-str v)) {:param k}))
   (doseq [[k v] p
           :when (number? v)]
     (when-not (Double/isFinite (double v))
@@ -60,6 +67,9 @@
 
 (defn tempo [session]
   (get-in session [:globals :tempo] 120))
+
+(defn delay-feedback [session]
+  (get-in session [:globals :delay-feedback] 0.38))
 
 (defn bar-seconds [session]
   (/ (* 4 60.0) (double (tempo session))))
@@ -100,11 +110,12 @@
          (assoc e :track track))))))
 
 (defn bar-events [session compiled bar]
-  (let [secs (bar-seconds session)]
+  (let [secs (bar-seconds session)
+        catalog (library/catalog session)]
     (for [track (sort (keys (:tracks session)))
           :when (audible? session track)
           e (track-events session compiled track bar)
-          p (params (library/catalog session) e secs)]
+          p (params catalog e secs)]
       p)))
 
 (defn- probe-bars [node]
@@ -150,15 +161,32 @@
             (fail (str "Arrangement step " (pr-str step) ": :fill is a number of bars between 1 and " bars)
                   {:step step})))))))
 
-(declare launch-section)
+(declare launch-section track-key!)
+
+(def ^:private instrument-keys (assoc instruments/param-docs :base ""))
+
+(defn- validate-instruments! [{:keys [instruments kits] :as session}]
+  (let [catalog (library/catalog session)]
+    (doseq [k (keys kits)] (instruments/resolve-kit (:kits catalog) k))
+    (doseq [k (keys instruments)] (instruments/resolve-instrument (:instruments catalog) k)))
+  (doseq [[k params] instruments]
+    (when-not (map? params)
+      (fail (str "Instrument " k " must be a map of parameters, got " (pr-str params)) {:instrument k}))
+    (doseq [p (keys params)
+            :when (not (contains? instrument-keys p))]
+      (fail (str "Instrument " k " has no parameter " p (expand/suggestion p instrument-keys)
+                 "; (describe :synth/acid) lists them")
+            {:instrument k :param p}))))
 
 (defn validate! [session]
   (let [t (tempo session)]
     (when-not (and (number? t) (<= 20 t 999))
       (fail (str ":tempo must be a number between 20 and 999, got " (pr-str t)) {:tempo t})))
-  (let [fb (get-in session [:globals :delay-feedback] 0.38)]
+  (let [fb (delay-feedback session)]
     (when-not (and (number? fb) (<= 0 fb 0.95))
       (fail (str ":delay-feedback must be a number between 0 and 0.95, got " (pr-str fb)) {:delay-feedback fb})))
+  (doseq [t (keys (:tracks session))] (track-key! t))
+  (validate-instruments! session)
   (validate-arrangement! session)
   (doseq [section (keys (:sections session))]
     (try (validate-tracks! (launch-section session section))
@@ -205,18 +233,15 @@
 
 (defn put-instrument [session k params]
   (def-key! k)
-  (assoc-in session [:instruments k] params))
+  (cond
+    (nil? params) (update session :instruments dissoc k)
+    (map? params) (assoc-in session [:instruments k] params)
+    :else (fail (str "An instrument is a map of parameters, got " (pr-str params)) {:instrument k})))
 
 (defn resolve-section [sections k]
-  (loop [k k, seen #{}, acc {}]
-    (cond
-      (nil? k) (into {} (remove (comp nil? val)) acc)
-      (seen k) (fail (str "Circular section :base through " k) {:section k})
-      :else (let [m (or (get sections k) (fail (str "Unknown section " k) {:section k}))]
-              (when-not (map? m)
-                (fail (str "Section " k " must be a map of tracks to nodes") {:section k}))
-              (doseq [t (keys (dissoc m :base))] (track-key! t))
-              (recur (:base m) (conj seen k) (merge (dissoc m :base) acc))))))
+  (let [tracks (instruments/resolve-with-base sections {} k :section)]
+    (doseq [t (keys tracks)] (track-key! t))
+    (into {} (remove (comp nil? val)) tracks)))
 
 (defn put-section [session k tracks]
   (if (nil? tracks)
@@ -238,9 +263,13 @@
         (< bar (+ at bars)) {:index i :section section :start at :bars bars :opts opts}
         :else (recur more (+ at bars) (inc i))))))
 
-(defn arrangement-end [{:keys [arrangement arrangement-start]}]
-  (when (and arrangement arrangement-start)
-    (+ arrangement-start (reduce + (map second arrangement)))))
+(defn arrangement-bars [{:keys [arrangement]}]
+  (when (seq arrangement)
+    (reduce + (map second arrangement))))
+
+(defn arrangement-end [{:keys [arrangement-start] :as session}]
+  (when-let [bars (and arrangement-start (arrangement-bars session))]
+    (+ arrangement-start bars)))
 
 (defn arrange [session plan start]
   (assoc session :arrangement plan :arrangement-start start :current-step nil))

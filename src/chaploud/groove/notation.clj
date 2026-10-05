@@ -148,15 +148,19 @@
       (fail (str "Unexpected " t) {:token t})
       [[:word (word->event t)] more])))
 
+(defn- positive-token [op n]
+  (let [x (number-token n)]
+    (if (pos? x) x (fail (str op n " needs a number greater than 0") {:token (str op n)}))))
+
 (defn- parse-term [toks]
   (let [[node toks] (parse-atom toks)]
     (loop [node node, toks toks, weight (num 1), copies (num 1)]
       (let [[t & more] toks
             [_ op n] (when t (re-matches modifier t))]
         (cond
-          (= op "*") (recur [:fast (number-token n) node] more weight copies)
-          (= op "/") (recur [:fast (/ 1 (number-token n)) node] more weight copies)
-          (= op "@") (recur node more (number-token n) copies)
+          (= op "*") (recur [:fast (positive-token op n) node] more weight copies)
+          (= op "/") (recur [:fast (/ 1 (positive-token op n)) node] more weight copies)
+          (= op "@") (recur node more (positive-token op n) copies)
           (= op "?") (recur [:degrade (number-token n) node] more weight copies)
           (= op "!") (recur node more weight (* copies (long (number-token n))))
           (= t "?") (recur [:degrade 0.5 node] more weight copies)

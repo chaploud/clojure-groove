@@ -1,5 +1,6 @@
 (ns ^:no-doc chaploud.groove.engine.voices
-  (:require [chaploud.groove.pitch :as pitch])
+  (:require [chaploud.groove.instruments :as instruments]
+            [chaploud.groove.pitch :as pitch])
   (:import [clojure.lang IFn$DDD IFn$LD]))
 
 (set! *warn-on-reflection* true)
@@ -35,7 +36,8 @@
     3 (- 1.0 (* 4.0 (Math/abs (- phase 0.5))))))
 
 (defn- osc-kind ^long [k]
-  (case k :saw 0 :square 1 :sine 2 :tri 3 :supersaw 0 0))
+  (case k (nil :saw :supersaw) 0 :square 1 :sine 2 :tri 3
+        (throw (ex-info (str ":osc must be :saw :square :sine :tri or :supersaw, got " (pr-str k)) {:osc k}))))
 
 (defmacro ^:private svf-step [st x g k out]
   (let [[s xx gg kk ic1 ic2 a1 a2 a3 v1 v2 v3] (repeatedly 12 gensym)]
@@ -192,8 +194,7 @@
 
 (defn- synth-voice
   [{:keys [osc unison detune sub cutoff env fdecay res attack decay sustain release drive gain vel pan
-           dur-s midi spread glide-from-midi glide-time hp]
-    :or {unison 1 detune 0.0 sub 0.0 env 0.0 fdecay 0.2 res 0.2 drive 1.0 spread 0.0 hp 0.0}}
+           dur-s midi spread glide-from-midi glide-time hp]}
    sr seed]
   (let [sr (double sr)
         kind (osc-kind osc)
@@ -227,7 +228,7 @@
         pl (* amp (double pl)) pr (* amp (double pr))
         n (long-array 1)
         glide-semis (if glide-from-midi (- (double glide-from-midi) (double midi)) 0.0)
-        glide-tau (/ (double (or glide-time 0.06)) 3.0)]
+        glide-tau (/ (double glide-time) 3.0)]
     (reify Voice
       (render [_ l r from to]
         (loop [i from, j (aget n 0)]
@@ -268,6 +269,6 @@
 
 (defn make-voice ^Voice [{:keys [voice gain vel pan length] :as params} sr seed]
   (if (= voice :synth)
-    (synth-voice params sr seed)
+    (synth-voice (instruments/with-defaults params) sr seed)
     (let [f (or (drum-fns voice) (throw (ex-info (str "Unknown voice type " voice) {:voice voice})))]
       (percussion (f params sr) (double length) (* (double gain) (double vel)) pan sr seed))))

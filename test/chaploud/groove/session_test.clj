@@ -172,3 +172,17 @@
                                                           :attack 0.01 :decay 0.2 :sustain 0.5 :release 0.1})
                  (s/play :x [:notes {:inst :my/x} [0]]))]
     (is (map? (s/validate! sess)))))
+
+(deftest bad-parameters-are-rejected-before-they-play
+  (doseq [[label inst msg] [["a zero glide time" {:base :synth/acid :glide-time 0} #":glide-time must be greater than 0"]
+                            ["a misspelled oscillator" {:base :synth/acid :osc :sqaure} #":osc must be"]
+                            ["a string cutoff" {:base :synth/acid :cutoff "800"} #":cutoff must be a number"]
+                            ["an unknown base" {:base :synth/nope} #"Unknown instrument :synth/nope"]]]
+    (is (thrown-with-msg? Exception msg
+                          (s/validate! (-> (s/put-instrument s/empty-session :my/x inst)
+                                           (s/play :x [:notes {:inst :my/x} [0]]))))
+        label)))
+
+(deftest song-tracks-must-be-simple-keywords
+  (is (thrown-with-msg? Exception #"simple keywords"
+                        (s/validate! (assoc s/empty-session :tracks {:a/b {:node [:steps {:inst :drum/kick} "x"]}})))))

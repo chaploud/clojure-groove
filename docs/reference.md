@@ -72,11 +72,11 @@ Timing and feel: `:step`, `:swing` (0–1 of a step), `:swing-step`, `:nudge` (f
 
 Steps: `:vel`, `:prob`, `:if` (`:fill :!fill :1st :!1st [a b]`), `:ratchet`. `:1st` counts from when the track started, which a section resets, so `[:fill/crash {:if :1st}]` marks a section's first bar; `[a b]` plays on the a-th of every b loops, e.g. `[1 8]` for once every eight.
 
-Sound: `:inst`, `:kit`, and any instrument parameter, for example `:cutoff`, `:res`, `:hp`, `:decay`, `:pan`, `:delay`, `:reverb`. `(g/describe :synth/acid)` lists an instrument's parameters with their meaning.
+Sound: `:inst`, `:kit`, and any instrument parameter, for example `:cutoff`, `:res`, `:hp` (highpass after a synth's filter, Hz), `:decay`, `:pan`, `:delay`, `:reverb`. `(g/describe k)` lists an instrument's parameters with their defaults and meaning; an instrument definition with an unknown parameter is rejected.
 
 Signals: any numeric attribute can be `[:lfo shape bars low high]` (`:sine :tri :saw :square`) or `[:ramp from to bars]`, evaluated at each note's written position in bars since its track started.
 
-Globals only: `:tempo` (20–999 BPM), `:delay-feedback` (0–0.95, default 0.38; raise it for dub echoes that keep repeating).
+Globals only, plain numbers rather than signals: `:tempo` (20–999 BPM), `:delay-feedback` (0–0.95, default 0.38; raise it for dub echoes that keep repeating).
 
 ## Instruments
 
@@ -100,7 +100,7 @@ Define your own with `:base`: `{:my/bass {:base :synth/acid :cutoff 500.0}}`. Ki
  :tracks {:track node}}
 ```
 
-A section is the complete set of tracks it plays. Entering it, at an arrangement step or with `launch`, starts those tracks from their first step and stops every other track; this happens at every step, even when the same section repeats. `:base` builds on another section, and `nil` drops a track inherited from it. `{:fill n}` makes `:if :fill` steps play in the step's last n bars, and every track stops when the arrangement ends. A song file may contain only the keys above; anything else is rejected, so a misspelled key cannot silently do nothing. Files from 0.1.0 used `:scenes`, which only changed the tracks they named; loading one explains how to convert it.
+A section is the complete set of tracks it plays. Entering it, at an arrangement step or with `launch`, starts those tracks from their first step and stops every other track; this happens at every step, even when the same section repeats. `:base` builds on another section, and `nil` drops a track inherited from it. `{:fill n}` makes `:if :fill` steps play in the step's last n bars, and every track stops when the arrangement ends. A song file may contain only the keys above; anything else is rejected, so a misspelled key cannot silently do nothing. A file with `:scenes` (format 1) is rejected with instructions for converting it.
 
 ## REPL
 

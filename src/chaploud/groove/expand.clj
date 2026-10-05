@@ -43,7 +43,7 @@
                   (vec (range (inc n)))
                   (map-indexed vector a)))))
 
-(defn- suggestion [k defs]
+(defn suggestion [k defs]
   (let [target (str k)
         [best d] (first (sort-by second (map (fn [c] [c (distance target (str c))]) (keys defs))))]
     (when (and best (<= d (max 2 (quot (count target) 4))))

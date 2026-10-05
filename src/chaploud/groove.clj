@@ -67,6 +67,7 @@
 (defn- default-drum [track]
   (let [k (keyword "drum" (name track))]
     (or (notation/sound-aliases (name track))
+        (some (fn [[role inst]] (when (= inst k) role)) instruments/default-kit)
         (when (contains? instruments/builtin k) k)
         (throw (ex-info (str "No drum named " track "; pass :inst, e.g. (drum " track " \"x...\" :inst :rim)")
                         {:track track})))))
@@ -128,16 +129,18 @@
 
 (defn instrument!
   "Defines an instrument from synthesis parameters, usually `{:base :synth/acid ...}` plus
-  overrides. `(describe :synth/acid)` lists the parameters."
+  overrides, or removes it when `params` is nil. `(describe :synth/acid)` lists the parameters
+  with their defaults; unknown parameters are rejected."
   [k params]
   (commit! #(session/put-instrument % k params))
   k)
 
 (defn globals!
   "Merges `m` into the globals, the root of the attribute cascade (`:tempo`, `:root`,
-  `:scale`, ...). Returns the new globals."
+  `:scale`, ...), and `:delay-feedback` (0-0.95, default 0.38), how long the delay keeps
+  repeating. A nil value removes the key. Returns the new globals."
   [m]
-  (:globals (commit! #(update % :globals merge m))))
+  (:globals (commit! #(update % :globals (fn [g] (into {} (remove (comp nil? val)) (merge g m)))))))
 
 (defn tempo
   "Sets the tempo in BPM."
@@ -226,8 +229,8 @@
     (concat
      (for [k (keys defs)] (merge {:name k :kind :part} (library/about k)))
      (for [k (cons :kit/default (keys kits))] (merge {:name k :kind :kit} (library/about k)))
-     (for [[k v] (merge instruments/builtin instruments)]
-       {:name k :kind :instrument :doc (name (:voice v (:base v)))}))))
+     (for [k (keys (merge instruments/builtin instruments))]
+       (merge {:name k :kind :instrument} (library/about k))))))
 
 (defn browse
   "Lists bundled parts, kits and instruments by namespace, or searches their names, tags and
@@ -279,7 +282,7 @@
         (println (format "  %-4s %s" (name role) inst)))
 
       (or (contains? instruments k) (contains? instruments/builtin k))
-      (doseq [[p v] (sort-by key (instruments/resolve-instrument instruments k))]
+      (doseq [[p v] (sort-by key (instruments/with-defaults (instruments/resolve-instrument instruments k)))]
         (println (format "  %-12s %-10s %s" p (pr-str v) (instruments/param-docs p ""))))
 
       :else

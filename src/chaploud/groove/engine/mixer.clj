@@ -81,7 +81,7 @@
      :out-r out-r
      :position (fn ^long [] (aget position 0))
      :take-non-finite-resets! (fn ^long [] (let [n (aget resets 0)] (aset resets 0 0) n))
-     :set-globals! (fn [{:keys [tempo delay-feedback] :or {tempo 120 delay-feedback 0.38}}]
+     :set-globals! (fn [tempo delay-feedback]
                      (aset delay-frames 0 (long (min (dec delay-len) (* sr (/ 60.0 (double tempo)) 0.75))))
                      (aset feedback 0 (double delay-feedback)))
      :render!

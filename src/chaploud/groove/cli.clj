@@ -8,7 +8,7 @@
   "Usage: groove <command> [args]
 
   play <song> [--bars N] [--device NAME]   play a song file or bundled song; Ctrl+C stops
-  render <song> [bars] [out.wav]           render offline to a WAV file
+  render <song> [--bars N] [out.wav]       render offline to a WAV file
   songs                                    list bundled songs
   devices                                  list audio outputs
 
@@ -23,13 +23,15 @@ A song is a path to an .edn file or the name of a bundled song, e.g. trance.")
     (cond
       (empty? args) [opts positional]
       (= a "--bars") (recur more (assoc opts :bars (bars-arg b)) positional)
-      (= a "--device") (recur more (assoc opts :device b) positional)
+      (= a "--device") (if b
+                         (recur more (assoc opts :device b) positional)
+                         (throw (ex-info "--device needs an output name; see groove devices" {})))
       :else (recur (rest args) opts (conj positional a)))))
 
 (defn play [song {:keys [bars device]}]
   (g/load! song)
   (let [s (g/session)
-        bars (or bars (when (seq (:arrangement s)) (render/song-bars s)))]
+        bars (or bars (when (seq (:arrangement s)) (session/arrangement-bars s)))]
     (g/start! {:device device})
     (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable g/stop!))
     (println (str "Playing " song " at " (session/tempo s) " BPM"
@@ -56,8 +58,10 @@ A song is a path to an .edn file or the name of a bundled song, e.g. trance.")
     (case command
       "play" (if song (play song opts) (usage-error))
       "render" (if song
-                 (println (render/render-file song (some-> (first more) bars-arg)
-                                              (or (second more) (render/default-out song))))
+                 (let [[bars out] (if (or (:bars opts) (not (some-> (first more) parse-long)))
+                                    [(:bars opts) (first more)]
+                                    [(bars-arg (first more)) (second more)])]
+                   (println (render/render-file song bars (or out (render/default-out song)))))
                  (usage-error))
       "songs" (songs)
       "devices" (run! println (g/devices))

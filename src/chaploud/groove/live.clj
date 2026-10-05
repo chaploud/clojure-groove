@@ -38,7 +38,7 @@
   (let [frame (double frame)
         session (:session st)
         bar-frames (* (session/bar-seconds session) (double (:sample-rate mixer)))]
-    ((:set-globals! mixer) (:globals session))
+    ((:set-globals! mixer) (session/tempo session) (session/delay-feedback session))
     (when (pos? (long ((:take-non-finite-resets! mixer))))
       (on-error "the output went non-finite, so the delay and reverb were reset" nil))
     (doseq [e (events-of st bar on-error)]
@@ -53,9 +53,9 @@
         lookahead (* (double (:sample-rate mixer)) lookahead-seconds)]
     (loop [bar 0, frame (+ (double (position)) lookahead)]
       (when (and @running (alive?))
+        (swap! !transport #(if (identical? running (:running %)) (assoc % :bar bar) %))
         (let [st (swap! !state advance bar on-error)
               next-frame (double (schedule-bar! mixer st bar frame on-error))]
-          (swap! !transport #(if (identical? running (:running %)) (assoc % :bar bar) %))
           (when (pos? (long (take-dropouts!)))
             (on-error "audio dropouts: the output buffer ran dry, so the CPU was too busy; try (start! {:buffer-ms 300})" nil))
           (while (and @running (alive?) (< (double (position)) (- next-frame lookahead)))

@@ -89,3 +89,10 @@
     (is (thrown-with-msg? Exception #"unknown keys \[:arangement\]" (io/read-song (str dir "/typo.edn"))))
     (is (thrown-with-msg? Exception #":sections must be a map" (io/read-song (str dir "/shape.edn"))))
     (is (thrown-with-msg? Exception #"bad-node.edn: Track :k" (io/load-song (str dir "/bad-node.edn"))))))
+
+(deftest saving-ignores-the-repl-print-length
+  (let [path (str (tmp-dir) "/song.edn")
+        sess (s/play s/empty-session :k [:steps {:inst :drum/kick} (vec (repeat 32 :x))])]
+    (binding [*print-length* 10 *print-level* 2]
+      (io/write-song! sess path))
+    (is (= 32 (count (get-in (io/read-song path) [:tracks :k 2]))))))

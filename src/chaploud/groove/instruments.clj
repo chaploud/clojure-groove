@@ -1,4 +1,5 @@
-(ns ^:no-doc chaploud.groove.instruments)
+(ns ^:no-doc chaploud.groove.instruments
+  (:require [clojure.string :as str]))
 
 (def builtin
   {:drum/kick {:voice :kick :bus :drums :duck true :gain 1.0 :length 0.9
@@ -44,9 +45,9 @@
    :synth/organ {:voice :synth :bus :synth :osc :square :gain 0.2 :octave 3
                  :cutoff 1200.0 :env 0.0 :res 0.05
                  :attack 0.004 :decay 0.1 :sustain 0.6 :release 0.04 :gate 0.4 :pan -0.25}
-   :synth/skank {:voice :synth :bus :synth :osc :square :gain 0.25 :octave 4
-                 :cutoff 2600.0 :hp 350.0 :env 0.0 :res 0.1
-                 :attack 0.001 :decay 0.09 :sustain 0.0 :release 0.04 :gate 0.25 :pan 0.25}
+   :synth/skank {:voice :synth :bus :synth :osc :square :gain 0.28 :octave 4
+                 :cutoff 3200.0 :hp 500.0 :env 2500.0 :fdecay 0.03 :res 0.2
+                 :attack 0.001 :decay 0.06 :sustain 0.0 :release 0.04 :gate 0.25 :pan 0.25}
    :synth/melodica {:voice :synth :bus :synth :osc :saw :gain 0.22 :octave 5
                     :cutoff 1700.0 :env 500.0 :fdecay 0.3 :res 0.1
                     :attack 0.025 :decay 0.3 :sustain 0.8 :release 0.12 :gate 0.85 :delay 0.25 :reverb 0.2}
@@ -54,17 +55,26 @@
                 :cutoff 2200.0 :env 800.0 :fdecay 0.3 :res 0.05
                 :attack 0.003 :decay 0.6 :sustain 0.3 :release 0.3 :gate 0.9}})
 
+(def synth-defaults
+  {:unison 1 :detune 0.0 :spread 0.0 :sub 0.0 :env 0.0 :fdecay 0.2 :res 0.2 :hp 0.0 :drive 1.0
+   :pan 0.0 :delay 0.0 :reverb 0.0 :glide-time 0.06})
+
+(defn with-defaults [params]
+  (if (= :synth (:voice params)) (merge synth-defaults params) params))
+
 (def default-kit
   {:bd :drum/kick :sd :drum/snare :cp :drum/clap :hh :drum/hat :oh :drum/open-hat :rim :drum/rim
    :lt :drum/tom-low :mt :drum/tom-mid :ht :drum/tom-high :cb :drum/cowbell :cr :drum/crash :rd :drum/ride})
 
-(defn- resolve-with-base [defs builtins k what]
+(defn resolve-with-base [defs builtins k what]
   (loop [k k, seen #{}, acc {}]
     (cond
       (nil? k) acc
       (seen k) (throw (ex-info (str "Circular " (name what) " :base through " k) {what k}))
       :else (let [m (or (get defs k) (get builtins k)
                         (throw (ex-info (str "Unknown " (name what) " " k) {what k})))]
+              (when-not (map? m)
+                (throw (ex-info (str (str/capitalize (name what)) " " k " must be a map, got " (pr-str m)) {what k})))
               (recur (:base m) (conj seen k) (merge (dissoc m :base) acc))))))
 
 (defn resolve-instrument [instruments k]

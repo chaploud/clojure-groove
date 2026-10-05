@@ -88,6 +88,6 @@
 (defn write-song! [session path]
   (let [f (jio/file path)]
     (some-> (.getParentFile f) .mkdirs)
-    (spit f (binding [*print-namespace-maps* false]
+    (spit f (binding [*print-namespace-maps* false *print-length* nil *print-level* nil *print-meta* false]
               (with-out-str (pprint/pprint (session->song session)))))
     path))

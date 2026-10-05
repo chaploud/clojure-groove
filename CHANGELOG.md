@@ -13,7 +13,7 @@
 - Step and note bodies can be written one bar at a time (a vector of strings, or a vector of note vectors); each bar is checked to be exactly one bar long.
 - `:hp` adds a highpass after a synth's filter, and `:synth/speaker` uses it to sound like a small in-store speaker; ramping `:hp` down opens it up to full range.
 - Reggae: `:beat/one-drop`, and `:synth/organ` (bubble), `:synth/skank` (offbeat guitar chop) and `:synth/melodica`. The `:delay-feedback` global sets how long the delay keeps repeating.
-- New parts: `:lead/` melodies and `:arp/` arpeggios. A 30-second `showcase` song goes from a filtered intro through a build into a full drop. The bundled songs are rewritten as full arrangements with melodies, builds, fills and second drops.
+- New parts: `:lead/` melodies and `:arp/` arpeggios. A 30-second `showcase` song goes from a filtered intro through a build into a full drop, and `market` grows a future-bounce hook from an in-store jingle into EDM. The bundled songs are rewritten as full arrangements with melodies, builds, fills and second drops.
 
 ## 0.1.0 (2026-10-05)
 

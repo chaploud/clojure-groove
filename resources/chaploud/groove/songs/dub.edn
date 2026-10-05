@@ -1,7 +1,7 @@
 ;; Dub techno at 120 BPM in D dorian: a chord stab alternating i7 and IV7, drowned in delay and
 ;; reverb under a slow filter LFO, with the groove assembled and taken apart around it.
 {:groove/format 2
- :globals {:tempo 120 :root :d :scale :dorian :kit :kit/tr909}
+ :globals {:tempo 120 :delay-feedback 0.6 :root :d :scale :dorian :kit :kit/tr909}
  :defs
  {:dub/stab [:fx [:struct "........ ..x....."]
              [:notes {:inst :synth/keys :octave 4 :delay 1.0 :reverb 1.0 :vel 0.6

@@ -1,5 +1,7 @@
 (ns chaploud.groove-test
   (:require [chaploud.groove :as g]
+            [chaploud.groove.instruments :as instruments]
+            [chaploud.groove.library :as library]
             [chaploud.groove.live :as live]
             [chaploud.groove.session :as s]
             [clojure.edn]
@@ -27,7 +29,8 @@
   (g/drum :hh "x")
   (g/synth :lead [0])
   (g/synth :foo [0])
-  (is (= {:hh :hh :lead :synth/lead :foo :synth/keys}
+  (g/drum :open-hat "x")
+  (is (= {:hh :hh :lead :synth/lead :foo :synth/keys :open-hat :oh}
          (update-vals (:tracks (g/session)) #(get-in % [:node 1 :inst]))))
   (is (thrown-with-msg? Exception #"No drum named :zz" (g/drum :zz "x"))))
 
@@ -84,3 +87,20 @@
 
 (deftest show-prints-hits-in-sixteenth-columns
   (is (= "bd   |x···.···X···.···|" (str/trim-newline (with-out-str (g/show [:steps {:inst :bd} "x... .... X... ...."]))))))
+
+(deftest instruments-reject-unknown-parameters-and-nil-removes-them
+  (is (thrown-with-msg? Exception #"no parameter :cutof \(did you mean :cutoff\?\)"
+                        (g/instrument! :my/bass {:base :synth/acid :cutof 100.0})))
+  (is (thrown? Exception (g/instrument! :my/bass :synth/acid)))
+  (g/instrument! :my/bass {:base :synth/acid :cutoff 100.0})
+  (g/instrument! :my/bass nil)
+  (is (empty? (:instruments (g/session)))))
+
+(deftest a-nil-global-falls-back-to-its-default
+  (g/globals! {:delay-feedback 0.7})
+  (is (not (contains? (g/globals! {:delay-feedback nil}) :delay-feedback))))
+
+(deftest every-built-in-instrument-is-described
+  (is (every? library/about (keys instruments/builtin)))
+  (is (str/includes? (with-out-str (g/browse "reggae")) ":synth/skank"))
+  (is (str/includes? (with-out-str (g/describe :synth/acid)) ":hp")))
