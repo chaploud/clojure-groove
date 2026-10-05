@@ -54,3 +54,8 @@
 (deftest root-voicing-follows-transpose
   (is (= [48] (midis {:root :c :scale :minor :octave 2 :voicing :root :roman :i :transpose 12})))
   (is (= [43] (midis {:root :c :scale :minor :octave 2 :voicing :root :roman :i :transpose 7}))))
+
+(deftest scale-transpose-moves-by-scale-steps
+  (let [at (fn [degree shift] (:midi (p/resolve-midi {:degree degree :root :d :scale :major :octave 4 :scale-transpose shift})))]
+    (is (= [62 66 67] [(at 0 0) (at 0 2) (at 1 2)]))
+    (is (= 59 (at 0 -2)))))

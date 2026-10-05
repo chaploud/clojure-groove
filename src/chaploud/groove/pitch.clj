@@ -46,11 +46,11 @@
        (steps (Math/floorMod d n))
        (* 12 (+ 1 octave (Math/floorDiv d n))))))
 
-(defn resolve-midi [{:keys [midi note degree transpose octave] :or {octave 4} :as event}]
+(defn resolve-midi [{:keys [midi note degree transpose octave scale-transpose] :or {octave 4} :as event}]
   (let [m (cond
             midi midi
             note (note->midi note octave)
-            degree (degree->midi degree event))]
+            degree (degree->midi (+ degree (or scale-transpose 0)) event))]
     (cond-> event
       m (assoc :midi (+ m (or transpose 0))))))
 
@@ -121,7 +121,8 @@
                    roman (let [{:keys [degree shift intervals]}
                                (or (parse-roman roman)
                                    (throw (ex-info (str "Not a chord symbol: " (pr-str roman)) {:roman roman})))
-                               base (+ (degree->midi degree (cond-> event (not (zero? shift)) (assoc :scale :major)))
+                               base (+ (degree->midi (+ degree (or (:scale-transpose event) 0))
+                                                     (cond-> event (not (zero? shift)) (assoc :scale :major)))
                                        shift (or transpose 0))]
                            (map #(+ base %) intervals))
                    chord (map #(:midi (resolve-midi (merge event %))) chord))]

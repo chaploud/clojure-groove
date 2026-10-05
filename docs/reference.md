@@ -66,7 +66,7 @@ Chord suffixes: `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug`. Uppercase numeral
 
 ## Attributes
 
-Pitch: `:root` (note name, default `:c`), `:scale` (keyword or a vector of semitones), `:octave` (default from the instrument), `:degree`, `:note`, `:midi`, `:transpose`, `:voicing` (`:close :open :drop2 :root`; `:root` is the root nearest the tonic), `:inv`.
+Pitch: `:root` (note name, default `:c`), `:scale` (keyword or a vector of semitones), `:octave` (default from the instrument), `:degree`, `:note`, `:midi`, `:transpose` (semitones), `:scale-transpose` (scale steps, for harmonies: `-2` is a third below a melody written in degrees; note names are not moved), `:voicing` (`:close :open :drop2 :root`; `:root` is the root nearest the tonic), `:inv`.
 
 Timing and feel: `:step`, `:swing` (0–1 of a step), `:swing-step`, `:nudge` (fraction of the note), `:humanize` (0–1), `:gate` (fraction of the note held), `:glide`, `:glide-time`.
 
