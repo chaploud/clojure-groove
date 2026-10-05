@@ -92,7 +92,7 @@
     :else 1))
 
 (defn- nearest-tonic [m event]
-  (let [tonic (degree->midi 0 event)]
+  (let [tonic (+ (degree->midi 0 event) (or (:transpose event) 0))]
     (+ m (* 12 (Math/round (/ (- tonic m) 12.0))))))
 
 (defn- voice [midis {:keys [voicing inv] :as event}]
