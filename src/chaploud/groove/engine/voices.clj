@@ -192,8 +192,8 @@
 
 (defn- synth-voice
   [{:keys [osc unison detune sub cutoff env fdecay res attack decay sustain release drive gain vel pan
-           dur-s midi spread glide-from-midi glide-time]
-    :or {unison 1 detune 0.0 sub 0.0 env 0.0 fdecay 0.2 res 0.2 drive 1.0 spread 0.0}}
+           dur-s midi spread glide-from-midi glide-time hp]
+    :or {unison 1 detune 0.0 sub 0.0 env 0.0 fdecay 0.2 res 0.2 drive 1.0 spread 0.0 hp 0.0}}
    sr seed]
   (let [sr (double sr)
         kind (osc-kind osc)
@@ -214,6 +214,9 @@
         sub (double sub)
         sub-inc (/ (* 0.5 hz) sr)
         st-l (double-array 2) st-r (double-array 2)
+        hp? (pos? (double hp))
+        hp-g (g-of (double hp) sr)
+        hp-l (double-array 2) hp-r (double-array 2)
         cutoff (double cutoff) env (* (double env) (if (> (double vel) 0.95) 1.5 1.0))
         fdecay (double fdecay) k (k-of res)
         attack (double attack) decay (double decay) sustain (double sustain) release (double release)
@@ -250,6 +253,8 @@
                   g (g-of fc sr)
                   yl (lowpass st-l (+ (aget mix 0) sub-s) g k)
                   yr (lowpass st-r (+ (aget mix 1) sub-s) g k)
+                  yl (if hp? (highpass hp-l yl hp-g 1.414) yl)
+                  yr (if hp? (highpass hp-r yr hp-g 1.414) yr)
                   a (if (< t gate-off)
                       (decay-env t attack decay sustain)
                       (* (decay-env gate-off attack decay sustain)

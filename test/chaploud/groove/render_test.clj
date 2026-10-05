@@ -78,3 +78,7 @@
     (dotimes [_ 20] ((:render! mx)))
     (is (pos? ((:take-non-finite-resets! mx))))
     (is (zero? ((:take-non-finite-resets! mx))))))
+
+(deftest a-highpass-thins-a-low-note
+  (let [low #(rms (render :b [:notes (merge {:inst :synth/sub :octave 2} %) [:w 0]]) 4000 40000)]
+    (is (< (* 4 (low {:hp 1000.0})) (low {})))))

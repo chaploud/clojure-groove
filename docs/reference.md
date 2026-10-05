@@ -72,7 +72,7 @@ Timing and feel: `:step`, `:swing` (0–1 of a step), `:swing-step`, `:nudge` (f
 
 Steps: `:vel`, `:prob`, `:if` (`:fill :!fill :1st :!1st [a b]`), `:ratchet`. `:1st` counts from when the track started, which a section resets, so `[:fill/crash {:if :1st}]` marks a section's first bar; `[a b]` plays on the a-th of every b loops, e.g. `[1 8]` for once every eight.
 
-Sound: `:inst`, `:kit`, and any instrument parameter, for example `:cutoff`, `:res`, `:decay`, `:pan`, `:delay`, `:reverb`. `(g/describe :synth/acid)` lists an instrument's parameters with their meaning.
+Sound: `:inst`, `:kit`, and any instrument parameter, for example `:cutoff`, `:res`, `:hp`, `:decay`, `:pan`, `:delay`, `:reverb`. `(g/describe :synth/acid)` lists an instrument's parameters with their meaning.
 
 Signals: any numeric attribute can be `[:lfo shape bars low high]` (`:sine :tri :saw :square`) or `[:ramp from to bars]`, evaluated at each note's written position in bars since its track started.
 
@@ -82,7 +82,7 @@ Globals only: `:tempo` (20–999 BPM).
 
 | Drums | Synths |
 |---|---|
-| `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` | `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` |
+| `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` | `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/speaker` |
 
 Define your own with `:base`: `{:my/bass {:base :synth/acid :cutoff 500.0}}`. Kits map roles to instruments: `{:my/kit {:base :kit/tr808 :bd :my/kick}}`.
 

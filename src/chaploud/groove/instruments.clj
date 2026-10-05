@@ -38,6 +38,9 @@
    :synth/lead {:voice :synth :bus :synth :osc :square :gain 0.25 :octave 5
                 :cutoff 2400.0 :env 1200.0 :fdecay 0.2 :res 0.35
                 :attack 0.005 :decay 0.2 :sustain 0.7 :release 0.12 :drive 1.4 :gate 0.8}
+   :synth/speaker {:voice :synth :bus :synth :osc :square :gain 0.3 :octave 5
+                   :cutoff 2600.0 :hp 700.0 :env 0.0 :res 0.3
+                   :attack 0.002 :decay 0.25 :sustain 0.6 :release 0.08 :drive 3.0 :gate 0.85}
    :synth/keys {:voice :synth :bus :synth :osc :tri :gain 0.4 :octave 4
                 :cutoff 2200.0 :env 800.0 :fdecay 0.3 :res 0.05
                 :attack 0.003 :decay 0.6 :sustain 0.3 :release 0.3 :gate 0.9}})
@@ -106,6 +109,7 @@
    :env "how far the filter envelope opens above :cutoff, Hz"
    :fdecay "filter envelope decay, seconds"
    :res "filter resonance, 0-1"
+   :hp "highpass frequency after the filter, Hz; 0 is off. With :cutoff it narrows a synth to a small speaker"
    :attack "amplitude attack, seconds"
    :sustain "amplitude sustain level, 0-1"
    :release "amplitude release, seconds"
