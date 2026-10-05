@@ -1,0 +1,31 @@
+;; Shop-floor future bounce at 128 BPM in D major: an original, sing-along hook over I-V-vi-IV,
+;; first as a chiming keys line, then a build with claps and a snare roll, then a drop where a
+;; square lead and a supersaw double the hook over offbeat stabs and a bouncing octave bass.
+{:groove/format 2
+ :globals {:tempo 128 :root :d :scale :major :kit :kit/tr909}
+ :defs
+ {:market/hook [:notes {:inst :synth/lead :octave 4}
+                [[:e 7 :s 7 9 :e 7 4 :q 2 :e 4 :_]
+                 [:e 8 :s 8 6 :e 8 11 :q 8 :e 6 :_]
+                 [:e 9 :s 9 11 :e 9 7 :q 5 :e 7 :_]
+                 [:q 7 :e 5 3 :h 5]]]
+  :market/chime [:market/hook {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.8}]
+  :market/saw [:market/hook {:inst :synth/supersaw :octave 4 :vel 0.55}]
+  :market/stabs [:fx [:struct "..x. ..x. ..x. ..x."]
+                 [:prog/axis {:inst :synth/supersaw :octave 4 :vel 0.5 :gate 0.4}]]
+  :market/pad [:prog/axis {:octave 3 :vel 0.45}]
+  :market/octaves [:fx [:struct "x.x. x.x. x.x. x.x."]
+                   [:notes {:inst :synth/bass :gate 0.5}
+                    [[:e 0 7 0 7 0 7 0 7] [:e 4 11 4 11 4 11 4 11]
+                     [:e 5 12 5 12 5 12 5 12] [:e 3 10 3 10 3 10 3 10]]]]
+  :market/claps [:steps {:inst :cp :vel 0.5 :reverb 0.5} "x... x... x... x..."]}
+ :sections
+ {:intro {:chime :market/chime :pad :market/pad
+          :claps [:steps {:inst :cp :vel 0.35} ".... x... .... x..."]}
+  :build {:chime :market/chime :pad [:market/pad {:cutoff [:ramp 400.0 4000.0 8]}]
+          :claps :market/claps :roll [:fill/snare-roll {:if :fill}]}
+  :drop {:drums :beat/house :bass :market/octaves :stabs :market/stabs
+         :hook :market/hook :saw :market/saw :crash [:fill/crash {:if :1st}]}
+  :break {:pad :market/pad :chime :market/chime :roll [:fill/snare-roll {:if :fill}]}
+  :drop2 {:base :drop :chime [:market/chime {:octave 6 :vel 0.35}]}}
+ :arrangement [[:intro 4] [:build 8 {:fill 2}] [:drop 8] [:break 4 {:fill 1}] [:drop2 8]]}
