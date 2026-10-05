@@ -16,7 +16,7 @@
    :drum/tom-mid {:voice :tom :bus :drums :gain 0.7 :length 0.8 :pitch 120.0 :decay 0.22}
    :drum/tom-high {:voice :tom :bus :drums :gain 0.7 :length 0.7 :pitch 170.0 :decay 0.2 :pan 0.3}
 
-   :drum/timpani {:voice :tom :bus :drums :gain 0.6 :length 2.0 :pitch 65.0 :decay 0.8 :pan -0.1}
+   :drum/timpani {:voice :tom :bus :drums :gain 0.6 :length 2.0 :pitch 65.0 :decay 0.8 :octave 2 :pan -0.1}
    :drum/taiko {:voice :tom :bus :drums :gain 1.0 :length 1.0 :pitch 52.0 :decay 0.32 :reverb 0.3}
 
    :synth/acid {:voice :synth :bus :bass :osc :saw :gain 0.45 :octave 2
@@ -47,13 +47,13 @@
                    :attack 0.002 :decay 0.25 :sustain 0.6 :release 0.08 :drive 3.0 :gate 0.85}
    :synth/brass {:voice :synth :bus :synth :osc :supersaw :unison 3 :detune 9.0 :spread 0.5
                  :gain 0.34 :octave 4 :cutoff 1300.0 :env 2000.0 :fdecay 0.35 :res 0.1
-                 :attack 0.03 :decay 0.4 :sustain 0.8 :release 0.15 :drive 1.6 :gate 0.9 :reverb 0.3}
+                 :attack 0.03 :decay 0.4 :sustain 0.8 :release 0.15 :drive 1.6 :gate 0.9 :delay 0.0 :reverb 0.6}
    :synth/strings {:voice :synth :bus :synth :osc :supersaw :unison 5 :detune 11.0 :spread 0.8
                    :gain 0.24 :octave 4 :cutoff 2600.0 :env 600.0 :fdecay 0.1 :res 0.05
-                   :attack 0.004 :decay 0.15 :sustain 0.5 :release 0.08 :gate 0.6 :reverb 0.25}
+                   :attack 0.004 :decay 0.15 :sustain 0.5 :release 0.08 :gate 0.6 :delay 0.0 :reverb 0.6}
    :synth/choir {:voice :synth :bus :synth :osc :supersaw :unison 4 :detune 15.0 :spread 1.0
                  :gain 0.22 :octave 4 :cutoff 1100.0 :hp 250.0 :env 0.0 :res 0.3
-                 :attack 0.45 :decay 1.0 :sustain 0.9 :release 1.0 :gate 1.0 :reverb 0.6}
+                 :attack 0.45 :decay 1.0 :sustain 0.9 :release 1.0 :gate 1.0 :delay 0.0}
    :synth/organ {:voice :synth :bus :synth :osc :square :gain 0.2 :octave 3
                  :cutoff 1200.0 :env 0.0 :res 0.05
                  :attack 0.004 :decay 0.1 :sustain 0.6 :release 0.04 :gate 0.4 :pan -0.25}
@@ -62,14 +62,25 @@
                  :attack 0.001 :decay 0.06 :sustain 0.0 :release 0.04 :gate 0.25 :pan 0.25}
    :synth/melodica {:voice :synth :bus :synth :osc :saw :gain 0.22 :octave 5
                     :cutoff 1700.0 :env 500.0 :fdecay 0.3 :res 0.1
-                    :attack 0.025 :decay 0.3 :sustain 0.8 :release 0.12 :gate 0.85 :delay 0.25 :reverb 0.2}
+                    :attack 0.025 :decay 0.3 :sustain 0.8 :release 0.12 :gate 0.85 :delay 0.5 :reverb 0.5}
    :synth/keys {:voice :synth :bus :synth :osc :tri :gain 0.4 :octave 4
                 :cutoff 2200.0 :env 800.0 :fdecay 0.3 :res 0.05
                 :attack 0.003 :decay 0.6 :sustain 0.3 :release 0.3 :gate 0.9}})
 
 (def synth-defaults
   {:unison 1 :detune 0.0 :spread 0.0 :sub 0.0 :env 0.0 :fdecay 0.2 :res 0.2 :hp 0.0 :drive 1.0
-   :pan 0.0 :delay 0.0 :reverb 0.0 :glide-time 0.06})
+   :pan 0.0 :glide-time 0.06})
+
+(def required-params
+  (let [drum [:gain :length]]
+    {:synth [:gain :cutoff :attack :decay :sustain :release]
+     :kick (into drum [:pitch :punch :pitch-decay :decay :click :drive])
+     :snare (into drum [:tone :snappy :decay])
+     :clap (into drum [:decay])
+     :metal (into drum [:decay :tune :cutoff])
+     :tom (into drum [:pitch :decay])
+     :rim drum
+     :cowbell (into drum [:decay])}))
 
 (defn with-defaults [params]
   (if (= :synth (:voice params)) (merge synth-defaults params) params))
@@ -123,7 +134,7 @@
    :reverb "send to the reverb, 0-1"
    :length "longest a drum hit can ring, seconds"
    :decay "decay time, seconds"
-   :pitch "base frequency in Hz (kick, toms)"
+   :pitch "base frequency in Hz (kick, toms); a note's pitch replaces it on toms"
    :punch "how far the kick's pitch sweeps above :pitch, Hz"
    :pitch-decay "how fast the kick's sweep falls, per second"
    :click "level of the kick's transient"

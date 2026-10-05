@@ -208,7 +208,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 
 Built-in instruments are synthesized, so they need no sample downloads:
 
-- Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` `:drum/timpani` `:drum/taiko`
+- Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high`, plus `:drum/timpani` (follows a note's pitch) and `:drum/taiko`, which no kit role points to
 - Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys`
 - Orchestral: `:synth/brass` `:synth/strings` (short, for ostinatos) `:synth/choir`
 - Reggae and character: `:synth/organ` (the bubble), `:synth/skank` (offbeat guitar chop), `:synth/melodica`, `:synth/speaker` (a small in-store speaker)
@@ -248,7 +248,7 @@ A section is the complete set of tracks it plays: entering it starts them from t
 | `bb test` | run the test suite |
 | `bb lint` / `bb fmt` / `bb fmt:check` | clj-kondo and cljfmt |
 | `bb ci` | everything CI runs |
-| `bb play SONG` / `bb render SONG [bars] [out.wav]` / `bb songs` / `bb devices` | the command line |
+| `bb play SONG` / `bb render SONG [--bars N] [out.wav]` / `bb songs` / `bb devices` | the command line |
 | `bb examples` | render every bundled song (smoke test) |
 | `bb jar` / `bb deploy` | build the jar / deploy it to Clojars |
 

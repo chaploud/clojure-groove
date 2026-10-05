@@ -24,7 +24,7 @@
   play {:doc "Play a song: bb play trance | bb play my-song.edn [--bars N] [--device NAME]"
         :task (apply clojure "-J-XX:+UseZGC -M -m chaploud.groove.cli play" *command-line-args*)}
 
-  render {:doc "Render a song to WAV: bb render trance [bars] [out.wav]"
+  render {:doc "Render a song to WAV: bb render trance [--bars N] [out.wav]"
           :task (apply clojure "-M -m chaploud.groove.cli render" *command-line-args*)}
 
   songs {:doc "List bundled songs"

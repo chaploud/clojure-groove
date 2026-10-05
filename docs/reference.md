@@ -116,4 +116,4 @@ A section is the complete set of tracks it plays. Entering it, at an arrangement
 
 ## Command line
 
-`bb play SONG [--bars N] [--device NAME]`, `bb render SONG [bars] [out.wav]`, `bb songs`, `bb devices`, or `clojure -M -m chaploud.groove.cli ...` without Babashka.
+`bb play SONG [--bars N] [--device NAME]`, `bb render SONG [--bars N] [out.wav]`, `bb songs`, `bb devices`, or `clojure -M -m chaploud.groove.cli ...` without Babashka.

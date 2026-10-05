@@ -29,6 +29,10 @@
   (set (remove #{:voice :bus :duck :choke :osc} (keys instruments/param-docs))))
 
 (defn- check-params! [p]
+  (doseq [k (instruments/required-params (:voice p))
+          :when (not (contains? p k))]
+    (fail (str (:inst p) " needs " (pr-str k) " for its " (pr-str (:voice p)) " voice; build on a built-in with :base")
+          {:param k}))
   (doseq [k numeric-params
           :let [v (get p k)]
           :when (and (contains? p k) (not (number? v)))]
@@ -65,14 +69,18 @@
              :vel (* (double (:vel p)) (double (:vel-scale p 1.0)))
              :dur-s (* (double (:dur p)) (double (:gate p)) bar-seconds)))))
 
-(defn tempo [session]
-  (get-in session [:globals :tempo] 120))
+(def mix-globals
+  {:tempo [20 999 120]
+   :delay-feedback [0 0.95 0.38]
+   :duck-depth [0 1 0.75]})
 
-(defn delay-feedback [session]
-  (get-in session [:globals :delay-feedback] 0.38))
+(defn global [session k]
+  (get-in session [:globals k] (peek (mix-globals k))))
 
-(defn duck-depth [session]
-  (get-in session [:globals :duck-depth] 0.75))
+(defn mix-settings [session]
+  (into {} (for [k (keys mix-globals)] [k (global session k)])))
+
+(defn tempo [session] (global session :tempo))
 
 (defn bar-seconds [session]
   (/ (* 4 60.0) (double (tempo session))))
@@ -166,11 +174,15 @@
 
 (declare launch-section track-key!)
 
-(def ^:private instrument-keys (assoc instruments/param-docs :base ""))
+(def ^:private instrument-keys (assoc instruments/param-docs :base "" :vel "" :transpose ""))
 
 (defn- validate-instruments! [{:keys [instruments kits] :as session}]
   (let [catalog (library/catalog session)]
-    (doseq [k (keys kits)] (instruments/resolve-kit (:kits catalog) k))
+    (doseq [k (keys kits)
+            [role inst] (instruments/resolve-kit (:kits catalog) k)]
+      (try (instruments/resolve-instrument (:instruments catalog) inst)
+           (catch clojure.lang.ExceptionInfo e
+             (fail (str "Kit " k " role " role ": " (ex-message e)) {:kit k :role role}))))
     (doseq [k (keys instruments)] (instruments/resolve-instrument (:instruments catalog) k)))
   (doseq [[k params] instruments]
     (when-not (map? params)
@@ -182,15 +194,10 @@
             {:instrument k :param p}))))
 
 (defn validate! [session]
-  (let [t (tempo session)]
-    (when-not (and (number? t) (<= 20 t 999))
-      (fail (str ":tempo must be a number between 20 and 999, got " (pr-str t)) {:tempo t})))
-  (let [fb (delay-feedback session)]
-    (when-not (and (number? fb) (<= 0 fb 0.95))
-      (fail (str ":delay-feedback must be a number between 0 and 0.95, got " (pr-str fb)) {:delay-feedback fb})))
-  (let [d (duck-depth session)]
-    (when-not (and (number? d) (<= 0 d 1))
-      (fail (str ":duck-depth must be a number between 0 and 1, got " (pr-str d)) {:duck-depth d})))
+  (doseq [[k [lo hi]] mix-globals
+          :let [v (global session k)]]
+    (when-not (and (number? v) (<= lo v hi))
+      (fail (str (pr-str k) " must be a number between " lo " and " hi ", got " (pr-str v)) {k v})))
   (doseq [t (keys (:tracks session))] (track-key! t))
   (validate-instruments! session)
   (validate-arrangement! session)

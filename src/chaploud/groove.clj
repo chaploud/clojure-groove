@@ -282,7 +282,9 @@
         (println (format "  %-4s %s" (name role) inst)))
 
       (or (contains? instruments k) (contains? instruments/builtin k))
-      (doseq [[p v] (sort-by key (instruments/with-defaults (instruments/resolve-instrument instruments k)))]
+      (doseq [[p v] (sort-by key (dissoc (instruments/with-defaults
+                                           (instruments/resolve-event {:instruments instruments :kits kits} {:inst k}))
+                                         :inst))]
         (println (format "  %-12s %-10s %s" p (pr-str v) (instruments/param-docs p ""))))
 
       :else

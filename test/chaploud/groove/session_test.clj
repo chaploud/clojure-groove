@@ -186,3 +186,19 @@
 (deftest song-tracks-must-be-simple-keywords
   (is (thrown-with-msg? Exception #"simple keywords"
                         (s/validate! (assoc s/empty-session :tracks {:a/b {:node [:steps {:inst :drum/kick} "x"]}})))))
+
+(deftest instruments-without-a-base-name-the-missing-parameter
+  (doseq [inst [{:voice :synth} {:voice :synth :osc :saw :gain 0.3 :cutoff 800.0} {:voice :tom :gain 0.5}]]
+    (is (thrown-with-msg? Exception #"needs :"
+                          (s/validate! (-> (s/put-instrument s/empty-session :my/x inst)
+                                           (s/play :x [:notes {:inst :my/x} [0]]))))
+        (pr-str inst))))
+
+(deftest kit-roles-must-name-known-instruments
+  (is (thrown-with-msg? Exception #"Kit :my/kit role :bd"
+                        (s/validate! (s/put-kit s/empty-session :my/kit {:bd :drum/nope})))))
+
+(deftest timpani-notes-sit-in-octave-2
+  (let [sess (s/play s/empty-session :t [:notes {:inst :drum/timpani} [:h 0 4]])
+        events (s/bar-events (s/begin-bar sess 0) (s/validate! sess) 0)]
+    (is (= [36 43] (map :midi events)))))

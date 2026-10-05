@@ -1,5 +1,6 @@
 (ns chaploud.groove.library-test
   (:require [chaploud.groove.expand :as expand]
+            [chaploud.groove.instruments :as instruments]
             [chaploud.groove.library :as library]
             [chaploud.groove.session :as s]
             [clojure.test :refer [deftest is testing]]))
@@ -16,7 +17,7 @@
     (is (integer? (:len (expand/expand k (:defs catalog)))) (str k))))
 
 (deftest every-part-and-kit-is-described
-  (doseq [k (concat (keys (:defs catalog)) (keys (:kits catalog)))]
+  (doseq [k (concat (keys (:defs catalog)) (keys (:kits catalog)) (keys instruments/builtin))]
     (is (string? (:doc (library/about k))) (str k))))
 
 (deftest kits-swap-the-instruments-behind-roles

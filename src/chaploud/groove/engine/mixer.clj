@@ -67,9 +67,9 @@
         delay-l (double-array delay-len)
         delay-r (double-array delay-len)
         delay-idx (long-array 1)
-        delay-frames (long-array [(long (* sr 0.35))])
-        feedback (double-array [0.38])
-        duck-depth (double-array [0.75])
+        delay-frames (long-array 1)
+        feedback (double-array 1)
+        duck-depth (double-array 1)
         [^IFn$DD rev-l reset-l] (make-reverb sr 0)
         [^IFn$DD rev-r reset-r] (make-reverb sr 23)
         resets (long-array 1)
@@ -82,10 +82,10 @@
      :out-r out-r
      :position (fn ^long [] (aget position 0))
      :take-non-finite-resets! (fn ^long [] (let [n (aget resets 0)] (aset resets 0 0) n))
-     :set-globals! (fn [tempo delay-feedback depth]
+     :set-globals! (fn [{:keys [tempo delay-feedback] :as settings}]
                      (aset delay-frames 0 (long (min (dec delay-len) (* sr (/ 60.0 (double tempo)) 0.75))))
                      (aset feedback 0 (double delay-feedback))
-                     (aset duck-depth 0 (double depth)))
+                     (aset duck-depth 0 (double (:duck-depth settings))))
      :render!
      (fn []
        (let [start (aget position 0)

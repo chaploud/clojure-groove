@@ -1,7 +1,5 @@
 (ns chaploud.groove-test
   (:require [chaploud.groove :as g]
-            [chaploud.groove.instruments :as instruments]
-            [chaploud.groove.library :as library]
             [chaploud.groove.live :as live]
             [chaploud.groove.session :as s]
             [clojure.edn]
@@ -98,9 +96,9 @@
 
 (deftest a-nil-global-falls-back-to-its-default
   (g/globals! {:delay-feedback 0.7})
-  (is (not (contains? (g/globals! {:delay-feedback nil}) :delay-feedback))))
+  (is (not (contains? (g/globals! {:delay-feedback nil}) :delay-feedback)))
+  (is (= 0.38 (s/global (g/session) :delay-feedback))))
 
-(deftest every-built-in-instrument-is-described
-  (is (every? library/about (keys instruments/builtin)))
+(deftest browse-and-describe-cover-built-in-instruments
   (is (str/includes? (with-out-str (g/browse "reggae")) ":synth/skank"))
   (is (str/includes? (with-out-str (g/describe :synth/acid)) ":hp")))

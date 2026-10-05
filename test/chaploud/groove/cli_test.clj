@@ -10,7 +10,9 @@
 
 (deftest bad-bars-are-reported-not-ignored
   (is (thrown-with-msg? Exception #"bars must be a whole number" (#'cli/options ["--bars"])))
-  (is (thrown-with-msg? Exception #"bars must be a whole number" (#'cli/options ["--bars" "abc"]))))
+  (is (thrown-with-msg? Exception #"bars must be a whole number" (#'cli/options ["--bars" "abc"])))
+  (is (thrown-with-msg? Exception #"bars must be a whole number" (#'cli/options ["--bars" "0"])))
+  (is (thrown-with-msg? Exception #"bars must be a whole number" (#'cli/options ["--bars" "-3"]))))
 
 (deftest devices-match-exact-names-first
   (is (= "MacBook Speakers" (chaploud.groove.engine.output/pick-device ["USB Speakers" "MacBook Speakers"] "macbook speakers")))

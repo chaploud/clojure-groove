@@ -163,8 +163,8 @@
             hp (highpass st2 (highpass st x g k) g k)]
         (* 0.9 hp (Math/exp (/ (- t) decay)))))))
 
-(defn- tom-fn [{:keys [pitch decay]} sr]
-  (let [pitch (double pitch) decay (double decay) sr (double sr)
+(defn- tom-fn [{:keys [pitch decay midi]} sr]
+  (let [pitch (if midi (pitch/midi->hz midi) (double pitch)) decay (double decay) sr (double sr)
         phase (double-array 1)]
     (fn ^double [^double t ^double nz]
       (let [f (* pitch (+ 1.0 (* 0.6 (Math/exp (* t -18.0)))))

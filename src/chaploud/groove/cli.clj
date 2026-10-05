@@ -15,8 +15,8 @@
 A song is a path to an .edn file or the name of a bundled song, e.g. trance.")
 
 (defn- bars-arg [s]
-  (or (some-> s parse-long)
-      (throw (ex-info (str "bars must be a whole number, got " (pr-str s)) {}))))
+  (let [n (some-> s parse-long)]
+    (if (pos-int? n) n (throw (ex-info (str "bars must be a whole number above 0, got " (pr-str s)) {})))))
 
 (defn- options [args]
   (loop [[a b & more :as args] args, opts {}, positional []]
