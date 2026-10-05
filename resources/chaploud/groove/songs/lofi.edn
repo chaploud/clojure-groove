@@ -4,15 +4,15 @@
  :defs
  {:lofi/keys [:prog/royal-road {:inst :synth/keys :octave 4 :voicing :drop2 :vel 0.55}]
   :lofi/melody [:notes {:inst :synth/keys :octave 5 :vel 0.45 :delay 0.6}
-                [:q 9 :e 7 5 :h 7
-                 :q 8 :e 6 4 :h 6
-                 :q 6 :e 4 2 :q 4 :_
-                 :e 9 7 :q 5 :h :_]]
-  :lofi/sub [:notes {:inst :synth/sub} [:q. 3 :e :_ :q 7 :_  :q. 4 :e :_ :q 8 :_  :q. 2 :e :_ :q 6 :_  :q. 5 :e :_ :q 9 :_]]}
- :scenes
+                [[:q 9 :e 7 5 :h 7]
+                 [:q 8 :e 6 4 :h 6]
+                 [:q 6 :e 4 2 :q 4 :_]
+                 [:e 9 7 :q 5 :h :_]]]
+  :lofi/sub [:fx [:struct [:notes [:q. 0 :e :_ :q 0 :_]]] [:prog/royal-road {:inst :synth/sub :voicing :root}]]}
+ :sections
  {:intro {:keys :lofi/keys}
-  :main {:drums :beat/lofi :sub :lofi/sub}
-  :melody {:melody :lofi/melody}
-  :break {:drums nil :sub nil}
-  :outro {:melody nil :drums nil}}
+  :main {:keys :lofi/keys :drums :beat/lofi :sub :lofi/sub}
+  :melody {:base :main :melody :lofi/melody}
+  :break {:keys :lofi/keys :melody :lofi/melody}
+  :outro {:keys :lofi/keys :sub :lofi/sub}}
  :arrangement [[:intro 4] [:main 8] [:melody 16] [:break 8] [:main 8] [:melody 8] [:outro 4]]}

@@ -23,7 +23,7 @@
   (g/play :pad [:prog/epic {:octave 3}])
   (g/play :arp [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck :vel 0.6 :delay 0.7}]])
   (g/clear :acid)
-  (g/play :bass [:prog/epic {:inst :synth/bass :voicing :root}])
+  (g/play :bass [:fx [:struct ".x.x .x.x .x.x .x.x"] [:prog/epic {:inst :synth/bass :voicing :root}]])
 
   ;; mini-notation for dense rhythms
   (g/mini :perc "rim(5,16,3), cb(3,8)" :vel 0.5)
@@ -41,8 +41,8 @@
   (g/mute :pad)
   (g/unmute)
   (g/snap! :drop)
-  (g/scene! :break {:drums nil :bass nil})
-  (g/arrange! [[:break 4] [:drop 8]])
+  (g/section! :break {:base :drop :drums nil :bass nil :roll [:fill/snare-roll {:if :fill}]})
+  (g/arrange! [[:break 4 {:fill 1}] [:drop 8]])
 
   ;; files
   (g/save! "out/jam.edn")

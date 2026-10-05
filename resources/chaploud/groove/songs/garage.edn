@@ -1,16 +1,18 @@
 ;; UK garage at 132 BPM in F minor: swung minor-seventh stabs over a two-step beat, a bass that slides
 ;; between the roots and their fifths, and a plucked call-and-answer for the second half.
-{:globals {:tempo 132 :root :f :scale :minor :swing 0.2}
+{:globals {:tempo 132 :root :f :scale :minor :swing 0.2 :kit :kit/tr909}
  :defs
- {:garage/drums [:beat/two-step {:kit :kit/tr909}]
-  :garage/stabs [:notes {:inst :synth/keys :octave 4 :reverb 0.5} [:e :_ :i7 :_ :s :_ :i7 :e :_ :q :_ :e :i7 :e :_ :VImaj7 :_ :s :_ :VImaj7 :e :_ :q :_ :e :VImaj7 :e :_ :iv7 :_ :s :_ :iv7 :e :_ :q :_ :e :iv7 :e :_ :v7 :_ :s :_ :v7 :e :_ :q :_ :e :v7]]
+ {:garage/stabs [:fx [:struct "..x. ...x .... ..x."]
+                 [:prog/deep-house {:inst :synth/keys :octave 4 :reverb 0.5}]]
   :garage/bass [:notes {:inst :synth/bass}
-                [:e 0 :_ :s :_ 0 {:degree 4 :glide true} :_ :e :_ 2 :_ {:degree 0 :glide true} :e 5 :_ :s :_ 5 {:degree 9 :glide true} :_ :e :_ 7 :_ {:degree 5 :glide true} :e 3 :_ :s :_ 3 {:degree 7 :glide true} :_ :e :_ 5 :_ {:degree 3 :glide true} :e 4 :_ :s :_ 4 {:degree 8 :glide true} :_ :e :_ 6 :_ {:degree 4 :glide true}]]
-  :garage/crash [:steps {:inst :cr :kit :kit/tr909} "x..............................................................................................................................."]}
- :scenes
- {:intro {:drums :garage/drums :stabs [:garage/stabs {:cutoff [:ramp 400.0 2500.0 8]}]}
-  :main {:stabs :garage/stabs :bass :garage/bass :crash :garage/crash}
-  :break {:drums nil :bass nil :crash nil :lead [:lead/call-response {:inst :synth/pluck :octave 5 :vel 0.55 :delay 1.0}]}
-  :main2 {:drums :garage/drums :bass :garage/bass :crash :garage/crash}
-  :outro {:lead nil :bass nil :crash nil}}
+                [[:e 0 :_ :s :_ 0 {:degree 4 :glide true} :_ :e :_ 2 :_ {:degree 0 :glide true}]
+                 [:e 5 :_ :s :_ 5 {:degree 9 :glide true} :_ :e :_ 7 :_ {:degree 5 :glide true}]
+                 [:e 3 :_ :s :_ 3 {:degree 7 :glide true} :_ :e :_ 5 :_ {:degree 3 :glide true}]
+                 [:e 4 :_ :s :_ 4 {:degree 8 :glide true} :_ :e :_ 6 :_ {:degree 4 :glide true}]]]}
+ :sections
+ {:intro {:drums :beat/two-step :stabs [:garage/stabs {:cutoff [:ramp 400.0 2500.0 8]}]}
+  :main {:drums :beat/two-step :stabs :garage/stabs :bass :garage/bass :crash [:fill/crash {:if :1st}]}
+  :break {:stabs :garage/stabs :lead [:lead/call-response {:inst :synth/pluck :octave 5 :vel 0.55 :delay 1.0}]}
+  :main2 {:base :main :lead [:lead/call-response {:inst :synth/pluck :octave 5 :vel 0.55 :delay 1.0}]}
+  :outro {:drums :beat/two-step :stabs :garage/stabs}}
  :arrangement [[:intro 8] [:main 16] [:break 8] [:main2 16] [:outro 8]]}

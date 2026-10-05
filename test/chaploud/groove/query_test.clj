@@ -61,3 +61,19 @@
     (is (= [0 1 2 3 2 1 0 1] (arp :up-down)))
     (is (every? #(<= 0 % 3) (arp :random)))
     (is (= [0 1/8] (take 2 (map :t (q/bar-events (x/expand [:fx [:arp :up 1/8] [:notes [:w :I7]]] {}) 0 {})))))))
+
+(deftest struct-plays-a-rhythm-through-the-notes-underneath
+  (let [node [:fx [:struct ".x.x"] [:notes [:h 0 4]]]
+        evs (q/bar-events (x/expand node {}) 0 {})]
+    (is (= [1/16 3/16 5/16 7/16 9/16 11/16 13/16 15/16] (map :t evs)))
+    (is (= [0 0 0 0 4 4 4 4] (map :degree evs)))
+    (is (every? #(= 1/16 (:dur %)) evs)))
+  (testing "rhythm steps carry their own attributes and the notes keep theirs"
+    (let [evs (q/bar-events (x/expand [:fx [:struct [:steps [{:vel 1.0} :_ :_ :_]]] [:notes {:inst :synth/keys} [:w 0]]] {}) 0 {})]
+      (is (= [{:inst :synth/keys :degree 0 :vel 1.0}] (map #(select-keys % [:inst :degree :vel]) (take 1 evs))))))
+  (testing "rests underneath stay silent"
+    (is (= [0] (map :t (q/bar-events (x/expand [:fx [:struct "xxxx xxxx xxxx xxxx"] [:notes [:s 0 :_ :_ :_ :_ :_ :_ :_ :_ :_ :_ :_ :_ :_ :_ :_]]] {}) 0 {}))))))
+
+(deftest struct-takes-only-timing-from-a-note-rhythm
+  (let [evs (q/bar-events (x/expand [:fx [:struct [:notes [:q. 9 :e :_ :h :_]]] [:notes [:w 2]]] {}) 0 {})]
+    (is (= [[0 3/8 2]] (map (juxt :t :dur :degree) evs)))))

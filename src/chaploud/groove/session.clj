@@ -11,11 +11,11 @@
    :instruments {}
    :kits {}
    :defs {}
-   :scenes {}
    :tracks {}
    :mute #{}
    :solo #{}
-   :fill #{}})
+   :fill #{}
+   :sections {}})
 
 (defn- fail
   ([msg data] (throw (ex-info msg data)))
@@ -69,6 +69,13 @@
   (and (not (mute track))
        (or (empty? solo) (contains? solo track))))
 
+(declare arrangement-step)
+
+(defn- fill? [session bar]
+  (or (contains? (:fill session) bar)
+      (let [{:keys [start bars opts]} (arrangement-step session bar)]
+        (boolean (and (:fill opts) (>= bar (- (+ start bars) (:fill opts))))))))
+
 (defn track-events
   ([session compiled track bar] (track-events session compiled track bar {}))
   ([session compiled track bar opts]
@@ -76,7 +83,7 @@
          node (compiled track)
          since (- bar (or launch bar))]
      (when (and node (>= since 0))
-       (for [e (query/bar-events node since (merge {:fill? (contains? (:fill session) bar)
+       (for [e (query/bar-events node since (merge {:fill? (fill? session bar)
                                                     :seed [track bar]}
                                                    opts))]
          (assoc e :track track))))))
@@ -114,27 +121,36 @@
                    e))))
     compiled))
 
-(declare launch-scene)
-
-(defn- validate-arrangement! [{:keys [arrangement scenes]}]
+(defn- validate-arrangement! [{:keys [arrangement sections]}]
   (when arrangement
     (when-not (sequential? arrangement)
-      (fail "An arrangement is a vector of [scene bars] pairs" {:arrangement arrangement}))
+      (fail "An arrangement is a vector of [section bars] or [section bars {:fill n}] steps"
+            {:arrangement arrangement}))
     (doseq [step arrangement]
-      (let [[scene bars] (when (vector? step) step)]
-        (when-not (and (contains? scenes scene) (pos-int? bars))
-          (fail (str "Arrangement step " (pr-str step) " must be [known-scene positive-bars]")
-                {:step step}))))))
+      (let [[section bars opts :as v] (when (vector? step) step)]
+        (when-not (and (<= 2 (count v) 3) (contains? sections section) (pos-int? bars)
+                       (or (nil? opts) (map? opts)))
+          (fail (str "Arrangement step " (pr-str step) " must be [known-section bars] or [known-section bars {:fill n}]")
+                {:step step}))
+        (when-let [unknown (seq (remove #{:fill} (keys opts)))]
+          (fail (str "Arrangement step " (pr-str step) " has unknown options " (vec unknown)) {:step step}))
+        (when-let [n (:fill opts)]
+          (when-not (and (pos-int? n) (<= n bars))
+            (fail (str "Arrangement step " (pr-str step) ": :fill is a number of bars between 1 and " bars)
+                  {:step step})))))))
+
+(declare resolve-section)
 
 (defn validate! [session]
   (let [t (tempo session)]
     (when-not (and (number? t) (<= 20 t 999))
       (fail (str ":tempo must be a number between 20 and 999, got " (pr-str t)) {:tempo t})))
   (validate-arrangement! session)
-  (doseq [scene (keys (:scenes session))]
-    (try (validate-tracks! (launch-scene session scene))
+  (doseq [section (keys (:sections session))]
+    (try (validate-tracks! (assoc session :tracks (update-vals (resolve-section (:sections session) section)
+                                                               (fn [node] {:node node}))))
          (catch clojure.lang.ExceptionInfo e
-           (fail (str "Scene " scene ": " (ex-message e)) (assoc (ex-data e) :scene scene) e))))
+           (fail (str "Section " section ": " (ex-message e)) (assoc (ex-data e) :section section) e))))
   (validate-tracks! session))
 
 ;; ---------------------------------------------------------------- transitions
@@ -178,37 +194,46 @@
   (def-key! k)
   (assoc-in session [:instruments k] params))
 
-(defn launch-scene [session scene]
-  (let [tracks (or (get-in session [:scenes scene])
-                   (fail (str "Unknown scene " scene) {:scene scene}))]
-    (reduce-kv (fn [s track node]
-                 (track-key! track)
-                 (if node
-                   (assoc-in s [:tracks track] {:node node})
-                   (update s :tracks dissoc track)))
-               (assoc session :current-scene scene)
-               tracks)))
+(defn resolve-section [sections k]
+  (loop [k k, seen #{}, acc {}]
+    (cond
+      (nil? k) (into {} (remove (comp nil? val)) acc)
+      (seen k) (fail (str "Circular section :base through " k) {:section k})
+      :else (let [m (or (get sections k) (fail (str "Unknown section " k) {:section k}))]
+              (when-not (map? m)
+                (fail (str "Section " k " must be a map of tracks to nodes") {:section k}))
+              (doseq [t (keys (dissoc m :base))] (track-key! t))
+              (recur (:base m) (conj seen k) (merge (dissoc m :base) acc))))))
 
-(defn snapshot [session scene]
-  (assoc-in session [:scenes scene] (track-nodes session)))
+(defn put-section [session k tracks]
+  (if (nil? tracks)
+    (update session :sections dissoc k)
+    (do (resolve-section (assoc (:sections session) k tracks) k)
+        (assoc-in session [:sections k] tracks))))
 
-(defn arrangement-scene [{:keys [arrangement arrangement-start]} bar]
+(defn launch-section [session section]
+  (assoc session :tracks (update-vals (resolve-section (:sections session) section) (fn [node] {:node node}))))
+
+(defn snapshot [session section]
+  (assoc-in session [:sections section] (track-nodes session)))
+
+(defn arrangement-step [{:keys [arrangement arrangement-start]} bar]
   (when (and arrangement arrangement-start (>= bar arrangement-start))
-    (loop [[[scene bars] & more] arrangement, at arrangement-start]
+    (loop [[[section bars opts] & more] arrangement, at arrangement-start, i 0]
       (cond
-        (nil? scene) nil
-        (< bar (+ at bars)) scene
-        :else (recur more (+ at bars))))))
+        (nil? section) nil
+        (< bar (+ at bars)) {:index i :section section :start at :bars bars :opts opts}
+        :else (recur more (+ at bars) (inc i))))))
 
 (defn begin-bar [session bar]
-  (let [scene (arrangement-scene session bar)
-        session (if (and scene (not= scene (:current-scene session)))
-                  (launch-scene session scene)
+  (let [{:keys [index section]} (arrangement-step session bar)
+        session (if (and index (not= index (:current-step session)))
+                  (assoc (launch-section session section) :current-step index)
                   session)]
     (update session :tracks update-vals #(update % :launch (fn [l] (or l bar))))))
 
 (defn rewind [session]
   (-> session
       (update :tracks update-vals #(dissoc % :launch))
-      (assoc :fill #{} :current-scene nil)
+      (assoc :fill #{} :current-step nil)
       (cond-> (:arrangement session) (assoc :arrangement-start 0))))

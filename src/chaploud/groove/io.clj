@@ -4,9 +4,9 @@
             [clojure.java.io :as jio]
             [clojure.pprint :as pprint]))
 
-(def format-version 1)
+(def format-version 2)
 
-(def ^:private song-keys [:globals :kits :instruments :defs :scenes :tracks :arrangement])
+(def ^:private song-keys [:globals :kits :instruments :defs :sections :tracks :arrangement])
 
 (defn session->song [session]
   (apply array-map
@@ -45,11 +45,15 @@
         (throw (ex-info (str where ": :groove/format must be a positive integer") {:url where})))
       (when (> version format-version)
         (throw (ex-info (str where " needs a newer version of groove (format " version ")") {:url where})))
+      (when (contains? song :scenes)
+        (throw (ex-info (str where ": :scenes was renamed to :sections, and a section is now the complete "
+                             "set of tracks it plays; use :base to build on another section")
+                        {:url where})))
       (when-not (and (vector? includes) (every? string? includes))
         (throw (ex-info (str where ": :include must be a vector of paths") {:url where})))
       (reduce (fn [acc inc-path]
                 (let [lib (read-song* (java.net.URL. url ^String inc-path) (conj seen where))]
-                  (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:kits :instruments :defs :scenes])))
+                  (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:kits :instruments :defs :sections])))
               (dissoc song :include)
               includes))))
 

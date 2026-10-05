@@ -4,7 +4,7 @@
 (defn- fail [msg path data]
   (throw (ex-info msg (assoc data :path path))))
 
-(def transforms #{:rev :fast :slow :every :transpose :degrade :arp})
+(def transforms #{:rev :fast :slow :every :transpose :degrade :arp :struct})
 
 (defn- check-transform [[op & args :as tf] path]
   (when-not (and (vector? tf) (transforms op))
@@ -18,6 +18,10 @@
                (check-transform (second args) path))
     :transpose (when-not (number? (first args))
                  (fail ":transpose needs a number of semitones" path {:transform tf}))
+    :struct (when-not (and (= 1 (count args))
+                           (let [r (first args)] (or (string? r) (vector? r) (qualified-keyword? r))))
+              (fail "Use [:struct \"x.x.\"] or [:struct node]: the rhythm to play the node's notes at"
+                    path {:transform tf}))
     :arp (let [[order rate] args]
            (when-not (#{:up :down :up-down :random} order)
              (fail ":arp needs an order: :up :down :up-down or :random" path {:transform tf}))
@@ -98,7 +102,10 @@
                sub (fn [i child] (expand* child defs ctx overrides (conj path i) seen))]
            (case tag
              :steps (let [step (:step ctx 1/16)
-                          steps (leaf path #(notation/parse-steps (one-child tag children path)))]
+                          body (one-child tag children path)
+                          steps (leaf path #(if (and (vector? body) (every? string? body) (seq body))
+                                              (notation/parse-step-bars body step)
+                                              (notation/parse-steps body)))]
                       (positive-len {:kind :steps :attrs ctx :step step :steps steps :len (* step (count steps))} path))
              :notes (let [items (leaf path #(notation/parse-notes (one-child tag children path) (:step ctx 1/16)))]
                       (positive-len {:kind :notes :attrs ctx :items items
@@ -119,7 +126,15 @@
                        tfs (if (keyword? (first tfs)) [tfs] tfs)]
                    (when-not (and (vector? tfs) (= 2 (count children)))
                      (fail "Use [:fx [[:transform ...] ...] node]" path {}))
-                   (let [c (sub 1 child)]
-                     {:kind :fx :fx (mapv #(check-transform % path) tfs) :child c :len (:len c)}))
+                   (let [c (sub 1 child)
+                         rhythm (fn [r]
+                                  (expand* (if (string? r) [:steps r] r) defs {:step (:step ctx 1/16)} {}
+                                           (conj path :struct) seen))
+                         prepare (fn prepare [[op & args :as tf]]
+                                   (case op
+                                     :struct [:struct (rhythm (first args))]
+                                     :every [:every (first args) (prepare (second args))]
+                                     tf))]
+                     {:kind :fx :fx (mapv #(prepare (check-transform % path)) tfs) :child c :len (:len c)}))
              (fail (str "Unknown node type " tag "; expected :steps :notes :cycle :seq :par :rep :fx or a qualified reference")
                    path {:tag tag}))))))))

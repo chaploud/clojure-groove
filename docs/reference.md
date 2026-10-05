@@ -6,8 +6,8 @@ Everything a song can contain, in one place. From the REPL, `(g/browse)` and `(g
 
 | Node | Length | Notes |
 |---|---|---|
-| `[:steps attrs body]` | number of steps × `:step` (default 1/16) | body is a step string or vector |
-| `[:notes attrs body]` | sum of note lengths | body is a note vector |
+| `[:steps attrs body]` | number of steps × `:step` (default 1/16) | body is a step string or vector, or a vector of step strings (one per bar) |
+| `[:notes attrs body]` | sum of note lengths | body is a note vector, or a vector of note vectors (one per bar) |
 | `[:cycle attrs "..."]` | 1 bar | TidalCycles-style mini-notation |
 | `[:seq & nodes]` | sum | one after another |
 | `[:par & nodes]` | longest | together; shorter children rest until the longest ends |
@@ -28,6 +28,8 @@ Attributes cascade: `:globals` < parent nodes < a node's own attributes < attrib
 | | `0.5` | hit with that velocity |
 | | `{...}` | hit with attributes (see step attributes) |
 
+A vector of strings is one bar per string, and each must be exactly one bar of steps.
+
 ## Note bodies
 
 | Item | Meaning |
@@ -38,6 +40,7 @@ Attributes cascade: `:globals` < parent nodes < a node's own attributes < attrib
 | `#{0 2 4}` | chord of degrees or note names |
 | `:_` `nil` | rest |
 | `:w :h :q :e :s :t` | whole, half, quarter, eighth, sixteenth, thirty-second; applies to what follows |
+| `[...]` as every item | one bar each; lengths reset per bar and each bar must add up to exactly one |
 | `:q.` `:e.` | dotted |
 | `:qt` `:et` `:st` | triplet |
 | `1/8` | length as a fraction of a bar; applies to what follows |
@@ -59,6 +62,7 @@ Chord suffixes: `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug`. Uppercase numeral
 | `[:transpose n]` | semitones |
 | `[:degrade p]` | drop events with probability p (deterministic: the same loop drops the same events) |
 | `[:arp order rate]` | play chords one note at a time; order `:up :down :up-down :random`, rate default 1/16 |
+| `[:struct rhythm]` | play whatever sounds underneath at the rhythm's hits; rhythm is a step string or a node, and only its timing and step attributes count |
 
 ## Attributes
 
@@ -66,7 +70,7 @@ Pitch: `:root` (note name, default `:c`), `:scale` (keyword or a vector of semit
 
 Timing and feel: `:step`, `:swing` (0–1 of a step), `:swing-step`, `:nudge` (fraction of the note), `:humanize` (0–1), `:gate` (fraction of the note held), `:glide`, `:glide-time`.
 
-Steps: `:vel`, `:prob`, `:if` (`:fill :!fill :1st :!1st [a b]`), `:ratchet`.
+Steps: `:vel`, `:prob`, `:if` (`:fill :!fill :1st :!1st [a b]`), `:ratchet`. `:1st` counts from when the track started, which a section resets, so `[:fill/crash {:if :1st}]` marks a section's first bar; `[a b]` plays on the a-th of every b loops, e.g. `[1 8]` for once every eight.
 
 Sound: `:inst`, `:kit`, and any instrument parameter, for example `:cutoff`, `:res`, `:decay`, `:pan`, `:delay`, `:reverb`. `(g/describe :synth/acid)` lists an instrument's parameters with their meaning.
 
@@ -85,16 +89,18 @@ Define your own with `:base`: `{:my/bass {:base :synth/acid :cutoff 500.0}}`. Ki
 ## Song files
 
 ```clojure
-{:groove/format 1
- :include ["relative/path.edn"]   ; merges :kits :instruments :defs :scenes; this file wins
+{:groove/format 2
+ :include ["relative/path.edn"]   ; merges :kits :instruments :defs :sections; this file wins
  :globals {...}
  :kits {...}
  :instruments {...}
  :defs {...}
- :scenes {:name {:track node-or-nil}}
- :arrangement [[:scene bars] ...]
+ :sections {:name {:track node, :base :other-section, :dropped-track nil}}
+ :arrangement [[:section bars] [:section bars {:fill n}] ...]
  :tracks {:track node}}
 ```
+
+A section is the complete set of tracks it plays. Entering it, at an arrangement step or with `launch`, starts those tracks from their first step and stops every other track; this happens at every step, even when the same section repeats. `:base` builds on another section, and `nil` drops a track inherited from it. `{:fill n}` makes `:if :fill` steps play in the step's last n bars. Files from 0.1.0 used `:scenes`, which only changed the tracks they named; loading one explains how to convert it.
 
 ## REPL
 
@@ -104,7 +110,7 @@ Define your own with `:base`: `{:my/bass {:base :synth/acid :cutoff 500.0}}`. Ki
 | `drum` `synth` `mini` `play` `clear` `hush` | tracks |
 | `mute` `unmute` `solo` `unsolo` `fill` | performance |
 | `put!` `instrument!` `kit!` `globals!` `tempo` | definitions |
-| `scene!` `snap!` `launch` `arrange!` | scenes |
+| `section!` `snap!` `launch` `arrange!` | sections |
 | `save!` `load!` `render!` | files |
 | `browse` `audition` `describe` `show` `session` | discovery |
 
