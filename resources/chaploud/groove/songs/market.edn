@@ -1,31 +1,50 @@
-;; Shop-floor future bounce at 128 BPM in D major: an original, sing-along hook over I-V-vi-IV,
-;; first as a chiming keys line, then a build with claps and a snare roll, then a drop where a
-;; square lead and a supersaw double the hook over offbeat stabs and a bouncing octave bass.
+;; Shop-floor future bounce at 128 BPM in D major, about three minutes. An original sing-along
+;; hook starts as a thin in-store jingle from a small speaker, turns into EDM a layer at a time,
+;; and the speaker jingle comes back on top of each drop, then has the last word.
 {:groove/format 2
  :globals {:tempo 128 :root :d :scale :major :kit :kit/tr909}
+ :instruments
+ {:market/speaker {:base :synth/lead :osc :square :gain 0.3 :cutoff 1600.0 :env 300.0 :res 0.15
+                   :drive 2.6 :delay 0.0 :reverb 0.12}
+  :market/music-box {:base :synth/keys :gain 0.3 :cutoff 1400.0 :decay 0.4 :delay 0.0 :reverb 0.15}}
  :defs
  {:market/hook [:notes {:inst :synth/lead :octave 4}
                 [[:e 7 :s 7 9 :e 7 4 :q 2 :e 4 :_]
                  [:e 8 :s 8 6 :e 8 11 :q 8 :e 6 :_]
                  [:e 9 :s 9 11 :e 9 7 :q 5 :e 7 :_]
                  [:q 7 :e 5 3 :h 5]]]
+  :market/jingle [:market/hook {:inst :market/speaker}]
+  :market/store-chords [:fx [:struct "x... x... x... x..."] [:prog/axis {:inst :market/music-box :octave 3}]]
   :market/chime [:market/hook {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.8}]
   :market/saw [:market/hook {:inst :synth/supersaw :octave 4 :vel 0.55}]
   :market/stabs [:fx [:struct "..x. ..x. ..x. ..x."]
                  [:prog/axis {:inst :synth/supersaw :octave 4 :vel 0.5 :gate 0.4}]]
   :market/pad [:prog/axis {:octave 3 :vel 0.45}]
+  :market/arp [:arp/axis {:octave 5 :vel 0.35}]
   :market/octaves [:fx [:struct "x.x. x.x. x.x. x.x."]
                    [:notes {:inst :synth/bass :gate 0.5}
                     [[:e 0 7 0 7 0 7 0 7] [:e 4 11 4 11 4 11 4 11]
                      [:e 5 12 5 12 5 12 5 12] [:e 3 10 3 10 3 10 3 10]]]]
-  :market/claps [:steps {:inst :cp :vel 0.5 :reverb 0.5} "x... x... x... x..."]}
+  :market/soft-kick [:beat/four-floor {:vel 0.55}]
+  :market/claps [:steps {:inst :cp :vel 0.5 :reverb 0.5} "x... x... x... x..."]
+  :market/roll [:fill/snare-roll {:if :fill}]
+  :market/crash [:fill/crash {:if :1st}]}
  :sections
- {:intro {:chime :market/chime :pad :market/pad
-          :claps [:steps {:inst :cp :vel 0.35} ".... x... .... x..."]}
-  :build {:chime :market/chime :pad [:market/pad {:cutoff [:ramp 400.0 4000.0 8]}]
-          :claps :market/claps :roll [:fill/snare-roll {:if :fill}]}
-  :drop {:drums :beat/house :bass :market/octaves :stabs :market/stabs
-         :hook :market/hook :saw :market/saw :crash [:fill/crash {:if :1st}]}
-  :break {:pad :market/pad :chime :market/chime :roll [:fill/snare-roll {:if :fill}]}
-  :drop2 {:base :drop :chime [:market/chime {:octave 6 :vel 0.35}]}}
- :arrangement [[:intro 4] [:build 8 {:fill 2}] [:drop 8] [:break 4 {:fill 1}] [:drop2 8]]}
+ {:store {:jingle :market/jingle :chords :market/store-chords}
+  :warm {:base :store :kick :market/soft-kick
+         :hats [:steps {:inst :hh :vel 0.25} "..x. ..x. ..x. ..x."]}
+  :grow {:base :warm :jingle [:market/jingle {:cutoff [:ramp 1600.0 5000.0 8]}]
+         :bass :market/octaves :claps [:steps {:inst :cp :vel 0.4} ".... x... .... x..."]
+         :pad [:market/pad {:cutoff [:ramp 400.0 2500.0 8]}]}
+  :build {:pad [:market/pad {:cutoff [:ramp 600.0 5000.0 8]}] :chime :market/chime
+          :arp [:market/arp {:cutoff [:ramp 400.0 7000.0 8]}]
+          :claps :market/claps :roll :market/roll}
+  :drop {:drums :beat/house :bass :market/octaves :stabs :market/stabs :pad :market/pad
+         :hook :market/saw :jingle [:market/jingle {:vel 0.9}] :crash :market/crash}
+  :aisle {:jingle :market/jingle :chords :market/store-chords :pad [:market/pad {:vel 0.3}]
+          :roll :market/roll}
+  :drop2 {:base :drop :lead :market/hook :chime [:market/chime {:octave 6 :vel 0.35}]
+          :arp :market/arp}
+  :closing {:jingle :market/jingle :chords :market/store-chords}}
+ :arrangement [[:store 8] [:warm 8] [:grow 8] [:build 8 {:fill 2}] [:drop 16]
+               [:aisle 8 {:fill 1}] [:build 8 {:fill 2}] [:drop2 16] [:closing 4]]}
