@@ -142,10 +142,10 @@ A library of ready-made parts ships with the code, so a groove can start from a 
 
 | Namespace | |
 |---|---|
-| `:beat/` | drum patterns: four-floor, house, deep-house, disco, techno, trance, electro, breakbeat, two-step, dnb, jungle, boom-bap, trap, dembow, afrobeat, one-drop, halftime, lofi |
-| `:fill/` | one-bar fills: snare-roll, toms, crash, stutter |
+| `:beat/` | drum patterns: four-floor, house, deep-house, disco, techno, trance, electro, breakbeat, two-step, dnb, jungle, boom-bap, trap, dembow, afrobeat, one-drop, battle, halftime, lofi |
+| `:fill/` | one-bar fills: snare-roll, toms, crash, timpani-roll, stutter |
 | `:bass/` | basslines in scale degrees: offbeat, rolling, acid, octave, root-fifth, sub, tr808, reese, funk |
-| `:prog/` | chord progressions: axis, sensitive, epic, andalusian, ii-v-i, royal-road, komuro, canon, blues, dorian-vamp, deep-house |
+| `:prog/` | chord progressions: axis, sensitive, epic, andalusian, ii-v-i, royal-road, komuro, canon, heroic, mediant, blues, dorian-vamp, deep-house |
 | `:lead/` | melodies: anthem, anthem-high, pop, neon (four bars, each written over the progression named in its description), call-response, pentatonic |
 | `:arp/` | arpeggios: trance, up-down, octave-bounce, thirds, and epic, axis, sensitive that follow a progression |
 | `:kit/` | drum kits: default, tr808, tr909, lofi, hard |
@@ -208,8 +208,9 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 
 Built-in instruments are synthesized, so they need no sample downloads:
 
-- Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high`
+- Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` `:drum/timpani` `:drum/taiko`
 - Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys`
+- Orchestral: `:synth/brass` `:synth/strings` (short, for ostinatos) `:synth/choir`
 - Reggae and character: `:synth/organ` (the bubble), `:synth/skank` (offbeat guitar chop), `:synth/melodica`, `:synth/speaker` (a small in-store speaker)
 
 `(g/browse "reggae")` finds instruments and parts by tag, and `(g/describe :synth/acid)` lists every parameter with its default.

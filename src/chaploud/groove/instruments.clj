@@ -16,6 +16,9 @@
    :drum/tom-mid {:voice :tom :bus :drums :gain 0.7 :length 0.8 :pitch 120.0 :decay 0.22}
    :drum/tom-high {:voice :tom :bus :drums :gain 0.7 :length 0.7 :pitch 170.0 :decay 0.2 :pan 0.3}
 
+   :drum/timpani {:voice :tom :bus :drums :gain 0.6 :length 2.0 :pitch 65.0 :decay 0.8 :pan -0.1}
+   :drum/taiko {:voice :tom :bus :drums :gain 1.0 :length 1.0 :pitch 52.0 :decay 0.32 :reverb 0.3}
+
    :synth/acid {:voice :synth :bus :bass :osc :saw :gain 0.45 :octave 2
                 :cutoff 260.0 :env 2400.0 :fdecay 0.17 :res 0.85
                 :attack 0.002 :decay 0.25 :sustain 0.7 :release 0.03 :drive 2.0 :gate 0.7}
@@ -42,6 +45,15 @@
    :synth/speaker {:voice :synth :bus :synth :osc :square :gain 0.3 :octave 5
                    :cutoff 2600.0 :hp 700.0 :env 0.0 :res 0.3
                    :attack 0.002 :decay 0.25 :sustain 0.6 :release 0.08 :drive 3.0 :gate 0.85}
+   :synth/brass {:voice :synth :bus :synth :osc :supersaw :unison 3 :detune 9.0 :spread 0.5
+                 :gain 0.3 :octave 4 :cutoff 700.0 :env 2200.0 :fdecay 0.35 :res 0.1
+                 :attack 0.03 :decay 0.4 :sustain 0.8 :release 0.15 :drive 1.6 :gate 0.9 :reverb 0.3}
+   :synth/strings {:voice :synth :bus :synth :osc :supersaw :unison 5 :detune 11.0 :spread 0.8
+                   :gain 0.24 :octave 4 :cutoff 2600.0 :env 600.0 :fdecay 0.1 :res 0.05
+                   :attack 0.004 :decay 0.15 :sustain 0.5 :release 0.08 :gate 0.6 :reverb 0.25}
+   :synth/choir {:voice :synth :bus :synth :osc :supersaw :unison 4 :detune 15.0 :spread 1.0
+                 :gain 0.22 :octave 4 :cutoff 1100.0 :hp 250.0 :env 0.0 :res 0.3
+                 :attack 0.45 :decay 1.0 :sustain 0.9 :release 1.0 :gate 1.0 :reverb 0.6}
    :synth/organ {:voice :synth :bus :synth :osc :square :gain 0.2 :octave 3
                  :cutoff 1200.0 :env 0.0 :res 0.05
                  :attack 0.004 :decay 0.1 :sustain 0.6 :release 0.04 :gate 0.4 :pan -0.25}

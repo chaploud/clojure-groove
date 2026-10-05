@@ -12,6 +12,8 @@
   :drum/tom-low {:tags #{:drums} :doc "Low tom"}
   :drum/tom-mid {:tags #{:drums} :doc "Mid tom"}
   :drum/tom-high {:tags #{:drums} :doc "High tom"}
+  :drum/timpani {:tags #{:drums :orchestral :epic} :doc "Low, ringing timpani"}
+  :drum/taiko {:tags #{:drums :epic} :doc "Deep taiko drum"}
   :synth/acid {:tags #{:bass :acid} :doc "Resonant saw bass with a squelchy filter envelope"}
   :synth/bass {:tags #{:bass} :doc "Square bass with a sub sine"}
   :synth/sub {:tags #{:bass} :doc "Pure sine sub bass"}
@@ -21,6 +23,9 @@
   :synth/pluck {:tags #{:lead :arp} :doc "Short saw pluck"}
   :synth/lead {:tags #{:lead} :doc "Square lead"}
   :synth/keys {:tags #{:keys :chords} :doc "Soft triangle keys"}
+  :synth/brass {:tags #{:lead :orchestral :epic} :doc "Brass section: the filter opens on each note"}
+  :synth/strings {:tags #{:orchestral :epic :arp} :doc "Short string section for ostinatos"}
+  :synth/choir {:tags #{:pad :orchestral :epic} :doc "Slow, airy choir pad"}
   :synth/organ {:tags #{:keys :reggae} :doc "Square organ for the reggae bubble on the offbeat eighths"}
   :synth/skank {:tags #{:guitar :reggae} :doc "Offbeat guitar chop: short, bright, highpassed"}
   :synth/melodica {:tags #{:lead :reggae :dub} :doc "Reedy saw lead with a soft attack"}

@@ -10,6 +10,8 @@
   :prog/royal-road [:notes {:inst :synth/pad :scale :major} [:w :IVmaj7 :V7 :iii7 :vi]]
   :prog/komuro [:notes {:inst :synth/pad :scale :major} [:w :vi :IV :V :I]]
   :prog/canon [:notes {:inst :synth/pad :scale :major} [:w :I :V :vi :iii :IV :I :IV :V]]
+  :prog/heroic [:notes {:inst :synth/pad :scale :major} [:w :I :bVI :bVII :I]]
+  :prog/mediant [:notes {:inst :synth/pad :scale :minor} [:w :i :bvi :i :biii]]
   :prog/blues [:notes {:inst :synth/keys :scale :major} [:w :I7 :IV7 :I7 :I7 :IV7 :IV7 :I7 :I7 :V7 :IV7 :I7 :V7]]
   :prog/dorian-vamp [:notes {:inst :synth/keys :scale :dorian} [:w :i7 :IV7]]
   :prog/deep-house [:notes {:inst :synth/keys :scale :minor} [:w :i7 :VImaj7 :iv7 :v7]]}
@@ -21,6 +23,8 @@
   :prog/ii-v-i {:tags #{:progression :jazz} :doc "ii7-V7-Imaj7 with sevenths"}
   :prog/royal-road {:tags #{:progression :j-pop :anime} :doc "IVmaj7-V7-iii7-vi, the J-pop royal road"}
   :prog/komuro {:tags #{:progression :j-pop :eurobeat} :doc "vi-IV-V-I"}
+  :prog/heroic {:tags #{:progression :epic :major} :doc "I-bVI-bVII-I, the victory cadence borrowed from the parallel minor"}
+  :prog/mediant {:tags #{:progression :epic :minor :film} :doc "i-bvi-i-biii: minor chords a third apart, dark and unsettled"}
   :prog/canon {:tags #{:progression :classical :pop} :doc "Pachelbel's eight-chord canon"}
   :prog/blues {:tags #{:progression :blues} :doc "Twelve-bar blues with dominant sevenths"}
   :prog/dorian-vamp {:tags #{:progression :funk :house :dorian} :doc "i7-IV7 in dorian"}

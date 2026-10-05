@@ -51,6 +51,10 @@
                   [:steps {:inst :bd} ".... .... x... ...."]
                   [:steps {:inst :rim :vel 0.7} ".... .... x... ...."]
                   [:steps {:inst :hh} [0.35 :_ 0.2 :_ 0.35 :_ 0.2 :_ 0.35 :_ 0.2 :_ 0.35 :_ 0.2 0.15]]]
+  :beat/battle [:par [:steps {:inst :bd} "x..x ..x. x..x ..x."]
+                [:steps {:inst :sd} ".... x... .... x.x."]
+                [:steps {:inst :drum/taiko :vel 0.8} "x... .... x... ...."]
+                [:steps {:inst :hh :vel 0.4} "x.x. x.x. x.x. x.x."]]
   :beat/halftime [:par [:steps {:inst :bd} "x... .... .... ..x."]
                   [:steps {:inst :sd} ".... .... x... ...."]
                   [:steps {:inst :hh :vel 0.45} "x.x. x.x. x.x. x.x."]]
@@ -75,5 +79,6 @@
   :beat/dembow {:tags #{:reggaeton :latin} :tempo 95 :doc "The dembow rhythm"}
   :beat/afrobeat {:tags #{:afrobeat :afro} :tempo 110 :doc "Afrobeat groove with a Euclidean cowbell"}
   :beat/one-drop {:tags #{:reggae :dub} :tempo 76 :doc "Reggae one drop: nothing on 1, kick and rim together on 3"}
+  :beat/battle {:tags #{:epic :battle :orchestral} :tempo 150 :doc "Driving kick, snare and taiko for a boss fight"}
   :beat/halftime {:tags #{:dubstep :halftime} :tempo 140 :doc "Snare on beat 3"}
   :beat/lofi {:tags #{:lofi :hip-hop :swing} :tempo 84 :doc "Lazy, heavily swung, on the lofi kit"}}}

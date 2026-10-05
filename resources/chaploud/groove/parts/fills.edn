@@ -7,9 +7,15 @@
               [:steps {:inst :mt} ".... ..x. x.x. ...."]
               [:steps {:inst :lt} ".... .... .... x.xx"]]
   :fill/crash [:steps {:inst :cr} "x... .... .... ...."]
+  :fill/timpani-roll [:steps {:inst :drum/timpani}
+                      [{:vel 0.3 :ratchet 2} {:vel 0.35 :ratchet 2} {:vel 0.4 :ratchet 2} {:vel 0.45 :ratchet 2}
+                       {:vel 0.5 :ratchet 2} {:vel 0.55 :ratchet 2} {:vel 0.6 :ratchet 2} {:vel 0.65 :ratchet 2}
+                       {:vel 0.7 :ratchet 2} {:vel 0.75 :ratchet 2} {:vel 0.8 :ratchet 2} {:vel 0.85 :ratchet 2}
+                       {:vel 0.9 :ratchet 2} {:vel 0.95 :ratchet 2} {:vel 1.0 :ratchet 2} {:vel 1.0 :ratchet 2}]]
   :fill/stutter [:steps {:inst :bd} "x.x. x.x. xxxx xxxx"]}
  :about
  {:fill/snare-roll {:tags #{:fill :build :edm} :doc "Rising snare roll into the next bar"}
   :fill/toms {:tags #{:fill} :doc "Tom run from high to low"}
   :fill/crash {:tags #{:fill :accent} :doc "A crash on the downbeat"}
+  :fill/timpani-roll {:tags #{:fill :build :epic :orchestral} :doc "Timpani roll swelling into the next bar"}
   :fill/stutter {:tags #{:fill :build} :doc "Kick stutter that doubles up"}}}

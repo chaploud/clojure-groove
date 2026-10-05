@@ -82,7 +82,7 @@ Globals only, plain numbers rather than signals: `:tempo` (20–999 BPM), `:dela
 
 | Drums | Synths |
 |---|---|
-| `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` | `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/organ` `:synth/skank` `:synth/melodica` `:synth/speaker` |
+| `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` `:drum/timpani` `:drum/taiko` | `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/brass` `:synth/strings` `:synth/choir` `:synth/organ` `:synth/skank` `:synth/melodica` `:synth/speaker` |
 
 Define your own with `:base`: `{:my/bass {:base :synth/acid :cutoff 500.0}}`. Kits map roles to instruments: `{:my/kit {:base :kit/tr808 :bd :my/kick}}`.
 
