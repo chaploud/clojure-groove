@@ -1,6 +1,7 @@
 (ns ^:no-doc chaploud.groove.live
   (:require [chaploud.groove.engine.mixer :as mixer]
             [chaploud.groove.engine.output :as output]
+            [chaploud.groove.instruments :as instruments]
             [chaploud.groove.session :as session])
   (:import [java.io ByteArrayOutputStream]))
 
@@ -47,7 +48,7 @@
              (on-error (str "track " (:track e) " skipped: " (ex-message ex)) ex))))
     (+ frame bar-frames)))
 
-(defn- run-transport [mixer running alive? on-error]
+(defn- run-transport [mixer running {:keys [alive? take-dropouts!]} on-error]
   (let [position (:position mixer)
         lookahead (* (double (:sample-rate mixer)) lookahead-seconds)]
     (loop [bar 0, frame (+ (double (position)) lookahead)]
@@ -55,6 +56,8 @@
         (let [st (swap! !state advance bar on-error)
               next-frame (double (schedule-bar! mixer st bar frame on-error))]
           (swap! !transport #(if (identical? running (:running %)) (assoc % :bar bar) %))
+          (when (pos? (long (take-dropouts!)))
+            (on-error "audio dropouts: the output buffer ran dry, so the CPU was too busy; try (start! {:buffer-ms 300})" nil))
           (while (and @running (alive?) (< (double (position)) (- next-frame lookahead)))
             (Thread/sleep 2))
           (recur (inc bar) next-frame))))))
@@ -78,15 +81,22 @@
     (swap! !state update :session session/rewind)
     nil))
 
+(defn- warm-up! []
+  (let [mixer (mixer/make-mixer output/sample-rate)]
+    (doseq [[i [_ preset]] (map-indexed vector instruments/builtin)]
+      (mixer/submit! mixer (* i 2000) (merge {:bus :synth} preset {:vel 0.8 :dur-s 0.2 :midi 48}) i))
+    (dotimes [_ 400] ((:render! mixer)))))
+
 (defn start! [opts]
   (or @!transport
-      (let [mixer (mixer/make-mixer output/sample-rate)
+      (let [_ (warm-up!)
+            mixer (mixer/make-mixer output/sample-rate)
             on-error (reporter *out*)
             audio (output/start-line! mixer opts on-error)
             running (volatile! true)
             thread (Thread. ^Runnable
                     (fn []
-                      (try (run-transport mixer running (:alive? audio) on-error)
+                      (try (run-transport mixer running audio on-error)
                            (catch Throwable t (on-error (str "transport stopped: " t) t)))
                       (when @running (stop!)))
                             "groove-transport")]

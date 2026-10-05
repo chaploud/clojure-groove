@@ -191,7 +191,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 
 | | |
 |---|---|
-| `start!` `stop!` `status` `devices` | audio transport; `(start! {:device "USB"})` picks an output, `status` lists problems reported while playing, each with how often it happened |
+| `start!` `stop!` `status` `devices` | audio transport; `(start! {:device "USB"})` picks an output and `:buffer-ms` (default 170) sets how far ahead audio is rendered; `status` lists problems reported while playing, each with how often it happened, including audio dropouts when the CPU falls behind |
 | `drum` `synth` `mini` `play` | set a track; edits are picked up at the next bar |
 | `clear` `hush` | remove some or all tracks |
 | `mute` `unmute` `solo` `unsolo` | |

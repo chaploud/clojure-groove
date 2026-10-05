@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Realtime playback renders 170 ms ahead by default (was 43 ms) and warms the JIT before the first block, so a busy CPU or a garbage-collection pause no longer clicks; `bb play` runs on ZGC. `(start! {:buffer-ms n})` changes the buffer, and `status` reports dropouts if they still happen.
 - Sections replace scenes. A section is the complete set of tracks it plays: entering it restarts them and stops the rest, `:base` builds on another section and `nil` drops an inherited track. Song files use `:sections` and `:groove/format 2`; files with `:scenes` are rejected with a message explaining the change. `scene!` is now `section!`.
 - Arrangement steps take options: `[:build 8 {:fill 1}]` turns on `:if :fill` steps in the step's last bar, so fills no longer need their own section.
 - `[:struct rhythm]` plays the notes underneath at a rhythm's hits, so stabs and basslines can follow a progression without writing every bar out. The rhythm contributes only its timing and step attributes.

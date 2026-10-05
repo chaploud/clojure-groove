@@ -23,7 +23,9 @@
 
 (defn start!
   "Starts the audio transport. Options: `:device`, a substring of an output name from
-  `devices`. Throws if no audio output is available; `render!` works without one."
+  `devices`, and `:buffer-ms` (default 170), how far ahead audio is rendered; raise it if
+  `status` reports dropouts. Edits land on bar boundaries, so the extra delay goes unnoticed.
+  Throws if no audio output is available; `render!` works without one."
   ([] (start! {}))
   ([opts] (live/start! opts) :playing))
 (defn stop!

@@ -35,7 +35,9 @@
     (or (first (filter #(= w (lower %)) names))
         (first (filter #(.contains ^String (lower %) w) names)))))
 
-(defn- open-line ^SourceDataLine [device]
+(def default-buffer-ms 170)
+
+(defn- open-line ^SourceDataLine [device buffer-ms]
   (let [mixers (output-mixers)
         info (when device
                (let [name (or (pick-device (devices) device)
@@ -46,25 +48,31 @@
       (doto (if info
               (AudioSystem/getSourceDataLine (audio-format) info)
               (AudioSystem/getSourceDataLine (audio-format)))
-        (.open (audio-format) (* 4 2048)))
+        (.open (audio-format) (* 4 (long (* sample-rate (/ (double buffer-ms) 1000.0))))))
       (catch Exception e
         (throw (ex-info (str "No audio output is available (" (ex-message e) "). "
                              "Render to a file instead, e.g. (render! \"out/song.wav\" 8) or bb render <song>.")
                         {} e))))))
 
-(defn start-line! [mixer {:keys [device]} on-error]
-  (let [line (open-line device)
+(defn start-line! [mixer {:keys [device buffer-ms] :or {buffer-ms default-buffer-ms}} on-error]
+  (let [line (open-line device buffer-ms)
         render! (:render! mixer)
         ^doubles l (:out-l mixer)
         ^doubles r (:out-r mixer)
         buf (byte-array (* 4 (alength l)))
         running (volatile! true)
+        dropouts (long-array 1)
+        primed (volatile! false)
         t (Thread. ^Runnable
            (fn []
              (try
                (while @running
                  (render!)
-                 (.write line (block->bytes l r buf) 0 (alength buf)))
+                 (when (and @primed (>= (.available line) (.getBufferSize line)))
+                   (aset dropouts 0 (inc (aget dropouts 0))))
+                 (.write line (block->bytes l r buf) 0 (alength buf))
+                 (when-not @primed
+                   (vreset! primed (< (.available line) (alength buf)))))
                (catch Throwable e
                  (on-error (str "audio stopped: " e) e))
                (finally
@@ -75,6 +83,7 @@
     (.setDaemon t true)
     (.start t)
     {:alive? #(.isAlive t)
+     :take-dropouts! (fn [] (let [n (aget dropouts 0)] (aset dropouts 0 0) n))
      :stop (fn [] (vreset! running false) (.join t 1000))}))
 
 (defn render-blocks! [mixer ^long frames ^ByteArrayOutputStream out]

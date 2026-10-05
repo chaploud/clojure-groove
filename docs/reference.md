@@ -106,7 +106,7 @@ A section is the complete set of tracks it plays. Entering it, at an arrangement
 
 | | |
 |---|---|
-| `start!` `stop!` `status` `devices` | transport |
+| `start!` `stop!` `status` `devices` | transport; `(start! {:device "name" :buffer-ms 170})` |
 | `drum` `synth` `mini` `play` `clear` `hush` | tracks |
 | `mute` `unmute` `solo` `unsolo` `fill` | performance |
 | `put!` `instrument!` `kit!` `globals!` `tempo` | definitions |
