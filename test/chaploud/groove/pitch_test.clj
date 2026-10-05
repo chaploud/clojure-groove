@@ -50,3 +50,7 @@
   (let [roots (fn [romans] (map #(first (midis {:root :c :scale :minor :octave 2 :voicing :root :roman %})) romans))]
     (is (= [36 34 32 31] (roots [:i :VII :VI :V])) "the Andalusian roots walk down")
     (is (every? #(<= 30 % 42) (roots [:i :ii :III :iv :v :VI :VII])))))
+
+(deftest root-voicing-follows-transpose
+  (is (= [48] (midis {:root :c :scale :minor :octave 2 :voicing :root :roman :i :transpose 12})))
+  (is (= [43] (midis {:root :c :scale :minor :octave 2 :voicing :root :roman :i :transpose 7}))))

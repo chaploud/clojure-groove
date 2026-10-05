@@ -37,7 +37,7 @@
           :when (contains? p k)]
     (when-not (and (number? v) (<= 0 v 1))
       (fail (str (pr-str k) " is a send level between 0 and 1, got " (pr-str v)) {:param k})))
-  (when-not (#{:drums :bass :synth} (:bus p))
+  (when-not (or (nil? (:bus p)) (#{:drums :bass :synth} (:bus p)))
     (fail (str ":bus must be :drums, :bass or :synth, got " (pr-str (:bus p))) {:param :bus}))
   (when-not (or (nil? (:choke p)) (keyword? (:choke p)))
     (fail (str ":choke names a group with a keyword, got " (pr-str (:choke p))) {:param :choke}))

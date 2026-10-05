@@ -166,3 +166,9 @@
         (pr-str bad)))
   (is (thrown-with-msg? Exception #":prob must be a number"
                         (s/validate! (session :x [:steps {:inst :drum/kick :prob "0.5"} "x"])))))
+
+(deftest instruments-without-a-bus-still-play
+  (let [sess (-> (s/put-instrument s/empty-session :my/x {:voice :synth :osc :saw :gain 0.3 :cutoff 800.0
+                                                          :attack 0.01 :decay 0.2 :sustain 0.5 :release 0.1})
+                 (s/play :x [:notes {:inst :my/x} [0]]))]
+    (is (map? (s/validate! sess)))))
