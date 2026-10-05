@@ -42,7 +42,7 @@
       (is (map? (s/validate! session)) name))))
 
 (deftest includes-resolve-inside-resources
-  (is (contains? (:defs (io/read-song "house")) :mylib/house)))
+  (is (contains? (:defs (io/read-song "cascade")) :mylib/house)))
 
 (deftest unknown-songs-say-so
   (is (thrown-with-msg? Exception #"No song file, resource or bundled song named nope" (io/read-song "nope"))))

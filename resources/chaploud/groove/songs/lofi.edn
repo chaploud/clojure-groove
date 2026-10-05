@@ -1,10 +1,18 @@
-;; Lo-fi hip hop at 84 BPM: heavy swing, lazy keys with seventh chords and a soft sub.
-{:globals {:tempo 84 :root :eb :scale :major :swing 0.28}
- :tracks
- {:kick [:steps {:inst :drum/kick :decay 0.22 :drive 1.2} "x... ...x ..x. ...."]
-  :snare [:steps {:inst :drum/rim :vel 0.9} ".... x... .... x..."]
-  :hat [:steps {:inst :drum/hat :vel 0.35} "x.xx x.x. x.xx x.xx"]
-  :keys [:seq [:notes {:inst :synth/keys :octave 4} [:h #{1 3 5 7} :q :_ :e :_ #{1 3 5 7}]]
-         [:notes {:inst :synth/keys :octave 4} [:h #{4 6 8 10} :h :_]]]
-  :sub [:seq [:notes {:inst :synth/sub} [:q. 1 :e :_ :h :_]]
-        [:notes {:inst :synth/sub} [:q. 4 :e :_ :h :_]]]}}
+;; Lo-fi hip hop at 84 BPM in E-flat major: drop-2 seventh chords on the royal-road progression,
+;; a lazy melody that answers them, a soft sub, and everything slightly humanized.
+{:globals {:tempo 84 :root :eb :scale :major :humanize 0.25}
+ :defs
+ {:lofi/keys [:prog/royal-road {:inst :synth/keys :octave 4 :voicing :drop2 :vel 0.55}]
+  :lofi/melody [:notes {:inst :synth/keys :octave 5 :vel 0.45 :delay 0.6}
+                [:q 9 :e 7 5 :h 7
+                 :q 8 :e 6 4 :h 6
+                 :q 6 :e 4 2 :q 4 :_
+                 :e 9 7 :q 5 :h :_]]
+  :lofi/sub [:notes {:inst :synth/sub} [:q. 3 :e :_ :q 7 :_  :q. 4 :e :_ :q 8 :_  :q. 2 :e :_ :q 6 :_  :q. 5 :e :_ :q 9 :_]]}
+ :scenes
+ {:intro {:keys :lofi/keys}
+  :main {:drums :beat/lofi :sub :lofi/sub}
+  :melody {:melody :lofi/melody}
+  :break {:drums nil :sub nil}
+  :outro {:melody nil :drums nil}}
+ :arrangement [[:intro 4] [:main 8] [:melody 16] [:break 8] [:main 8] [:melody 8] [:outro 4]]}

@@ -1,13 +1,19 @@
-;; Synthwave at 100 BPM: gated eighth-note bass, a sixteenth arpeggio over the same progression,
-;; and a pad that drifts across the stereo field.
-{:globals {:tempo 100 :root :a :scale :minor}
+;; Synthwave at 100 BPM in C major. The neon hook rides the vi-IV-I-V progression over a pulsing
+;; eighth-note bass; the pad drifts across the stereo field and the last chorus climbs an octave.
+{:globals {:tempo 100 :root :c :scale :major}
  :defs
- {:wave/chords [:prog/epic {:octave 3}]}
- :tracks
- {:drums [:par {:kit :kit/tr808}
-          [:steps {:inst :bd} "x... .... x... ...."]
-          [:steps {:inst :sd :reverb 0.6} ".... x... .... x..."]
-          [:steps {:inst :hh :vel 0.4} "x.x. x.x. x.x. x.x."]]
-  :pad [:wave/chords {:pan [:lfo :sine 8 -0.5 0.5]}]
-  :arp [:fx [:arp :up 1/16] [:wave/chords {:inst :synth/pluck :octave 4 :vel 0.55 :delay 0.6}]]
-  :bass [:fx [:arp :up 1/8] [:wave/chords {:inst :synth/bass :voicing :root :octave 2 :gate 0.6}]]}}
+ {:wave/pad [:prog/sensitive {:octave 3 :pan [:lfo :sine 8 -0.5 0.5]}]
+  :wave/bass [:notes {:inst :synth/bass :gate 0.55} [:e 5 5 5 5 5 5 5 5 3 3 3 3 3 3 3 3 0 0 0 0 0 0 0 0 4 4 4 4 4 4 4 4]]
+  :wave/drums [:par {:kit :kit/tr808}
+               [:steps {:inst :bd} "x... .... x.x. ...."]
+               [:steps {:inst :sd :reverb 0.7} ".... x... .... x..."]
+               [:steps {:inst :hh :vel 0.4} "x.x. x.x. x.x. x.xx"]]
+  :wave/crash [:steps {:inst :cr :kit :kit/tr808} "x..............................................................................................................................."]}
+ :scenes
+ {:intro {:pad :wave/pad :arp [:arp/sensitive {:vel 0.5 :delay 0.8 :cutoff [:ramp 600.0 4000.0 8]}]}
+  :verse {:drums :wave/drums :bass :wave/bass :arp [:arp/sensitive {:vel 0.5 :delay 0.8}]}
+  :chorus {:lead :lead/neon :crash :wave/crash}
+  :break {:drums nil :bass nil :crash nil :lead [:lead/neon {:inst :synth/pluck :vel 0.5 :delay 1.0}]}
+  :chorus2 {:drums :wave/drums :bass :wave/bass :lead [:lead/neon {:octave 6}] :crash :wave/crash}
+  :outro {:lead nil :drums nil :bass nil :crash nil}}
+ :arrangement [[:intro 8] [:verse 8] [:chorus 16] [:break 8] [:chorus2 16] [:outro 8]]}

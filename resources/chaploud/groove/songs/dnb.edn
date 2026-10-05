@@ -1,7 +1,16 @@
-;; Drum and bass at 174 BPM written in mini-notation: a two-step break and a moving reese.
-{:globals {:tempo 174 :root :d :scale :minor}
- :tracks
- {:break [:cycle "[bd ~ ~ ~] [sd ~ ~ ~] [~ ~ bd ~] [sd ~ ~ ~], hh*8?0.2"]
-  :ghost [:cycle {:vel 0.3} "~ [~ sd] ~ [sd ~]"]
-  :reese [:cycle {:inst :synth/reese :octave 1} "<0 0 -2 -3>"]
-  :pad [:cycle {:inst :synth/pad :octave 4 :vel 0.5} "<[0,2,4] [-2,0,2] [-4,-2,1] [-3,-1,1]>"]}}
+;; Liquid drum and bass at 174 BPM in D minor: a pad and plucked melody over the epic progression,
+;; a reese that follows the roots, and a jungle break for the second drop.
+{:globals {:tempo 174 :root :d}
+ :defs
+ {:dnb/pad [:prog/epic {:octave 3 :reverb 1.0}]
+  :dnb/reese [:notes {:inst :synth/reese :scale :minor} [:h 0 0 5 5 2 2 6 6]]
+  :dnb/lead [:lead/anthem {:inst :synth/pluck :octave 5 :vel 0.6 :delay 0.9}]
+  :dnb/crash [:steps {:inst :cr :kit :kit/default} "x..............................................................................................................................."]}
+ :scenes
+ {:intro {:pad :dnb/pad :arp [:arp/epic {:octave 5 :vel 0.4 :cutoff [:ramp 500.0 4000.0 8]}]}
+  :roll {:roll :fill/snare-roll}
+  :drop {:roll nil :drums :beat/dnb :reese :dnb/reese :lead :dnb/lead :arp nil :crash :dnb/crash}
+  :break {:drums nil :reese nil :crash nil :lead [:lead/anthem-high {:inst :synth/pluck :octave 4 :vel 0.5 :delay 1.0}]}
+  :drop2 {:drums :beat/jungle :reese :dnb/reese :lead :dnb/lead :crash :dnb/crash}
+  :outro {:lead nil :reese nil :crash nil :drums nil}}
+ :arrangement [[:intro 7] [:roll 1] [:drop 16] [:break 8] [:drop2 16] [:outro 8]]}

@@ -1,0 +1,17 @@
+;; Arpeggios. The figures are one bar of scale degrees; the progression arps follow a :prog/ part.
+{:defs
+ {:arp/trance [:notes {:inst :synth/pluck} [:s 0 4 7 4 9 4 7 4 0 4 7 4 11 4 7 4]]
+  :arp/up-down [:notes {:inst :synth/pluck} [:e 0 2 4 7 9 7 4 2]]
+  :arp/octave-bounce [:notes {:inst :synth/pluck} [:s 0 7 0 7 2 9 2 9 4 11 4 11 2 9 2 9]]
+  :arp/thirds [:notes {:inst :synth/pluck} [:s 0 2 1 3 2 4 3 5 4 6 5 7 6 8 7 9]]
+  :arp/epic [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck :octave 4}]]
+  :arp/axis [:fx [:arp :up 1/16] [:prog/axis {:inst :synth/pluck :octave 4}]]
+  :arp/sensitive [:fx [:arp :up 1/8] [:prog/sensitive {:inst :synth/pluck :octave 4}]]}
+ :about
+ {:arp/trance {:tags #{:arp :trance :sixteenths} :doc "Root, fifth and octave sixteenths with a moving top note"}
+  :arp/up-down {:tags #{:arp :eighths} :doc "Eighth notes up a chord and back"}
+  :arp/octave-bounce {:tags #{:arp :sixteenths :disco} :doc "Octave jumps climbing the scale"}
+  :arp/thirds {:tags #{:arp :sixteenths :scale} :doc "Broken thirds walking up the scale"}
+  :arp/epic {:tags #{:arp :progression :trance :minor} :doc "Up-down sixteenths through :prog/epic"}
+  :arp/axis {:tags #{:arp :progression :pop :major} :doc "Rising sixteenths through :prog/axis"}
+  :arp/sensitive {:tags #{:arp :progression :synthwave :major} :doc "Rising eighths through :prog/sensitive"}}}
