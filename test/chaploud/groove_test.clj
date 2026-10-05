@@ -3,6 +3,7 @@
             [chaploud.groove.live :as live]
             [chaploud.groove.session :as s]
             [clojure.edn]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is use-fixtures]]))
 
 (use-fixtures :each (fn [t]
@@ -82,4 +83,4 @@
   (is (= #{:kick} (set (keys (get-in (g/session) [:sections :one]))))))
 
 (deftest show-prints-hits-in-sixteenth-columns
-  (is (= "bd   |x···.···X···.···|" (clojure.string/trim-newline (with-out-str (g/show [:steps {:inst :bd} "x... .... X... ...."]))))))
+  (is (= "bd   |x···.···X···.···|" (str/trim-newline (with-out-str (g/show [:steps {:inst :bd} "x... .... X... ...."]))))))
