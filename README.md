@@ -36,7 +36,8 @@ On Linux, playback goes through ALSA, which PipeWire and PulseAudio both provide
 ```sh
 git clone https://github.com/chaploud/clojure-groove && cd clojure-groove
 bb songs               # list the bundled songs
-bb play trance         # play one (Ctrl+C stops); --device NAME picks an output, see bb devices
+bb play showcase       # 30 seconds: filtered intro, build, snare roll, drop with the hook
+bb play trance         # a full track (Ctrl+C stops); --device NAME picks an output, see bb devices
 bb render lofi         # or render it to out/lofi.wav without touching an audio device
 bb nrepl               # start an nREPL server for live coding
 ```
@@ -231,7 +232,7 @@ The kick ducks the bass and synth buses (sidechain). Every track has `:delay` an
 
 A section is the complete set of tracks it plays: entering it starts them from their first step and stops every other track, and every track stops when the arrangement ends. `:base` builds on another section and `nil` drops a track inherited from it. An arrangement step `[:drop 8 {:fill 1}]` makes `:if :fill` steps play in its last bar, and `:if :1st` steps play only in a section's first loop, which is how a crash marks the start of a drop.
 
-`:include` merges kits, instruments, definitions and sections from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
+`:include` merges kits, instruments, definitions and sections from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): a 30-second showcase, house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
 
 ## Development
 

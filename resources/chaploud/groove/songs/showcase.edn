@@ -1,0 +1,26 @@
+;; A 30-second tour at 132 BPM in F minor: four bars of filtered supersaw chords teasing the hook,
+;; four bars of kickless build with a rising arpeggio and a two-bar snare roll, then an eight-bar drop with a
+;; pumping bass, offbeat supersaw stabs and the hook doubled an octave up.
+{:groove/format 2
+ :globals {:tempo 132 :root :f :kit :kit/tr909}
+ :defs
+ {:show/chords [:prog/epic {:inst :synth/supersaw :octave 3 :vel 0.5 :reverb 1.0}]
+  :show/stabs [:fx [:struct "..x. ..x. ..x. ..x."]
+               [:prog/epic {:inst :synth/supersaw :octave 4 :vel 0.6 :gate 0.4}]]
+  :show/bass [:fx [:struct ".xxx .xxx .xxx .xxx"] [:prog/epic {:inst :synth/bass :voicing :root}]]
+  :show/hook :lead/anthem
+  :show/sparkle [:lead/anthem {:inst :synth/pluck :octave 5 :vel 0.45 :delay 1.0}]
+  :show/arp [:arp/epic {:octave 5 :vel 0.4}]
+  :show/drums [:par :beat/trance [:steps {:inst :hh :vel 0.3} "xxxx xxxx xxxx xxxx"]]}
+ :sections
+ {:intro {:chords [:show/chords {:cutoff [:ramp 300.0 2500.0 4]}]
+          :tease [:show/sparkle {:cutoff 1200.0}]}
+  :build {:chords :show/chords
+          :tease :show/sparkle
+          :claps [:steps {:inst :cp :vel 0.45 :reverb 0.6} "x... x... x... x..."]
+          :arp [:show/arp {:cutoff [:ramp 400.0 7000.0 4]}]
+          :roll [:fill/snare-roll {:if :fill}]}
+  :drop {:drums :show/drums :bass :show/bass :chords :show/chords :stabs :show/stabs
+         :hook :show/hook :sparkle :show/sparkle :arp :show/arp
+         :crash [:fill/crash {:if :1st}]}}
+ :arrangement [[:intro 4] [:build 4 {:fill 2}] [:drop 8]]}

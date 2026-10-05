@@ -11,7 +11,7 @@
 - Song files with unknown or misspelled keys, or a non-map where a map belongs, are rejected; validation errors from a file name the file, and every expansion error includes the path to the node.
 - `:prob`, `:delay`, `:reverb`, `:bus` and `:choke` are checked before a change is adopted, not when it plays. `status` counts how often each problem recurs, and output that goes non-finite is reported.
 - Step and note bodies can be written one bar at a time (a vector of strings, or a vector of note vectors); each bar is checked to be exactly one bar long.
-- New parts: `:lead/` melodies and `:arp/` arpeggios. The bundled songs are rewritten as full arrangements with melodies, builds, fills and second drops.
+- New parts: `:lead/` melodies and `:arp/` arpeggios. A 30-second `showcase` song goes from a filtered intro through a build into a full drop. The bundled songs are rewritten as full arrangements with melodies, builds, fills and second drops.
 
 ## 0.1.0 (2026-10-05)
 
