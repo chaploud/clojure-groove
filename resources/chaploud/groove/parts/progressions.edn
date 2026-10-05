@@ -24,4 +24,4 @@
   :prog/canon {:tags #{:progression :classical :pop} :doc "Pachelbel's eight-chord canon"}
   :prog/blues {:tags #{:progression :blues} :doc "Twelve-bar blues with dominant sevenths"}
   :prog/dorian-vamp {:tags #{:progression :funk :house :dorian} :doc "i7-IV7 in dorian"}
-  :prog/deep-house {:tags #{:progression :house :minor} :doc "i7-VImaj7-iv7-v7 minor-seventh chords"}}}
+  :prog/deep-house {:tags #{:progression :house :minor} :doc "i7-VImaj7-iv7-v7 seventh chords"}}}

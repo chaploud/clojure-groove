@@ -1,6 +1,7 @@
 (ns chaploud.groove.cli-test
   (:require [chaploud.groove.cli :as cli]
             [chaploud.groove.engine.output]
+            [chaploud.groove.io]
             [clojure.test :refer [deftest is]]))
 
 (deftest options-may-appear-anywhere
@@ -15,3 +16,14 @@
   (is (= "MacBook Speakers" (chaploud.groove.engine.output/pick-device ["USB Speakers" "MacBook Speakers"] "macbook speakers")))
   (is (= "USB Speakers" (chaploud.groove.engine.output/pick-device ["USB Speakers" "MacBook Speakers"] "usb")))
   (is (nil? (chaploud.groove.engine.output/pick-device ["USB Speakers"] "hdmi"))))
+
+(deftest render-and-songs-run-end-to-end
+  (let [out (str (java.io.File/createTempFile "techno" ".wav"))]
+    (is (re-find #"\.wav" (with-out-str (cli/run ["render" "techno" "1" out]))))
+    (is (< 100000 (.length (java.io.File. out)))))
+  (is (= (count (chaploud.groove.io/bundled-songs))
+         (count (re-seq #"BPM" (with-out-str (cli/run ["songs"])))))))
+
+(deftest usage-mistakes-are-reported
+  (is (thrown-with-msg? Exception #"Usage" (cli/run ["bogus"])))
+  (is (thrown-with-msg? Exception #"Usage" (cli/run ["render"]))))

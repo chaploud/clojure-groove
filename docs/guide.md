@@ -47,7 +47,7 @@ Degree 0 is the root, 7 the octave above. `:s` makes the following notes 16ths; 
 (g/play :bass [:fx [:struct ".x.x .x.x .x.x .x.x"] [:prog/epic {:inst :synth/bass :voicing :root}]])
 ```
 
-One progression now drives the pad, the arpeggio and the bass, so they always agree: `[:struct ".x.x ..."]` plays the chord root underneath at each offbeat. Swap `:prog/epic` for `:prog/sensitive` in all three and the whole harmony changes.
+One progression now drives the pad, the arpeggio and the bass, so they always agree: `[:struct ".x.x ..."]` plays the chord root underneath on every other 16th, in the octave nearest the key so the line moves by step. Swap `:prog/epic` for `:prog/sensitive` in all three and the whole harmony changes.
 
 ## 4. Movement
 

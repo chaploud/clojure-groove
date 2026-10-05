@@ -1,20 +1,22 @@
 ;; Acid techno at 132 BPM in A minor. A 303 line slides and sweeps under an LFO; every fourth bar it
 ;; lifts a minor third, and in the break the resonance screams while the filter climbs.
-{:globals {:tempo 132 :root :a :scale :minor :kit :kit/tr909}
+{:groove/format 2
+ :globals {:tempo 132 :root :a :scale :minor :kit :kit/tr909}
  :defs
  {:acid/line [:bass/acid {:cutoff [:lfo :tri 8 180.0 900.0]}]
   :acid/phrase [:seq [:rep 3 :acid/line] [:fx [:transpose 3] :acid/line]]
   :acid/hats [:steps {:inst :hh :vel 0.3} "xxxx xxxx xxxx xxxx"]
+  :acid/riff [:lead/pentatonic {:inst :synth/pluck :octave 5 :vel 0.45 :delay 1.0}]
   :acid/drums [:par :beat/four-floor
                [:steps {:inst :oh :vel 0.5} "..x. ..x. ..x. ..x."]
                [:steps {:inst :cp} ".... x... .... x..."]]}
  :sections
  {:intro {:drums :beat/four-floor :hats :acid/hats}
   :acid {:base :intro :acid [:acid/line {:cutoff [:lfo :tri 8 150.0 400.0]}]}
-  :drop {:drums :acid/drums :acid :acid/phrase :crash [:fill/crash {:if :1st}]}
+  :drop {:base :intro :drums :acid/drums :acid :acid/phrase :crash [:fill/crash {:if :1st}]}
   :break {:acid [:acid/line {:res 0.95 :cutoff [:ramp 150.0 2500.0 8]}]
-          :lead [:lead/pentatonic {:inst :synth/pluck :octave 5 :vel 0.45 :delay 1.0}]
+          :lead :acid/riff
           :roll [:fill/snare-roll {:if :fill}]}
-  :drop2 {:base :drop :hats :acid/hats}
+  :drop2 {:base :drop :lead [:acid/riff {:vel 0.35}]}
   :outro {:base :intro}}
  :arrangement [[:intro 8] [:acid 8] [:drop 16] [:break 8 {:fill 1}] [:drop2 16] [:outro 8]]}

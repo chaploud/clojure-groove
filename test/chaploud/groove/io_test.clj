@@ -1,6 +1,7 @@
 (ns chaploud.groove.io-test
   (:require [chaploud.groove.io :as io]
             [chaploud.groove.session :as s]
+            [clojure.edn]
             [clojure.java.io :as jio]
             [clojure.test :refer [deftest is]]))
 
@@ -61,3 +62,30 @@
   (let [path (str (tmp-dir) "/song.edn")]
     (spit path (pr-str {:scenes {:a {}}}))
     (is (thrown-with-msg? Exception #":scenes was renamed to :sections" (io/read-song path)))))
+
+(deftest round-trip-keeps-sections-and-the-arrangement
+  (let [path (str (tmp-dir) "/song.edn")
+        sess (assoc s/empty-session
+                    :sections {:a {:k [:steps {:inst :drum/kick} "x"]} :b {:base :a :k nil}}
+                    :arrangement [[:a 2] [:b 2 {:fill 1}]])
+        saved (io/write-song! sess path)
+        loaded (io/song->session (io/read-song saved))]
+    (is (= (select-keys sess [:sections :arrangement]) (select-keys loaded [:sections :arrangement])))
+    (is (= 2 (:groove/format (clojure.edn/read-string (slurp path)))))))
+
+(deftest includes-merge-sections-and-kits
+  (let [dir (tmp-dir)]
+    (spit (jio/file dir "lib.edn") (pr-str {:sections {:a {:k :x/a} :b {:k :x/b}} :kits {:x/kit {:bd :drum/rim}}}))
+    (spit (jio/file dir "song.edn") (pr-str {:include ["lib.edn"] :sections {:b {:k :x/mine}}}))
+    (let [song (io/read-song (str dir "/song.edn"))]
+      (is (= {:a {:k :x/a} :b {:k :x/mine}} (:sections song)))
+      (is (= {:x/kit {:bd :drum/rim}} (:kits song))))))
+
+(deftest misspelled-or-malformed-song-keys-are-rejected
+  (let [dir (tmp-dir)]
+    (spit (jio/file dir "typo.edn") (pr-str {:arangement [[:a 8]]}))
+    (spit (jio/file dir "shape.edn") (pr-str {:sections [:a]}))
+    (spit (jio/file dir "bad-node.edn") (pr-str {:tracks {:k [:steps {:inst :drum/kick} "xz"]}}))
+    (is (thrown-with-msg? Exception #"unknown keys \[:arangement\]" (io/read-song (str dir "/typo.edn"))))
+    (is (thrown-with-msg? Exception #":sections must be a map" (io/read-song (str dir "/shape.edn"))))
+    (is (thrown-with-msg? Exception #"bad-node.edn: Track :k" (io/load-song (str dir "/bad-node.edn"))))))

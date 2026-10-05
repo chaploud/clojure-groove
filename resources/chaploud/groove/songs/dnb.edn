@@ -1,15 +1,17 @@
 ;; Liquid drum and bass at 174 BPM in D minor: a pad and plucked melody over the epic progression,
 ;; a reese that follows the roots, and a jungle break for the second drop.
-{:globals {:tempo 174 :root :d}
+{:groove/format 2
+ :globals {:tempo 174 :root :d}
  :defs
  {:dnb/pad [:prog/epic {:octave 3 :reverb 1.0}]
-  :dnb/reese [:fx [:struct [:steps {:step 1/2} "xx"]] [:prog/epic {:inst :synth/reese :voicing :root}]]
+  :dnb/reese [:fx [:struct "x... .... x... ...."] [:prog/epic {:inst :synth/reese :voicing :root}]]
   :dnb/lead [:lead/anthem {:inst :synth/pluck :octave 5 :vel 0.6 :delay 0.9}]}
  :sections
  {:intro {:pad :dnb/pad :arp [:arp/epic {:octave 5 :vel 0.4 :cutoff [:ramp 500.0 4000.0 8]}]
           :roll [:fill/snare-roll {:if :fill}]}
   :drop {:pad :dnb/pad :drums :beat/dnb :reese :dnb/reese :lead :dnb/lead :crash [:fill/crash {:if :1st}]}
-  :break {:pad :dnb/pad :lead [:lead/anthem-high {:inst :synth/pluck :octave 4 :vel 0.5 :delay 1.0}]}
+  :break {:pad :dnb/pad :lead [:lead/anthem-high {:inst :synth/pluck :octave 4 :vel 0.5 :delay 1.0}]
+          :roll [:fill/snare-roll {:if :fill}]}
   :drop2 {:base :drop :drums :beat/jungle}
   :outro {:pad :dnb/pad}}
- :arrangement [[:intro 8 {:fill 1}] [:drop 16] [:break 8] [:drop2 16] [:outro 8]]}
+ :arrangement [[:intro 8 {:fill 1}] [:drop 16] [:break 8 {:fill 1}] [:drop2 16] [:outro 8]]}

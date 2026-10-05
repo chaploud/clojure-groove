@@ -1,14 +1,14 @@
-[{:name "house" :genre "house" :about "Minor-seventh stabs walk a deep-house progression; a call-and-answer melody joins halfway"}
+[{:name "house" :genre "house" :about "Seventh-chord stabs walk a deep-house progression; a call-and-answer melody joins halfway"}
  {:name "acid" :genre "techno" :about "A sliding 303 line under an LFO, lifted every fourth bar, with a screaming break"}
  {:name "techno" :genre "techno" :about "Reese rumble, a dark phrygian stab, Euclidean rims and filtered builds into two peaks"}
  {:name "trance" :genre "trance" :about "Builds, snare rolls and two drops: the anthem hook, then its higher answer"}
  {:name "dnb" :genre "drum and bass" :about "Liquid: pad and plucked hook over the epic progression, reese bass, jungle second drop"}
- {:name "lofi" :genre "hip hop" :about "Drop-2 sevenths on the royal road, a lazy answering melody, humanized"}
+ {:name "lofi" :genre "hip hop" :about "Drop-2 chords on the royal road, a lazy answering melody, humanized"}
  {:name "trap" :genre "trap" :about "Andalusian pad, a calling bell melody and an 808 that follows the roots"}
  {:name "polymeter" :genre "study" :about "Loops of 16, 12, 10 and 7 steps drifting against each other"}
  {:name "euclid" :genre "study" :about "Euclidean rhythms from around the world"}
  {:name "cascade" :genre "study" :about "References, the attribute cascade and :include: one motif reused four ways"}
  {:name "anthem" :genre "trance" :about "Big-room pop from bundled parts: piano, arpeggio and hook over the axis progression"}
- {:name "garage" :genre "uk garage" :about "Swung seventh stabs over two-step drums and a bass sliding between roots and fifths"}
+ {:name "garage" :genre "uk garage" :about "Swung seventh-chord stabs over two-step drums and a bass sliding between roots and fifths"}
  {:name "synthwave" :genre "synthwave" :about "A neon hook over vi-IV-I-V, pulsing bass, drifting pad, a final chorus an octave up"}
  {:name "dub" :genre "dub techno" :about "An i7/IV7 stab drowned in delay under a slow filter, the groove built up and taken apart"}]

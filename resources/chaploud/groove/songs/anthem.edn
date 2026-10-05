@@ -1,10 +1,11 @@
 ;; Big-room pop at 128 BPM in D major, built from bundled parts: the axis progression drives the
 ;; piano, the arpeggio and the bass, and the hook comes back an octave higher in the last drop.
-{:globals {:tempo 128 :root :d :kit :kit/tr909}
+{:groove/format 2
+ :globals {:tempo 128 :root :d :kit :kit/tr909}
  :defs
  {:anthem/piano [:prog/axis {:inst :synth/keys :octave 4 :voicing :open :vel 0.7}]
   :anthem/pad [:prog/axis {:octave 3}]
-  :anthem/bass [:fx [:struct [:steps {:step 1/8} ".x.x .x.x"]] [:prog/axis {:inst :synth/bass :voicing :root}]]
+  :anthem/bass [:fx [:struct "..x. ..x. ..x. ..x."] [:prog/axis {:inst :synth/bass :voicing :root}]]
   :anthem/arp [:arp/axis {:vel 0.5}]
   :anthem/crash [:fill/crash {:if :1st}]}
  :sections
@@ -12,9 +13,9 @@
   :verse {:base :intro :drums :beat/four-floor :bass :anthem/bass :arp :anthem/arp}
   :build {:piano :anthem/piano :pad :anthem/pad :bass :anthem/bass
           :arp [:anthem/arp {:cutoff [:ramp 500.0 7000.0 8]}] :roll [:fill/snare-roll {:if :fill}]}
-  :drop {:base :verse :drums :beat/house :pad :anthem/pad :lead :lead/pop :crash :anthem/crash}
+  :drop {:base :verse :drums :beat/house :pad :anthem/pad :lead [:lead/pop {:octave 4}] :crash :anthem/crash}
   :break {:piano :anthem/piano :pad :anthem/pad :lead [:lead/pop {:inst :synth/pluck :vel 0.5}]}
-  :drop2 {:base :drop :lead [:lead/pop {:octave 6}]}
+  :drop2 {:base :drop :lead :lead/pop}
   :outro {:base :verse}}
  :arrangement [[:intro 4] [:verse 8] [:build 8 {:fill 1}] [:drop 16] [:break 8] [:build 8 {:fill 1}]
                [:drop2 16] [:outro 8]]}

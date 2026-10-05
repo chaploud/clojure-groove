@@ -60,5 +60,5 @@
 (deftest bar-by-bar-bodies-must-add-up
   (is (= [[0 1/2] [1/2 1/2] [1 1]] (mapv (juxt :t :dur) (n/parse-notes [[:h 0 2] [:w 4]] 1/16))))
   (is (thrown-with-msg? Exception #"Bar 2 lasts 3/4" (n/parse-notes [[:w 0] [:h 2 :q 4]] 1/16)))
-  (is (= 32 (count (n/parse-step-bars ["x... x... x... x..." "x... x... x.x. x.x."] 1/16))))
-  (is (thrown-with-msg? Exception #"Bar 1 lasts 1/2" (n/parse-step-bars ["x... x..."] 1/16))))
+  (is (= 32 (count (n/parse-step-body ["x... x... x... x..." "x... x... x.x. x.x."] 1/16))))
+  (is (thrown-with-msg? Exception #"Bar 1 lasts 1/2" (n/parse-step-body ["x... x..."] 1/16))))

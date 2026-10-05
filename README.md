@@ -17,7 +17,7 @@ Live-code grooves from your Clojure REPL. Patterns are plain EDN data: write a d
 
 Everything runs on the JVM with no dependencies besides Clojure: drums and synths are synthesized in pure Clojure and played through Java Sound. A failed edit is rejected in the REPL with a pointed error, and the music keeps playing.
 
-> Status: 0.1.0, early. The data format is versioned (`:groove/format 2`) but may still change; see [CHANGELOG.md](CHANGELOG.md).
+> Status: early. The data format is versioned (`:groove/format 2`) but may still change; see [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
@@ -109,7 +109,7 @@ Roman numerals build a chord on a degree of the current scale: uppercase is majo
 (g/play  :stab [:fx [:struct "..x. ...x .... ..x."] [:prog/deep-house {:inst :synth/keys}]])
 ```
 
-`:voicing` is `:close` (default), `:open`, `:drop2` or `:root`, and `:inv n` inverts. `[:arp order rate]` plays each chord one note at a time (`:up :down :up-down :random`), and `[:struct rhythm]` plays whatever sounds underneath at the rhythm's hits, like Strudel's `struct`: the rhythm is a step string or any node, and only its timing and step attributes are used. Together they let one progression drive a pad, an arpeggio, stabs and a bassline. Mini-notation accepts the same numerals: `"<i VI III VII>"`.
+`:voicing` is `:close` (default), `:open`, `:drop2` or `:root`, and `:inv n` inverts; `:root` keeps only the root, in the octave nearest the key's tonic, so a bassline that follows the chords moves by step instead of leaping. `[:arp order rate]` plays each chord one note at a time (`:up :down :up-down :random`), and `[:struct rhythm]` plays whatever sounds underneath at the rhythm's hits, like Strudel's `struct`: the rhythm is a step string, one string per bar, or any node, and it contributes only its timing and the step attributes `:vel :prob :if :ratchet :nudge :gate`. Together they let one progression drive a pad, an arpeggio, stabs and a bassline. Mini-notation accepts the same numerals: `"<i VI III VII>"`.
 
 ### Cycles: mini-notation
 
@@ -143,7 +143,7 @@ A library of ready-made parts ships with the code, so a groove can start from a 
 | `:fill/` | one-bar fills: snare-roll, toms, crash, stutter |
 | `:bass/` | basslines in scale degrees: offbeat, rolling, acid, octave, root-fifth, sub, tr808, reese, funk |
 | `:prog/` | chord progressions: axis, sensitive, epic, andalusian, ii-v-i, royal-road, komuro, canon, blues, dorian-vamp, deep-house |
-| `:lead/` | four-bar melodies, each written over a progression: anthem, anthem-high, pop, neon, call-response, pentatonic |
+| `:lead/` | melodies: anthem, anthem-high, pop, neon (four bars, each written over the progression named in its description), call-response, pentatonic |
 | `:arp/` | arpeggios: trance, up-down, octave-bounce, thirds, and epic, axis, sensitive that follow a progression |
 | `:kit/` | drum kits: default, tr808, tr909, lofi, hard |
 
@@ -155,7 +155,7 @@ Any numeric attribute can be a signal instead of a number. It is evaluated at ea
 
 ```clojure
 (g/play :acid [:bass/acid {:cutoff [:lfo :tri 8 180.0 900.0]}])        ; sweep the filter over 8 bars
-(g/play :lead [:clip/motif {:cutoff [:ramp 300.0 6000.0 8] :reverb 0.5}]) ; an 8-bar build
+(g/play :lead [:arp/trance {:cutoff [:ramp 300.0 6000.0 8] :reverb 0.5}]) ; an 8-bar build
 (g/play :pad  [:prog/epic {:pan [:lfo :sine 2 -0.6 0.6]}])               ; drift left and right
 ```
 
@@ -183,7 +183,7 @@ Attributes cascade: they flow from `:globals` and parent nodes to their children
 (g/play :echo [:clip/motif {:octave 6 :vel 0.3}])
 ```
 
-References are checked before anything is adopted: an undefined name, a cycle, or a bad pattern anywhere in the tree is reported with its path, e.g. `Track :lead: Undefined reference :clip/motf` at `[:lead :seq 1 :clip/motf]`.
+References are checked before anything is adopted: an undefined name, a cycle, or a bad pattern anywhere in the tree is reported with its path, e.g. `Track :lead: Undefined reference :clip/motf (did you mean :clip/motif?) (at [:lead :seq 1 :clip/motf])`. Song files are checked the same way when they are loaded, and the error names the file.
 
 ## Live controls
 
@@ -191,7 +191,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 
 | | |
 |---|---|
-| `start!` `stop!` `status` `devices` | audio transport; `(start! {:device "USB"})` picks an output, `status` lists errors reported while playing |
+| `start!` `stop!` `status` `devices` | audio transport; `(start! {:device "USB"})` picks an output, `status` lists problems reported while playing, each with how often it happened |
 | `drum` `synth` `mini` `play` | set a track; edits are picked up at the next bar |
 | `clear` `hush` | remove some or all tracks |
 | `mute` `unmute` `solo` `unsolo` | |
@@ -229,7 +229,7 @@ The kick ducks the bass and synth buses (sidechain). Every track has `:delay` an
  :tracks {...}}
 ```
 
-A section is the complete set of tracks it plays: entering it starts them from their first step and stops every other track. `:base` builds on another section and `nil` drops a track inherited from it. An arrangement step `[:drop 8 {:fill 1}]` makes `:if :fill` steps play in its last bar, and `:if :1st` steps play only in a section's first loop, which is how a crash marks the start of a drop.
+A section is the complete set of tracks it plays: entering it starts them from their first step and stops every other track, and every track stops when the arrangement ends. `:base` builds on another section and `nil` drops a track inherited from it. An arrangement step `[:drop 8 {:fill 1}]` makes `:if :fill` steps play in its last bar, and `:if :1st` steps play only in a section's first loop, which is how a crash marks the start of a drop.
 
 `:include` merges kits, instruments, definitions and sections from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
 

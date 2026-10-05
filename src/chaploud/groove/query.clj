@@ -30,6 +30,8 @@
                  (if (< p n) p (- period p))))
     :random (long (* n (notation/chance :arp seed k)))))
 
+(def ^:private struct-keys [:vel :prob :if :ratchet :nudge :gate])
+
 (defn- apply-transform [[op & args] q len]
   (case op
     :rev (fn [lo hi iter]
@@ -60,14 +62,13 @@
                   rlen (:len rhythm)]
               (fn [lo hi iter]
                 (let [source (vec (q 0 len iter))
-                      per-loop (long (Math/ceil (double (/ len rlen))))]
-                  (for [[k start a b] (loop-windows rlen lo hi)
-                        {:keys [t dur event]} (query rhythm a b (+ (* iter per-loop) k))
-                        :let [at (+ start t)]
+                      base (* iter len)]
+                  (for [[k start a b] (loop-windows rlen (+ base lo) (+ base hi))
+                        {:keys [t dur event]} (query rhythm a b k)
+                        :let [at (- (+ start t) base)]
                         src source
                         :when (and (<= (:t src) at) (< at (+ (:t src) (:dur src))))]
-                    {:t at :dur dur
-                     :event (merge (:event src) (dissoc event :step :degree :note :midi :roman :chord :glide))}))))
+                    {:t at :dur dur :event (merge (:event src) (select-keys event struct-keys))}))))
     :arp (let [[order rate] args
                rate (or rate 1/16)]
            (fn [lo hi iter]
@@ -133,6 +134,8 @@
                       {:if condition})))))
 
 (defn- passes? [{condition :if prob :prob} {:keys [seed all?] :as ctx}]
+  (when-not (or (nil? prob) (and (number? prob) (<= 0 prob 1)))
+    (throw (ex-info (str ":prob must be a number between 0 and 1, got " (pr-str prob)) {:prob prob})))
   (let [holds (condition-holds? condition ctx)]
     (or all?
         (and holds (or (nil? prob) (< (notation/chance seed) prob))))))

@@ -77,3 +77,20 @@
 (deftest struct-takes-only-timing-from-a-note-rhythm
   (let [evs (q/bar-events (x/expand [:fx [:struct [:notes [:q. 9 :e :_ :h :_]]] [:notes [:w 2]]] {}) 0 {})]
     (is (= [[0 3/8 2]] (map (juxt :t :dur :degree) evs)))))
+
+(deftest struct-keeps-the-sound-of-the-notes-underneath
+  (let [lib {:r/beat [:steps {:inst :drum/kick :octave 7} [{:vel 1.0} :_ :_ :_]]}
+        evs (q/bar-events (x/expand [:fx [:struct :r/beat] [:notes {:inst :synth/bass :octave 2} [:w 0]]] lib) 0 {})]
+    (is (every? #(= [:synth/bass 2] [(:inst %) (:octave %)]) evs))
+    (is (= 1.0 (:vel (first evs))) "step attributes of the rhythm still apply")))
+
+(deftest a-rhythm-longer-than-the-notes-plays-to-its-end
+  (let [node (x/expand [:fx [:struct "x... .... .... .... x.x. x.x. x.x. x.x."] [:notes [:w 0]]] {})]
+    (is (= [1 8] (map #(count (q/bar-events node % {})) [0 1])))))
+
+(deftest a-rhythm-can-be-written-bar-by-bar
+  (let [node (x/expand [:fx {:step 1/8} [:struct ["x... ...." "x.x. ...."]] [:notes [:w 0]]] {})]
+    (is (= [1 2] (map #(count (q/bar-events node % {})) [0 1]))))
+  (is (= 2 (:len (x/expand [:steps ["x... .... .... ...." "x... .... .... ...."]] {}))))
+  (is (= 1 (:len (x/expand [:steps {:step 1/8} ["x... ...."]] {}))))
+  (is (thrown-with-msg? Exception #"Bar 1 lasts 1/2 .*at \[:steps\]" (x/expand [:steps ["x... ...."]] {}))))

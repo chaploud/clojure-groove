@@ -151,3 +151,18 @@
 (deftest sends-follow-the-effective-bus
   (let [[e] (events (s/begin-bar (session :l [:notes {:inst :synth/lead :bus :bass} [0]]) 0) 0)]
     (is (= [0.0 0.3] [(:delay e) (:reverb e)]))))
+
+(deftest the-arrangement-ends-in-silence
+  (let [sess (-> s/empty-session
+                 (assoc :sections {:a {:k [:steps {:inst :drum/kick} "x..............."]}}
+                        :arrangement [[:a 2]] :arrangement-start 0))
+        at (fn [bar] (reduce s/begin-bar sess (range (inc bar))))]
+    (is (= #{:k} (set (keys (:tracks (at 1))))))
+    (is (empty? (:tracks (at 2))))))
+
+(deftest send-levels-and-buses-are-checked
+  (doseq [bad [{:reverb :big} {:delay nil} {:delay 2.0} {:bus :drum} {:choke "hats"}]]
+    (is (thrown? Exception (s/validate! (session :x [:steps (merge {:inst :drum/kick} bad) "x"])))
+        (pr-str bad)))
+  (is (thrown-with-msg? Exception #":prob must be a number"
+                        (s/validate! (session :x [:steps {:inst :drum/kick :prob "0.5"} "x"])))))

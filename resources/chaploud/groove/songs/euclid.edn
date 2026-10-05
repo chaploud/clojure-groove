@@ -1,6 +1,7 @@
 ;; Euclidean rhythms from around the world, layered in mini-notation.
 ;; (3,8) tresillo  (5,8) cinquillo  (7,16) samba-ish  (4,12,2) quarter notes pushed late by a triplet 8th
-{:globals {:tempo 110 :root :c :scale :major-pentatonic}
+{:groove/format 2
+ :globals {:tempo 110 :root :c :scale :major-pentatonic}
  :tracks
  {:low [:cycle "bd(3,8)"]
   :mid [:cycle "lt(5,8), cb(4,12,2)"]

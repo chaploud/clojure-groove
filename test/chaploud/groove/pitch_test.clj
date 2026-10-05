@@ -45,3 +45,8 @@
 (deftest accidentals-count-from-the-major-scale
   (is (= [70 74 77] (midis {:root :c :scale :minor :octave 4 :roman :bVII})))
   (is (= [70 74 77] (midis {:root :c :scale :major :octave 4 :roman :bVII}))))
+
+(deftest bass-roots-stay-near-the-tonic
+  (let [roots (fn [romans] (map #(first (midis {:root :c :scale :minor :octave 2 :voicing :root :roman %})) romans))]
+    (is (= [36 34 32 31] (roots [:i :VII :VI :V])) "the Andalusian roots walk down")
+    (is (every? #(<= 30 % 42) (roots [:i :ii :III :iv :v :VI :VII])))))

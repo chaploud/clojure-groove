@@ -1,6 +1,7 @@
 ;; Uplifting trance at 138 BPM in G minor. The arpeggio filter opens through the build, a snare
 ;; roll lifts into the drop, and the second drop answers the first with a higher melody.
-{:globals {:tempo 138 :root :g :kit :kit/tr909}
+{:groove/format 2
+ :globals {:tempo 138 :root :g :kit :kit/tr909}
  :defs
  {:trance/pad [:prog/epic {:octave 3 :reverb 1.0}]
   :trance/arp [:arp/epic {:octave 5 :vel 0.55}]
@@ -14,6 +15,6 @@
          :lead :lead/anthem :crash :trance/crash}
   :break {:pad :trance/pad :lead [:lead/anthem-high {:inst :synth/pluck :vel 0.6 :delay 1.0}]}
   :drop2 {:base :drop :lead :lead/anthem-high}
-  :outro {:base :drop :bass nil :lead nil :pad nil :crash nil}}
+  :outro {:drums :beat/trance :arp :trance/arp}}
  :arrangement [[:intro 8] [:build 8 {:fill 1}] [:drop 16] [:break 8] [:build 8 {:fill 1}]
                [:drop2 16] [:outro 8]]}

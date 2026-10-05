@@ -21,7 +21,7 @@
     (let [s (session/begin-bar session bar)]
       (if (= (session/track-nodes s) (session/track-nodes session))
         (assoc st :session s)
-        (state-of s)))
+        {:session s :compiled (session/compile-tracks s)}))
     (catch Exception e
       (on-error (str "bar " bar ": arrangement stopped, " (ex-message e)) e)
       (assoc st :session (session/begin-bar (dissoc session :arrangement) bar)))))
@@ -38,6 +38,8 @@
         session (:session st)
         bar-frames (* (session/bar-seconds session) (double (:sample-rate mixer)))]
     ((:set-tempo! mixer) (session/tempo session))
+    (when (pos? (long ((:take-non-finite-resets! mixer))))
+      (on-error "the output went non-finite, so the delay and reverb were reset" nil))
     (doseq [e (events-of st bar on-error)]
       (try (mixer/submit! mixer (Math/round (+ frame (* (double (:t e)) bar-frames)))
                           e (hash [(:track e) bar (:t e)]))
@@ -59,9 +61,13 @@
 
 (defn- reporter [out]
   (fn [msg _]
-    (when-not (some #{msg} @!errors)
-      (swap! !errors conj msg)
-      (binding [*out* out] (println "groove:" msg)))))
+    (let [seen? (some #(= msg (:message %)) @!errors)]
+      (swap! !errors (fn [errors]
+                       (if seen?
+                         (mapv #(cond-> % (= msg (:message %)) (update :count inc)) errors)
+                         (conj errors {:message msg :count 1}))))
+      (when-not seen?
+        (binding [*out* out] (println "groove:" msg))))))
 
 (defn stop! []
   (when-let [{:keys [running ^Thread thread audio]} @!transport]

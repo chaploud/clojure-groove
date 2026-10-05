@@ -1,10 +1,11 @@
 ;; Synthwave at 100 BPM in C major. The neon hook rides the vi-IV-I-V progression over a pulsing
 ;; eighth-note bass; the pad drifts across the stereo field and the last chorus climbs an octave.
-{:globals {:tempo 100 :root :c :kit :kit/tr808}
+{:groove/format 2
+ :globals {:tempo 100 :root :c :kit :kit/tr808}
  :defs
  {:wave/pad [:prog/sensitive {:octave 3 :pan [:lfo :sine 8 -0.5 0.5]}]
   :wave/arp [:arp/sensitive {:vel 0.5 :delay 0.8}]
-  :wave/bass [:fx [:struct [:steps {:step 1/8} "xxxx xxxx"]]
+  :wave/bass [:fx [:struct "x.x. x.x. x.x. x.x."]
               [:prog/sensitive {:inst :synth/bass :voicing :root :gate 0.55}]]
   :wave/drums [:par [:steps {:inst :bd} "x... .... x.x. ...."]
                [:steps {:inst :sd :reverb 0.7} ".... x... .... x..."]
@@ -12,8 +13,8 @@
  :sections
  {:intro {:pad :wave/pad :arp [:wave/arp {:cutoff [:ramp 600.0 4000.0 8]}]}
   :verse {:pad :wave/pad :arp :wave/arp :drums :wave/drums :bass :wave/bass}
-  :chorus {:base :verse :lead :lead/neon :crash [:fill/crash {:if :1st}]}
+  :chorus {:base :verse :lead [:lead/neon {:octave 4}] :crash [:fill/crash {:if :1st}]}
   :break {:pad :wave/pad :arp :wave/arp :lead [:lead/neon {:inst :synth/pluck :vel 0.5 :delay 1.0}]}
-  :chorus2 {:base :chorus :lead [:lead/neon {:octave 6}]}
+  :chorus2 {:base :chorus :lead :lead/neon}
   :outro {:pad :wave/pad :arp :wave/arp}}
  :arrangement [[:intro 8] [:verse 8] [:chorus 16] [:break 8] [:chorus2 16] [:outro 8]]}

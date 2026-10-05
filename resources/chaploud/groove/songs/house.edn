@@ -1,10 +1,11 @@
-;; Deep house at 122 BPM in F minor: minor-seventh stabs walk i7-VImaj7-iv7-v7 over a swung beat,
+;; Deep house at 122 BPM in F minor: seventh-chord stabs walk i7-VImaj7-iv7-v7 over a swung beat,
 ;; the bass follows the roots, and a call-and-answer melody arrives for the second half.
-{:globals {:tempo 122 :root :f :scale :minor :kit :kit/tr909 :swing 0.12}
+{:groove/format 2
+ :globals {:tempo 122 :root :f :scale :minor :kit :kit/tr909 :swing 0.12}
  :defs
- {:house/stabs [:fx [:struct [:steps {:step 1/8} ".x.x ...x"]]
+ {:house/stabs [:fx [:struct "..x. ..x. .... ..x."]
                 [:prog/deep-house {:inst :synth/keys :octave 4 :reverb 0.5 :delay 0.4}]]
-  :house/bass [:fx [:struct [:steps {:step 1/8} "x..x .x.."]] [:prog/deep-house {:inst :synth/bass :voicing :root}]]
+  :house/bass [:fx [:struct "x... ..x. ..x. ...."] [:prog/deep-house {:inst :synth/bass :voicing :root}]]
   :house/lead [:lead/call-response {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.8}]}
  :sections
  {:intro {:drums :beat/four-floor :hats [:steps {:inst :hh :vel 0.3} "xxxx xxxx xxxx xxXx"]}

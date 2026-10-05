@@ -13,5 +13,5 @@
   (str "out/" (str/replace (.getName (java.io.File. ^String song)) #"\.edn$" "") ".wav"))
 
 (defn render-file [song bars out]
-  (let [session (io/song->session (io/read-song song))]
+  (let [{:keys [session]} (io/load-song song)]
     (output/write-wav! (live/render session (or bars (song-bars session))) out)))

@@ -32,7 +32,8 @@
   (live/stop!)
   :stopped)
 (defn status
-  "Returns `{:playing? :bar :errors}`; `:errors` lists problems reported while playing."
+  "Returns `{:playing? :bar :errors}`. `:errors` lists each problem reported while playing as
+  `{:message :count}`; a message is printed the first time and counted after that."
   [] (live/status))
 (defn devices
   "Returns the names of the audio outputs `start!` can use."
@@ -58,7 +59,7 @@
 (defn hush
   "Stops every track and the arrangement."
   []
-  (commit! #(assoc % :tracks {} :arrangement nil :current-step nil))
+  (commit! #(session/arrange (assoc % :tracks {}) nil nil))
   nil)
 
 (defn- default-drum [track]
@@ -168,10 +169,11 @@
 (defn- next-bar [] (inc (or (live/current-bar) -1)))
 
 (defn arrange!
-  "Plays sections in order from the next bar. `plan` is a vector of `[section bars]` steps;
-  `[section bars {:fill n}]` makes `:if :fill` steps play in the step's last n bars."
+  "Plays sections in order from the next bar, then stops every track when the plan ends.
+  `plan` is a vector of `[section bars]` steps; `[section bars {:fill n}]` makes `:if :fill`
+  steps play in the step's last n bars."
   [plan]
-  (commit! #(assoc % :arrangement plan :arrangement-start (next-bar) :current-step nil))
+  (commit! #(session/arrange % plan (next-bar)))
   plan)
 
 (defn fill
@@ -195,10 +197,10 @@
   "Replaces the session with a song: a file path, a classpath resource or the name of a
   bundled song (see `bb songs`). An arrangement in the song starts at the next bar."
   [path]
-  (let [song (io/read-song path)
+  (let [{:keys [session]} (io/load-song path)
         start (next-bar)]
-    (commit! (fn [_] (cond-> (io/song->session song)
-                       (:arrangement song) (assoc :arrangement-start start))))
+    (commit! (fn [_] (cond-> session
+                       (:arrangement session) (assoc :arrangement-start start))))
     path))
 
 (defn render!

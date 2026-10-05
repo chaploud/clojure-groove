@@ -79,7 +79,7 @@
      :out-l out-l
      :out-r out-r
      :position (fn ^long [] (aget position 0))
-     :non-finite-resets (fn ^long [] (aget resets 0))
+     :take-non-finite-resets! (fn ^long [] (let [n (aget resets 0)] (aset resets 0 0) n))
      :set-tempo! (fn [bpm]
                    (aset delay-frames 0 (long (min (dec delay-len) (* sr (/ 60.0 (double bpm)) 0.75)))))
      :render!
