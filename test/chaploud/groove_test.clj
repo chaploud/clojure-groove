@@ -82,4 +82,4 @@
   (is (= #{:kick} (set (keys (get-in (g/session) [:sections :one]))))))
 
 (deftest show-prints-hits-in-sixteenth-columns
-  (is (= "bd   |x···.···X···.···|\n" (with-out-str (g/show [:steps {:inst :bd} "x... .... X... ...."])))))
+  (is (= "bd   |x···.···X···.···|" (clojure.string/trim-newline (with-out-str (g/show [:steps {:inst :bd} "x... .... X... ...."]))))))
