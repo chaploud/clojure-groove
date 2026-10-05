@@ -1,12 +1,13 @@
 ;; Driving techno at 130 BPM in E phrygian: a rumbling reese, Euclidean rims, a dark stab that
 ;; echoes through the delay, and a filtered arpeggio that opens into each peak.
-{:globals {:tempo 130 :root :e :scale :phrygian :kit :kit/hard}
+{:groove/format 2
+ :globals {:tempo 130 :root :e :scale :phrygian :kit :kit/hard}
  :defs
  {:techno/rumble [:notes {:inst :synth/reese :gate 0.5} [:s :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 1]]
-  :techno/stab [:notes {:inst :synth/keys :octave 4 :delay 1.0 :reverb 0.8 :vel 0.55
-                        :cutoff [:lfo :sine 16 500.0 2500.0]}
-                [[:e :_ :_ :_ :i :_ :_ :_ :_]
-                 [:e :_ :_ :_ :_ :_ :bII :_ :_]]]
+  :techno/stab [:fx [:struct ["......x. ........" "........ ..x....."]]
+                [:notes {:inst :synth/keys :octave 4 :delay 1.0 :reverb 0.8 :vel 0.55
+                         :cutoff [:lfo :sine 16 500.0 2500.0]}
+                 [:w :i :bII]]]
   :techno/arp [:arp/thirds {:octave 4 :vel 0.4}]}
  :sections
  {:intro {:drums :beat/four-floor}

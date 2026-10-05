@@ -1,6 +1,7 @@
-;; UK garage at 132 BPM in F minor: swung minor-seventh stabs over a two-step beat, a bass that slides
+;; UK garage at 132 BPM in F minor: swung seventh-chord stabs over a two-step beat, a bass that slides
 ;; between the roots and their fifths, and a plucked call-and-answer for the second half.
-{:globals {:tempo 132 :root :f :scale :minor :swing 0.2 :kit :kit/tr909}
+{:groove/format 2
+ :globals {:tempo 132 :root :f :scale :minor :swing 0.2 :kit :kit/tr909}
  :defs
  {:garage/stabs [:fx [:struct "..x. ...x .... ..x."]
                  [:prog/deep-house {:inst :synth/keys :octave 4 :reverb 0.5}]]
@@ -8,11 +9,12 @@
                 [[:e 0 :_ :s :_ 0 {:degree 4 :glide true} :_ :e :_ 2 :_ {:degree 0 :glide true}]
                  [:e 5 :_ :s :_ 5 {:degree 9 :glide true} :_ :e :_ 7 :_ {:degree 5 :glide true}]
                  [:e 3 :_ :s :_ 3 {:degree 7 :glide true} :_ :e :_ 5 :_ {:degree 3 :glide true}]
-                 [:e 4 :_ :s :_ 4 {:degree 8 :glide true} :_ :e :_ 6 :_ {:degree 4 :glide true}]]]}
+                 [:e 4 :_ :s :_ 4 {:degree 8 :glide true} :_ :e :_ 6 :_ {:degree 4 :glide true}]]]
+  :garage/lead [:lead/call-response {:inst :synth/pluck :octave 5 :vel 0.55 :delay 1.0}]}
  :sections
  {:intro {:drums :beat/two-step :stabs [:garage/stabs {:cutoff [:ramp 400.0 2500.0 8]}]}
   :main {:drums :beat/two-step :stabs :garage/stabs :bass :garage/bass :crash [:fill/crash {:if :1st}]}
-  :break {:stabs :garage/stabs :lead [:lead/call-response {:inst :synth/pluck :octave 5 :vel 0.55 :delay 1.0}]}
-  :main2 {:base :main :lead [:lead/call-response {:inst :synth/pluck :octave 5 :vel 0.55 :delay 1.0}]}
+  :break {:stabs :garage/stabs :lead :garage/lead}
+  :main2 {:base :main :lead :garage/lead}
   :outro {:drums :beat/two-step :stabs :garage/stabs}}
  :arrangement [[:intro 8] [:main 16] [:break 8] [:main2 16] [:outro 8]]}

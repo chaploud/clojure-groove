@@ -56,3 +56,30 @@
   (is (empty? (:kits (g/session))))
   (is (thrown-with-msg? Exception #"Circular reference.*use a new one" (g/put! :beat/house [:beat/house {:swing 0.1}])))
   (is (= :clip/later (g/put! :clip/later [:par :clip/not-yet]))))
+
+(deftest launching-a-section-replaces-and-restarts-the-tracks
+  (g/drum :kick "x...")
+  (swap! live/!state update :session s/begin-bar 0)
+  (g/section! :a {:kick [:steps {:inst :bd} "x..."] :hat [:steps {:inst :hh} "..x."]})
+  (g/launch :a)
+  (is (= #{:kick :hat} (set (keys (:tracks (g/session))))))
+  (is (nil? (get-in (g/session) [:tracks :kick :launch])) "the kick restarts from its first step")
+  (let [before @live/!state]
+    (is (thrown? Exception (g/section! :b {:a/b [:steps {:inst :bd} "x"]})))
+    (is (thrown? Exception (g/section! :c {:base :c})))
+    (is (thrown? Exception (g/launch :nope)))
+    (is (identical? before @live/!state))))
+
+(deftest a-section-in-use-cannot-be-removed
+  (g/section! :a {:kick [:steps {:inst :bd} "x"]})
+  (g/section! :b {:base :a})
+  (is (thrown? Exception (g/section! :a nil))))
+
+(deftest auditions-are-not-snapped
+  (g/drum :kick "x")
+  (g/play :audition :beat/house)
+  (g/snap! :one)
+  (is (= #{:kick} (set (keys (get-in (g/session) [:sections :one]))))))
+
+(deftest show-prints-hits-in-sixteenth-columns
+  (is (= "bd   |x···.···X···.···|\n" (with-out-str (g/show [:steps {:inst :bd} "x... .... X... ...."])))))

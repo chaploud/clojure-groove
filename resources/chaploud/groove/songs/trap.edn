@@ -1,9 +1,10 @@
 ;; Trap at 140 BPM in C minor: an Andalusian pad, a bell melody calling and answering, an 808 that
 ;; follows the descending roots, and ratcheted hats.
-{:globals {:tempo 140 :root :c :kit :kit/tr808}
+{:groove/format 2
+ :globals {:tempo 140 :root :c :kit :kit/tr808}
  :defs
  {:trap/pad [:prog/andalusian {:octave 3 :vel 0.45 :reverb 1.0}]
-  :trap/boom [:fx [:struct [:notes [:q. 0 :e :_ :q :_ :e 0 0]]]
+  :trap/boom [:fx [:struct "x... .... ..x. ...x"]
               [:prog/andalusian {:inst :synth/sub :voicing :root :gate 1.0}]]
   :trap/bell [:lead/call-response {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.7}]}
  :sections

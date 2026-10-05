@@ -23,6 +23,8 @@
 
 (def ^:private time-constants #{:decay :fdecay :length :pitch-decay :drive})
 
+(def ^:private sends #{:delay :reverb})
+
 (defn- check-params! [p]
   (doseq [[k v] p
           :when (number? v)]
@@ -30,6 +32,15 @@
       (fail (str (pr-str k) " must be a finite number, got " v) {:param k}))
     (when (and (time-constants k) (not (pos? v)))
       (fail (str (pr-str k) " must be greater than 0, got " v) {:param k})))
+  (doseq [k sends
+          :let [v (get p k)]
+          :when (contains? p k)]
+    (when-not (and (number? v) (<= 0 v 1))
+      (fail (str (pr-str k) " is a send level between 0 and 1, got " (pr-str v)) {:param k})))
+  (when-not (#{:drums :bass :synth} (:bus p))
+    (fail (str ":bus must be :drums, :bass or :synth, got " (pr-str (:bus p))) {:param :bus}))
+  (when-not (or (nil? (:choke p)) (keyword? (:choke p)))
+    (fail (str ":choke names a group with a keyword, got " (pr-str (:choke p))) {:param :choke}))
   (let [{:keys [vel gate]} p]
     (when-not (and (number? vel) (<= 0 vel 2))
       (fail (str ":vel must be a number between 0 and 2, got " (pr-str vel)) {:param :vel}))
@@ -139,7 +150,7 @@
             (fail (str "Arrangement step " (pr-str step) ": :fill is a number of bars between 1 and " bars)
                   {:step step})))))))
 
-(declare resolve-section)
+(declare launch-section)
 
 (defn validate! [session]
   (let [t (tempo session)]
@@ -147,8 +158,7 @@
       (fail (str ":tempo must be a number between 20 and 999, got " (pr-str t)) {:tempo t})))
   (validate-arrangement! session)
   (doseq [section (keys (:sections session))]
-    (try (validate-tracks! (assoc session :tracks (update-vals (resolve-section (:sections session) section)
-                                                               (fn [node] {:node node}))))
+    (try (validate-tracks! (launch-section session section))
          (catch clojure.lang.ExceptionInfo e
            (fail (str "Section " section ": " (ex-message e)) (assoc (ex-data e) :section section) e))))
   (validate-tracks! session))
@@ -215,7 +225,7 @@
   (assoc session :tracks (update-vals (resolve-section (:sections session) section) (fn [node] {:node node}))))
 
 (defn snapshot [session section]
-  (assoc-in session [:sections section] (track-nodes session)))
+  (assoc-in session [:sections section] (dissoc (track-nodes session) :audition)))
 
 (defn arrangement-step [{:keys [arrangement arrangement-start]} bar]
   (when (and arrangement arrangement-start (>= bar arrangement-start))
@@ -225,11 +235,24 @@
         (< bar (+ at bars)) {:index i :section section :start at :bars bars :opts opts}
         :else (recur more (+ at bars) (inc i))))))
 
+(defn arrangement-end [{:keys [arrangement arrangement-start]}]
+  (when (and arrangement arrangement-start)
+    (+ arrangement-start (reduce + (map second arrangement)))))
+
+(defn arrange [session plan start]
+  (assoc session :arrangement plan :arrangement-start start :current-step nil))
+
 (defn begin-bar [session bar]
   (let [{:keys [index section]} (arrangement-step session bar)
-        session (if (and index (not= index (:current-step session)))
+        end (arrangement-end session)
+        session (cond
+                  (and index (not= index (:current-step session)))
                   (assoc (launch-section session section) :current-step index)
-                  session)]
+
+                  (and end (= bar end))
+                  (assoc session :tracks {} :current-step nil)
+
+                  :else session)]
     (update session :tracks update-vals #(update % :launch (fn [l] (or l bar))))))
 
 (defn rewind [session]

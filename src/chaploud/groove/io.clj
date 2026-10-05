@@ -8,6 +8,10 @@
 
 (def ^:private song-keys [:globals :kits :instruments :defs :sections :tracks :arrangement])
 
+(def ^:private shared-keys [:kits :instruments :defs :sections])
+
+(def ^:private map-keys #{:globals :kits :instruments :defs :sections :tracks})
+
 (defn session->song [session]
   (apply array-map
          :groove/format format-version
@@ -51,9 +55,16 @@
                         {:url where})))
       (when-not (and (vector? includes) (every? string? includes))
         (throw (ex-info (str where ": :include must be a vector of paths") {:url where})))
+      (when-let [unknown (seq (remove (into #{:include :groove/format} song-keys) (keys song)))]
+        (throw (ex-info (str where ": unknown keys " (vec unknown) "; a song may contain "
+                             (into [:groove/format :include] song-keys))
+                        {:url where})))
+      (doseq [k map-keys
+              :when (and (contains? song k) (not (map? (song k))))]
+        (throw (ex-info (str where ": " k " must be a map") {:url where})))
       (reduce (fn [acc inc-path]
                 (let [lib (read-song* (java.net.URL. url ^String inc-path) (conj seen where))]
-                  (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc [:kits :instruments :defs :sections])))
+                  (reduce #(update %1 %2 (fn [own] (merge (get lib %2) own))) acc shared-keys)))
               (dissoc song :include)
               includes))))
 
@@ -67,6 +78,12 @@
   (-> (merge session/empty-session (select-keys song song-keys))
       (update :globals #(merge (:globals session/empty-session) %))
       (update :tracks update-vals (fn [node] {:node node}))))
+
+(defn load-song [path]
+  (let [session (song->session (read-song path))]
+    (try {:session session :compiled (session/validate! session)}
+         (catch clojure.lang.ExceptionInfo e
+           (throw (ex-info (str path ": " (ex-message e)) (assoc (ex-data e) :song path) e))))))
 
 (defn write-song! [session path]
   (let [f (jio/file path)]

@@ -70,3 +70,11 @@
   (let [plain (render :a [:notes {:inst :synth/acid} [:q 0 4 0 4]])
         slid (render :a [:notes {:inst :synth/acid} [:q 0 {:degree 4 :glide true :glide-time 0.3} 0 4]])]
     (is (not (java.util.Arrays/equals ^bytes plain ^bytes slid)))))
+
+(deftest non-finite-output-is-counted-for-reporting
+  (let [mx (mixer/make-mixer 48000)
+        broken (assoc (instruments/resolve-instrument {} :synth/acid) :fdecay 0.0 :midi 45 :vel 0.8 :dur-s 0.2)]
+    (mixer/submit! mx 0 broken 1)
+    (dotimes [_ 20] ((:render! mx)))
+    (is (pos? ((:take-non-finite-resets! mx))))
+    (is (zero? ((:take-non-finite-resets! mx))))))

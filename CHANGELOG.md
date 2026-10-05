@@ -4,7 +4,11 @@
 
 - Sections replace scenes. A section is the complete set of tracks it plays: entering it restarts them and stops the rest, `:base` builds on another section and `nil` drops an inherited track. Song files use `:sections` and `:groove/format 2`; files with `:scenes` are rejected with a message explaining the change. `scene!` is now `section!`.
 - Arrangement steps take options: `[:build 8 {:fill 1}]` turns on `:if :fill` steps in the step's last bar, so fills no longer need their own section.
-- `[:struct rhythm]` plays the notes underneath at a rhythm's hits, so stabs and basslines can follow a progression without writing every bar out.
+- `[:struct rhythm]` plays the notes underneath at a rhythm's hits, so stabs and basslines can follow a progression without writing every bar out. The rhythm contributes only its timing and step attributes.
+- `:voicing :root` picks the root in the octave nearest the tonic, so basslines that follow a progression move by step.
+- An arrangement now stops every track when it ends, instead of repeating its last section.
+- Song files with unknown or misspelled keys, or a non-map where a map belongs, are rejected; validation errors from a file name the file, and every expansion error includes the path to the node.
+- `:prob`, `:delay`, `:reverb`, `:bus` and `:choke` are checked before a change is adopted, not when it plays. `status` counts how often each problem recurs, and output that goes non-finite is reported.
 - Step and note bodies can be written one bar at a time (a vector of strings, or a vector of note vectors); each bar is checked to be exactly one bar long.
 - New parts: `:lead/` melodies and `:arp/` arpeggios. The bundled songs are rewritten as full arrangements with melodies, builds, fills and second drops.
 

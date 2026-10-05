@@ -21,7 +21,7 @@
                  [:steps {:inst :sd} ".... x... .... x..."]
                  [:steps {:inst :hh :vel 0.5} "x.x. x.x. x.x. x.xx"]]
   :beat/breakbeat [:par [:steps {:inst :bd} "x.x. .... ..x. ...."]
-                   [:steps {:inst :sd} ".... x... .x.. x..."]
+                   [:steps {:inst :sd} [:_ :_ :_ :_ :x :_ :_ :_ :_ {:vel 0.4} :_ :_ :x :_ :_ :_]]
                    [:steps {:inst :hh :vel 0.5} "x.x. x.x. x.x. x.x."]]
   :beat/two-step [:par {:swing 0.2}
                   [:steps {:inst :bd} "x... .... ..x. ..x."]

@@ -1,5 +1,6 @@
 ;; Polymeter: loops of 16, 12, 10 and 7 steps drift against each other and realign after 1680 steps.
-{:globals {:tempo 118 :root :d :scale :dorian}
+{:groove/format 2
+ :globals {:tempo 118 :root :d :scale :dorian}
  :tracks
  {:kick [:steps {:inst :drum/kick} "x... x... x... x..."]
   :rim [:steps {:inst :drum/rim} "x.x ..x .x. ..."]

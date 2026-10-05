@@ -5,7 +5,7 @@
 
 ;; ---------------------------------------------------------------- steps
 
-(def ^:private step-rests #{nil false 0 :_ :- '_ "~"})
+(def ^:private step-rests #{nil false 0 :_ :- '_})
 
 (defn- step-char [ch i]
   (case ch
@@ -20,17 +20,19 @@
 
 (declare parse-steps)
 
-(defn parse-step-bars [bars step]
+(defn- parse-step-bars [bars step]
   (into [] (comp (map-indexed (fn [i bar]
-                                (let [steps (parse-steps bar)]
-                                  (when-not (= 1 (* step (count steps))) (bar-error i (* step (count steps))))
+                                (let [steps (parse-steps bar)
+                                      len (* step (count steps))]
+                                  (when-not (= 1 len) (bar-error i len))
                                   steps)))
                  cat)
         bars))
 
-(defn bars? [x]
-  (and (vector? x) (seq x) (every? #(or (string? %) (vector? %)) x)
-       (not-any? map? x)))
+(defn parse-step-body [x step]
+  (if (and (vector? x) (seq x) (every? string? x))
+    (parse-step-bars x step)
+    (parse-steps x)))
 
 (defn parse-steps [x]
   (cond
@@ -87,16 +89,16 @@
 (defn parse-notes [items default-dur]
   (link-glides
    (if (and (vector? items) (seq items) (every? vector? items))
-     (loop [[bar & more] items, i 0, offset (num 0), out []]
-       (if-not bar
-         out
-         (let [notes (parse-notes* bar default-dur)
-               len (reduce + 0 (map :dur notes))]
-           (when-not (= 1 len) (bar-error i len))
-           (recur more (inc i) (+ offset 1) (into out (map #(update % :t + offset)) notes)))))
+     (into [] (comp (map-indexed (fn [i bar]
+                                   (let [notes (parse-notes* bar default-dur)
+                                         len (reduce + 0 (map :dur notes))]
+                                     (when-not (= 1 len) (bar-error i len))
+                                     (map #(update % :t + i) notes))))
+                    cat)
+           items)
      (parse-notes* items default-dur))))
 
-(def ^:private pitch-keys [:degree :note :midi :roman :chord :octave :transpose])
+(def ^:private pitch-keys (conj pitch/sources :octave :transpose))
 
 (defn- link-glides [items]
   (let [notes (filterv :event items)

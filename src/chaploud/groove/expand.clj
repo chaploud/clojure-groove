@@ -2,7 +2,7 @@
   (:require [chaploud.groove.notation :as notation]))
 
 (defn- fail [msg path data]
-  (throw (ex-info msg (assoc data :path path))))
+  (throw (ex-info (if (seq path) (str msg " (at " (pr-str path) ")") msg) (assoc data :path path))))
 
 (def transforms #{:rev :fast :slow :every :transpose :degrade :arp :struct})
 
@@ -103,9 +103,7 @@
            (case tag
              :steps (let [step (:step ctx 1/16)
                           body (one-child tag children path)
-                          steps (leaf path #(if (and (vector? body) (every? string? body) (seq body))
-                                              (notation/parse-step-bars body step)
-                                              (notation/parse-steps body)))]
+                          steps (leaf path #(notation/parse-step-body body step))]
                       (positive-len {:kind :steps :attrs ctx :step step :steps steps :len (* step (count steps))} path))
              :notes (let [items (leaf path #(notation/parse-notes (one-child tag children path) (:step ctx 1/16)))]
                       (positive-len {:kind :notes :attrs ctx :items items
@@ -128,7 +126,8 @@
                      (fail "Use [:fx [[:transform ...] ...] node]" path {}))
                    (let [c (sub 1 child)
                          rhythm (fn [r]
-                                  (expand* (if (string? r) [:steps r] r) defs {:step (:step ctx 1/16)} {}
+                                  (expand* (if (or (string? r) (and (vector? r) (every? string? r))) [:steps r] r)
+                                           defs {:step (:step ctx 1/16)} {}
                                            (conj path :struct) seen))
                          prepare (fn prepare [[op & args :as tf]]
                                    (case op

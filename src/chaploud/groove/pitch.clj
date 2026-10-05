@@ -59,6 +59,8 @@
 
 ;; ---------------------------------------------------------------- chords
 
+(def sources [:midi :note :degree :roman :chord])
+
 (def ^:private numerals {"i" 0 "ii" 1 "iii" 2 "iv" 3 "v" 4 "vi" 5 "vii" 6})
 
 (def ^:private qualities
@@ -89,7 +91,11 @@
     chord (count chord)
     :else 1))
 
-(defn- voice [midis {:keys [voicing inv]}]
+(defn- nearest-tonic [m event]
+  (let [tonic (degree->midi 0 event)]
+    (+ m (* 12 (Math/round (/ (- tonic m) 12.0))))))
+
+(defn- voice [midis {:keys [voicing inv] :as event}]
   (let [sorted (vec (sort midis))
         sorted (reduce (fn [ms _] (vec (sort (conj (subvec ms 1) (+ 12 (first ms))))))
                        sorted
@@ -97,7 +103,7 @@
         n (count sorted)]
     (case (or voicing :close)
       :close sorted
-      :root [(first sorted)]
+      :root [(nearest-tonic (first sorted) event)]
       :open (if (>= n 3) (vec (sort (update sorted 1 + 12))) sorted)
       :drop2 (if (>= n 3) (vec (sort (update sorted (- n 2) - 12))) sorted)
       (throw (ex-info (str "Unknown :voicing " (pr-str voicing) "; use :close :open :drop2 or :root")
@@ -105,7 +111,7 @@
 
 (defn- glide-source [{:keys [glide-from] :as event}]
   (if glide-from
-    (let [from (resolve-midi (merge (apply dissoc event :glide-from :midi :note :degree :roman :chord [])
+    (let [from (resolve-midi (merge (apply dissoc event :glide-from sources)
                                     glide-from))]
       (assoc (dissoc event :glide-from) :glide-from-midi (:midi from)))
     event))

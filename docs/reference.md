@@ -62,11 +62,11 @@ Chord suffixes: `7 maj7 6 9 add9 sus2 sus4 dim dim7 m7b5 aug`. Uppercase numeral
 | `[:transpose n]` | semitones |
 | `[:degrade p]` | drop events with probability p (deterministic: the same loop drops the same events) |
 | `[:arp order rate]` | play chords one note at a time; order `:up :down :up-down :random`, rate default 1/16 |
-| `[:struct rhythm]` | play whatever sounds underneath at the rhythm's hits; rhythm is a step string or a node, and only its timing and step attributes count |
+| `[:struct rhythm]` | play whatever sounds underneath at the rhythm's hits; rhythm is a step string, a vector of step strings (one per bar), or a node, and it contributes only its timing and `:vel :prob :if :ratchet :nudge :gate` |
 
 ## Attributes
 
-Pitch: `:root` (note name, default `:c`), `:scale` (keyword or a vector of semitones), `:octave` (default from the instrument), `:degree`, `:note`, `:midi`, `:transpose`, `:voicing` (`:close :open :drop2 :root`), `:inv`.
+Pitch: `:root` (note name, default `:c`), `:scale` (keyword or a vector of semitones), `:octave` (default from the instrument), `:degree`, `:note`, `:midi`, `:transpose`, `:voicing` (`:close :open :drop2 :root`; `:root` is the root nearest the tonic), `:inv`.
 
 Timing and feel: `:step`, `:swing` (0–1 of a step), `:swing-step`, `:nudge` (fraction of the note), `:humanize` (0–1), `:gate` (fraction of the note held), `:glide`, `:glide-time`.
 
@@ -100,7 +100,7 @@ Define your own with `:base`: `{:my/bass {:base :synth/acid :cutoff 500.0}}`. Ki
  :tracks {:track node}}
 ```
 
-A section is the complete set of tracks it plays. Entering it, at an arrangement step or with `launch`, starts those tracks from their first step and stops every other track; this happens at every step, even when the same section repeats. `:base` builds on another section, and `nil` drops a track inherited from it. `{:fill n}` makes `:if :fill` steps play in the step's last n bars. Files from 0.1.0 used `:scenes`, which only changed the tracks they named; loading one explains how to convert it.
+A section is the complete set of tracks it plays. Entering it, at an arrangement step or with `launch`, starts those tracks from their first step and stops every other track; this happens at every step, even when the same section repeats. `:base` builds on another section, and `nil` drops a track inherited from it. `{:fill n}` makes `:if :fill` steps play in the step's last n bars, and every track stops when the arrangement ends. A song file may contain only the keys above; anything else is rejected, so a misspelled key cannot silently do nothing. Files from 0.1.0 used `:scenes`, which only changed the tracks they named; loading one explains how to convert it.
 
 ## REPL
 

@@ -34,14 +34,14 @@ A song is a path to an .edn file or the name of a bundled song, e.g. trance.")
     (.addShutdownHook (Runtime/getRuntime) (Thread. ^Runnable g/stop!))
     (println (str "Playing " song " at " (session/tempo s) " BPM"
                   (if bars (str " for " bars " bars") ", Ctrl+C to stop")))
-    (let [deadline (when bars (+ (System/currentTimeMillis) (long (* 1000 (+ 1.0 (* bars (session/bar-seconds s)))))))]
+    (let [deadline (when bars (+ (System/currentTimeMillis) (long (* 1000 (+ 2.0 (* bars (session/bar-seconds s)))))))]
       (while (and (:playing? (g/status))
                   (or (nil? deadline) (< (System/currentTimeMillis) deadline)))
         (Thread/sleep 200)))
-    (let [{:keys [errors]} (g/status)]
+    (let [{:keys [playing? errors]} (g/status)]
       (g/stop!)
-      (when (seq errors)
-        (throw (ex-info (str "playback stopped: " (last errors)) {}))))))
+      (when-not playing?
+        (throw (ex-info (str "playback stopped: " (or (:message (last errors)) "the audio output closed")) {}))))))
 
 (defn- songs []
   (doseq [{:keys [name genre about]} (io/bundled-songs)]

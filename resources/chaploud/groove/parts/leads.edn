@@ -1,5 +1,5 @@
-;; Melodies in scale degrees. Each is written over one progression, fixes that progression's
-;; scale, and follows :root, so pairing it with the progression it names always agrees.
+;; Melodies in scale degrees. Each fixes its scale and follows :root; the four-bar hooks are
+;; written over the progression named in their :about, so pairing them with it always agrees.
 {:defs
  {:lead/anthem [:notes {:inst :synth/supersaw :scale :minor}
                 [[:e 4 4 :q 7 :e 4 2 :q 0]
@@ -23,7 +23,7 @@
                [:q 8 :e 6 8 :h 11]]]
   :lead/call-response [:notes {:inst :synth/lead :scale :minor}
                        [[:e 4 5 :q 7 :h :_]
-                        [:e 9 7 5 4 :h 2]]]
+                        [:e 9 8 7 4 :h 4]]]
   :lead/pentatonic [:notes {:inst :synth/lead :scale :minor-pentatonic}
                     [:e 0 2 3 2 :s 4 3 2 0 :q 2]]}
  :about
@@ -31,5 +31,5 @@
   :lead/anthem-high {:tags #{:lead :melody :trance :edm :minor} :doc "Higher answer to :lead/anthem, also over :prog/epic"}
   :lead/pop {:tags #{:lead :melody :pop :major} :doc "Four-bar hook over :prog/axis"}
   :lead/neon {:tags #{:lead :melody :synthwave :major} :doc "Four-bar hook over :prog/sensitive"}
-  :lead/call-response {:tags #{:lead :melody :minor} :doc "Two-bar call and answer in a minor key"}
+  :lead/call-response {:tags #{:lead :melody :minor} :doc "Two-bar call and answer in a minor key; the answer ends on the fifth, so it sits over most minor progressions"}
   :lead/pentatonic {:tags #{:lead :riff :minor :pentatonic} :doc "One-bar minor-pentatonic riff that fits most minor grooves"}}}

@@ -50,16 +50,16 @@
   (loop [k k, seen #{}, acc {}]
     (cond
       (nil? k) acc
-      (seen k) (throw (ex-info (str "Circular " what " :base through " k) {what k}))
+      (seen k) (throw (ex-info (str "Circular " (name what) " :base through " k) {what k}))
       :else (let [m (or (get defs k) (get builtins k)
-                        (throw (ex-info (str "Unknown " what " " k) {what k})))]
+                        (throw (ex-info (str "Unknown " (name what) " " k) {what k})))]
               (recur (:base m) (conj seen k) (merge (dissoc m :base) acc))))))
 
 (defn resolve-instrument [instruments k]
-  (resolve-with-base instruments builtin k "instrument"))
+  (resolve-with-base instruments builtin k :instrument))
 
 (defn resolve-kit [kits k]
-  (resolve-with-base kits {:kit/default default-kit} k "kit"))
+  (resolve-with-base kits {:kit/default default-kit} k :kit))
 
 (defn instrument-key [kits {:keys [inst kit]}]
   (if (simple-keyword? inst)

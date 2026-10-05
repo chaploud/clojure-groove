@@ -1,4 +1,4 @@
-;; One-bar fills. Combine with :if :fill steps or launch them for a bar.
+;; One-bar fills. Give them {:if :fill} in a section and {:fill 1} on its arrangement step.
 {:defs
  {:fill/snare-roll [:steps {:inst :sd} [{:vel 0.4} :_ {:vel 0.45} :_ {:vel 0.5} :_ {:vel 0.55} :_
                                         {:vel 0.6} {:vel 0.65} {:vel 0.7} {:vel 0.75}

@@ -2,7 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as jio]))
 
-(def ^:private sections [:kits :instruments :defs :about])
+(def ^:private part-keys [:kits :instruments :defs :about])
 
 (def library
   (delay
@@ -10,7 +10,7 @@
       (apply merge-with merge
              (for [f files]
                (select-keys (edn/read-string (slurp (jio/resource (str "chaploud/groove/parts/" f))))
-                            sections))))))
+                            part-keys))))))
 
 (defn catalog [session]
   (into {} (for [k [:kits :instruments :defs]]

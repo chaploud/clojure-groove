@@ -1,6 +1,7 @@
-;; Lo-fi hip hop at 84 BPM in E-flat major: drop-2 seventh chords on the royal-road progression,
+;; Lo-fi hip hop at 84 BPM in E-flat major: drop-2 chords on the royal-road progression,
 ;; a lazy melody that answers them, a soft sub, and everything slightly humanized.
-{:globals {:tempo 84 :root :eb :scale :major :humanize 0.25}
+{:groove/format 2
+ :globals {:tempo 84 :root :eb :scale :major :humanize 0.25}
  :defs
  {:lofi/keys [:prog/royal-road {:inst :synth/keys :octave 4 :voicing :drop2 :vel 0.55}]
   :lofi/melody [:notes {:inst :synth/keys :octave 5 :vel 0.45 :delay 0.6}
@@ -8,7 +9,7 @@
                  [:q 8 :e 6 4 :h 6]
                  [:q 6 :e 4 2 :q 4 :_]
                  [:e 9 7 :q 5 :h :_]]]
-  :lofi/sub [:fx [:struct [:notes [:q. 0 :e :_ :q 0 :_]]] [:prog/royal-road {:inst :synth/sub :voicing :root}]]}
+  :lofi/sub [:fx [:struct "x... ...x ..x. ...."] [:prog/royal-road {:inst :synth/sub :voicing :root}]]}
  :sections
  {:intro {:keys :lofi/keys}
   :main {:keys :lofi/keys :drums :beat/lofi :sub :lofi/sub}

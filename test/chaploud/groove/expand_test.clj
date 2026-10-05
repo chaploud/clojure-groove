@@ -31,9 +31,9 @@
   (is (= 1 (:len (x/expand [:rep 4 :clip/kick] defs)))))
 
 (deftest errors-carry-paths
-  (is (= ["Circular reference through :loop/a" [:loop/a :seq 0 :loop/b :par 0 :loop/a]] (err :loop/a)))
-  (is (= ["Undefined reference :clip/nope" [:par 1 :clip/nope]] (err [:par :clip/kick :clip/nope])))
-  (is (= ["Unexpected character \\q at column 2 of step string" [:seq 0 :steps]] (err [:seq [:steps "xq"]])))
+  (is (= ["Circular reference through :loop/a (at [:loop/a :seq 0 :loop/b :par 0 :loop/a])" [:loop/a :seq 0 :loop/b :par 0 :loop/a]] (err :loop/a)))
+  (is (= ["Undefined reference :clip/nope (at [:par 1 :clip/nope])" [:par 1 :clip/nope]] (err [:par :clip/kick :clip/nope])))
+  (is (= ["Unexpected character \\q at column 2 of step string (at [:seq 0 :steps])" [:seq 0 :steps]] (err [:seq [:steps "xq"]])))
   (is (re-find #"Unknown transform" (first (err [:fx [[:wobble]] :clip/kick]))))
   (is (re-find #"Unknown node type" (first (err [:drums "x..."])))))
 
