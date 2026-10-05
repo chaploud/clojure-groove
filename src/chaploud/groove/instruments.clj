@@ -41,6 +41,15 @@
    :synth/speaker {:voice :synth :bus :synth :osc :square :gain 0.3 :octave 5
                    :cutoff 2600.0 :hp 700.0 :env 0.0 :res 0.3
                    :attack 0.002 :decay 0.25 :sustain 0.6 :release 0.08 :drive 3.0 :gate 0.85}
+   :synth/organ {:voice :synth :bus :synth :osc :square :gain 0.2 :octave 3
+                 :cutoff 1200.0 :env 0.0 :res 0.05
+                 :attack 0.004 :decay 0.1 :sustain 0.6 :release 0.04 :gate 0.4 :pan -0.25}
+   :synth/skank {:voice :synth :bus :synth :osc :square :gain 0.25 :octave 4
+                 :cutoff 2600.0 :hp 350.0 :env 0.0 :res 0.1
+                 :attack 0.001 :decay 0.09 :sustain 0.0 :release 0.04 :gate 0.25 :pan 0.25}
+   :synth/melodica {:voice :synth :bus :synth :osc :saw :gain 0.22 :octave 5
+                    :cutoff 1700.0 :env 500.0 :fdecay 0.3 :res 0.1
+                    :attack 0.025 :decay 0.3 :sustain 0.8 :release 0.12 :gate 0.85 :delay 0.25 :reverb 0.2}
    :synth/keys {:voice :synth :bus :synth :osc :tri :gain 0.4 :octave 4
                 :cutoff 2200.0 :env 800.0 :fdecay 0.3 :res 0.05
                 :attack 0.003 :decay 0.6 :sustain 0.3 :release 0.3 :gate 0.9}})

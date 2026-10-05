@@ -38,7 +38,7 @@
   (let [frame (double frame)
         session (:session st)
         bar-frames (* (session/bar-seconds session) (double (:sample-rate mixer)))]
-    ((:set-tempo! mixer) (session/tempo session))
+    ((:set-globals! mixer) (:globals session))
     (when (pos? (long ((:take-non-finite-resets! mixer))))
       (on-error "the output went non-finite, so the delay and reverb were reset" nil))
     (doseq [e (events-of st bar on-error)]

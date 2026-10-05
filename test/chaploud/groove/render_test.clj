@@ -82,3 +82,13 @@
 (deftest a-highpass-thins-a-low-note
   (let [low #(rms (render :b [:notes (merge {:inst :synth/sub :octave 2} %) [:w 0]]) 4000 40000)]
     (is (< (* 4 (low {:hp 1000.0})) (low {})))))
+
+(deftest delay-feedback-keeps-the-echo-repeating
+  (let [tail (fn [fb]
+               (let [sess (-> s/empty-session
+                              (assoc-in [:globals :delay-feedback] fb)
+                              (s/play :p [:notes {:inst :synth/skank :delay 1.0} [:w 0]]))]
+                 (rms (live/render sess 1) 72000 96000)))]
+    (is (< (* 4 (tail 0.0)) (tail 0.9)))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (s/validate! (assoc-in s/empty-session [:globals :delay-feedback] 1.2))))))

@@ -68,6 +68,7 @@
         delay-r (double-array delay-len)
         delay-idx (long-array 1)
         delay-frames (long-array [(long (* sr 0.35))])
+        feedback (double-array [0.38])
         [^IFn$DD rev-l reset-l] (make-reverb sr 0)
         [^IFn$DD rev-r reset-r] (make-reverb sr 23)
         resets (long-array 1)
@@ -80,8 +81,9 @@
      :out-r out-r
      :position (fn ^long [] (aget position 0))
      :take-non-finite-resets! (fn ^long [] (let [n (aget resets 0)] (aset resets 0 0) n))
-     :set-tempo! (fn [bpm]
-                   (aset delay-frames 0 (long (min (dec delay-len) (* sr (/ 60.0 (double bpm)) 0.75)))))
+     :set-globals! (fn [{:keys [tempo delay-feedback] :or {tempo 120 delay-feedback 0.38}}]
+                     (aset delay-frames 0 (long (min (dec delay-len) (* sr (/ 60.0 (double tempo)) 0.75))))
+                     (aset feedback 0 (double delay-feedback)))
      :render!
      (fn []
        (let [start (aget position 0)
@@ -141,7 +143,8 @@
                (recur))))
          (let [^doubles dl (dry 0) ^doubles dr (dry 1)
                ^doubles bl (dry 2) ^doubles br (dry 3)
-               dframes (aget delay-frames 0)]
+               dframes (aget delay-frames 0)
+               fb (aget feedback 0)]
            (dotimes [i block]
              (let [frame (+ start i)]
                (loop []
@@ -159,8 +162,8 @@
                      ridx (let [x (- widx dframes)] (if (neg? x) (+ x delay-len) x))
                      dl* (aget delay-l ridx)
                      dr* (aget delay-r ridx)
-                     _ (aset delay-l widx (+ (aget delay-in i) (* 0.38 dr*)))
-                     _ (aset delay-r widx (* 0.38 dl*))
+                     _ (aset delay-l widx (+ (aget delay-in i) (* fb dr*)))
+                     _ (aset delay-r widx (* fb dl*))
                      _ (aset delay-idx 0 (let [n (inc widx)] (if (>= n delay-len) 0 n)))
                      vin (aget verb-in i)
                      vl (.invokePrim rev-l vin)

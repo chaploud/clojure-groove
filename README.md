@@ -207,7 +207,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 Built-in instruments are synthesized, so they need no sample downloads:
 
 - Drums (also reachable through kit roles): `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high`
-- Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/speaker`
+- Synths: `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/organ` `:synth/skank` `:synth/melodica` `:synth/speaker`
 
 The kick ducks the bass and synth buses (sidechain). Every track has `:delay` and `:reverb` send levels (0–1) that default by bus: drums are dry with a little reverb, synths go through a tempo-synced delay and the reverb. A closed hat cuts off a ringing open hat, because both are in the `:choke :hats` group. Define your own instruments as data on top of a built-in one:
 

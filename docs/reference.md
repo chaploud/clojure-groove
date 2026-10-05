@@ -76,13 +76,13 @@ Sound: `:inst`, `:kit`, and any instrument parameter, for example `:cutoff`, `:r
 
 Signals: any numeric attribute can be `[:lfo shape bars low high]` (`:sine :tri :saw :square`) or `[:ramp from to bars]`, evaluated at each note's written position in bars since its track started.
 
-Globals only: `:tempo` (20–999 BPM).
+Globals only: `:tempo` (20–999 BPM), `:delay-feedback` (0–0.95, default 0.38; raise it for dub echoes that keep repeating).
 
 ## Instruments
 
 | Drums | Synths |
 |---|---|
-| `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` | `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/speaker` |
+| `:drum/kick` `:drum/snare` `:drum/clap` `:drum/hat` `:drum/open-hat` `:drum/ride` `:drum/crash` `:drum/rim` `:drum/cowbell` `:drum/tom-low` `:drum/tom-mid` `:drum/tom-high` | `:synth/acid` `:synth/bass` `:synth/sub` `:synth/reese` `:synth/supersaw` `:synth/pad` `:synth/pluck` `:synth/lead` `:synth/keys` `:synth/organ` `:synth/skank` `:synth/melodica` `:synth/speaker` |
 
 Define your own with `:base`: `{:my/bass {:base :synth/acid :cutoff 500.0}}`. Kits map roles to instruments: `{:my/kit {:base :kit/tr808 :bd :my/kick}}`.
 

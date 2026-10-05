@@ -156,6 +156,9 @@
   (let [t (tempo session)]
     (when-not (and (number? t) (<= 20 t 999))
       (fail (str ":tempo must be a number between 20 and 999, got " (pr-str t)) {:tempo t})))
+  (let [fb (get-in session [:globals :delay-feedback] 0.38)]
+    (when-not (and (number? fb) (<= 0 fb 0.95))
+      (fail (str ":delay-feedback must be a number between 0 and 0.95, got " (pr-str fb)) {:delay-feedback fb})))
   (validate-arrangement! session)
   (doseq [section (keys (:sections session))]
     (try (validate-tracks! (launch-section session section))
