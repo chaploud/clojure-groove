@@ -92,3 +92,12 @@
     (is (< (* 4 (tail 0.0)) (tail 0.9)))
     (is (thrown? clojure.lang.ExceptionInfo
                  (s/validate! (assoc-in s/empty-session [:globals :delay-feedback] 1.2))))))
+
+(deftest duck-depth-sets-how-far-the-kick-pushes-the-synths-down
+  (let [level (fn [depth]
+                (let [sess (-> s/empty-session
+                               (assoc-in [:globals :duck-depth] depth)
+                               (s/play :k [:steps {:inst :drum/kick :gain 0.0} "x..."])
+                               (s/play :p [:notes {:inst :synth/pad :attack 0.001} [:w 0]]))]
+                  (rms (live/render sess 1) 1000 3000)))]
+    (is (< (* 2 (level 0.75)) (level 0.0)))))

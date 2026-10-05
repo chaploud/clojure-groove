@@ -137,8 +137,8 @@
 
 (defn globals!
   "Merges `m` into the globals, the root of the attribute cascade (`:tempo`, `:root`,
-  `:scale`, ...), and `:delay-feedback` (0-0.95, default 0.38), how long the delay keeps
-  repeating. A nil value removes the key. Returns the new globals."
+  `:scale`, ...), `:delay-feedback` (0-0.95, default 0.38), how long the delay keeps
+  repeating, and `:duck-depth` (0-1, default 0.75), how far the kick ducks the other buses. A nil value removes the key. Returns the new globals."
   [m]
   (:globals (commit! #(update % :globals (fn [g] (into {} (remove (comp nil? val)) (merge g m)))))))
 

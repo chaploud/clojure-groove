@@ -46,7 +46,7 @@
                    :cutoff 2600.0 :hp 700.0 :env 0.0 :res 0.3
                    :attack 0.002 :decay 0.25 :sustain 0.6 :release 0.08 :drive 3.0 :gate 0.85}
    :synth/brass {:voice :synth :bus :synth :osc :supersaw :unison 3 :detune 9.0 :spread 0.5
-                 :gain 0.3 :octave 4 :cutoff 700.0 :env 2200.0 :fdecay 0.35 :res 0.1
+                 :gain 0.34 :octave 4 :cutoff 1300.0 :env 2000.0 :fdecay 0.35 :res 0.1
                  :attack 0.03 :decay 0.4 :sustain 0.8 :release 0.15 :drive 1.6 :gate 0.9 :reverb 0.3}
    :synth/strings {:voice :synth :bus :synth :osc :supersaw :unison 5 :detune 11.0 :spread 0.8
                    :gain 0.24 :octave 4 :cutoff 2600.0 :env 600.0 :fdecay 0.1 :res 0.05

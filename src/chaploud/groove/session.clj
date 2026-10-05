@@ -71,6 +71,9 @@
 (defn delay-feedback [session]
   (get-in session [:globals :delay-feedback] 0.38))
 
+(defn duck-depth [session]
+  (get-in session [:globals :duck-depth] 0.75))
+
 (defn bar-seconds [session]
   (/ (* 4 60.0) (double (tempo session))))
 
@@ -185,6 +188,9 @@
   (let [fb (delay-feedback session)]
     (when-not (and (number? fb) (<= 0 fb 0.95))
       (fail (str ":delay-feedback must be a number between 0 and 0.95, got " (pr-str fb)) {:delay-feedback fb})))
+  (let [d (duck-depth session)]
+    (when-not (and (number? d) (<= 0 d 1))
+      (fail (str ":duck-depth must be a number between 0 and 1, got " (pr-str d)) {:duck-depth d})))
   (doseq [t (keys (:tracks session))] (track-key! t))
   (validate-instruments! session)
   (validate-arrangement! session)

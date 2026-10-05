@@ -215,7 +215,7 @@ Built-in instruments are synthesized, so they need no sample downloads:
 
 `(g/browse "reggae")` finds instruments and parts by tag, and `(g/describe :synth/acid)` lists every parameter with its default.
 
-The kick ducks the bass and synth buses (sidechain). Every track has `:delay` and `:reverb` send levels (0–1) that default by bus: drums are dry with a little reverb, synths go through a tempo-synced delay and the reverb. `:delay-feedback` in the globals (0–0.95, default 0.38) sets how long the delay keeps repeating, and `:hp` adds a highpass after a synth's filter. A closed hat cuts off a ringing open hat, because both are in the `:choke :hats` group. Define your own instruments as data on top of a built-in one:
+The kick ducks the bass and synth buses (sidechain). Every track has `:delay` and `:reverb` send levels (0–1) that default by bus: drums are dry with a little reverb, synths go through a tempo-synced delay and the reverb. `:delay-feedback` in the globals (0–0.95, default 0.38) sets how long the delay keeps repeating, `:duck-depth` (0–1, default 0.75) how far the kick pushes the other buses down, and `:hp` adds a highpass after a synth's filter. A closed hat cuts off a ringing open hat, because both are in the `:choke :hats` group. Define your own instruments as data on top of a built-in one:
 
 ```clojure
 (g/instrument! :my/bass {:base :synth/acid :cutoff 500.0 :res 0.6 :octave 1})

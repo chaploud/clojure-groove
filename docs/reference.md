@@ -76,7 +76,7 @@ Sound: `:inst`, `:kit`, and any instrument parameter, for example `:cutoff`, `:r
 
 Signals: any numeric attribute can be `[:lfo shape bars low high]` (`:sine :tri :saw :square`) or `[:ramp from to bars]`, evaluated at each note's written position in bars since its track started.
 
-Globals only, plain numbers rather than signals: `:tempo` (20–999 BPM), `:delay-feedback` (0–0.95, default 0.38; raise it for dub echoes that keep repeating).
+Globals only, plain numbers rather than signals: `:tempo` (20–999 BPM), `:delay-feedback` (0–0.95, default 0.38; raise it for dub echoes that keep repeating), `:duck-depth` (0–1, default 0.75), how far the kick pushes the bass and synth buses down; lower it when a lead should stay in front of a busy kick.
 
 ## Instruments
 
