@@ -56,6 +56,18 @@
                  (map #(update-in % [:event :transpose] (fnil + 0) (first args)) (q lo hi iter)))
     :degrade (fn [lo hi iter]
                (remove #(< (notation/chance :degrade iter (:t %)) (first args)) (q lo hi iter)))
+    :struct (let [[rhythm] args
+                  rlen (:len rhythm)]
+              (fn [lo hi iter]
+                (let [source (vec (q 0 len iter))
+                      per-loop (long (Math/ceil (double (/ len rlen))))]
+                  (for [[k start a b] (loop-windows rlen lo hi)
+                        {:keys [t dur event]} (query rhythm a b (+ (* iter per-loop) k))
+                        :let [at (+ start t)]
+                        src source
+                        :when (and (<= (:t src) at) (< at (+ (:t src) (:dur src))))]
+                    {:t at :dur dur
+                     :event (merge (:event src) (dissoc event :step :degree :note :midi :roman :chord :glide))}))))
     :arp (let [[order rate] args
                rate (or rate 1/16)]
            (fn [lo hi iter]

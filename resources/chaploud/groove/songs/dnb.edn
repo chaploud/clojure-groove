@@ -3,14 +3,13 @@
 {:globals {:tempo 174 :root :d}
  :defs
  {:dnb/pad [:prog/epic {:octave 3 :reverb 1.0}]
-  :dnb/reese [:notes {:inst :synth/reese :scale :minor} [:h 0 0 5 5 2 2 6 6]]
-  :dnb/lead [:lead/anthem {:inst :synth/pluck :octave 5 :vel 0.6 :delay 0.9}]
-  :dnb/crash [:steps {:inst :cr :kit :kit/default} "x..............................................................................................................................."]}
- :scenes
- {:intro {:pad :dnb/pad :arp [:arp/epic {:octave 5 :vel 0.4 :cutoff [:ramp 500.0 4000.0 8]}]}
-  :roll {:roll :fill/snare-roll}
-  :drop {:roll nil :drums :beat/dnb :reese :dnb/reese :lead :dnb/lead :arp nil :crash :dnb/crash}
-  :break {:drums nil :reese nil :crash nil :lead [:lead/anthem-high {:inst :synth/pluck :octave 4 :vel 0.5 :delay 1.0}]}
-  :drop2 {:drums :beat/jungle :reese :dnb/reese :lead :dnb/lead :crash :dnb/crash}
-  :outro {:lead nil :reese nil :crash nil :drums nil}}
- :arrangement [[:intro 7] [:roll 1] [:drop 16] [:break 8] [:drop2 16] [:outro 8]]}
+  :dnb/reese [:fx [:struct [:steps {:step 1/2} "xx"]] [:prog/epic {:inst :synth/reese :voicing :root}]]
+  :dnb/lead [:lead/anthem {:inst :synth/pluck :octave 5 :vel 0.6 :delay 0.9}]}
+ :sections
+ {:intro {:pad :dnb/pad :arp [:arp/epic {:octave 5 :vel 0.4 :cutoff [:ramp 500.0 4000.0 8]}]
+          :roll [:fill/snare-roll {:if :fill}]}
+  :drop {:pad :dnb/pad :drums :beat/dnb :reese :dnb/reese :lead :dnb/lead :crash [:fill/crash {:if :1st}]}
+  :break {:pad :dnb/pad :lead [:lead/anthem-high {:inst :synth/pluck :octave 4 :vel 0.5 :delay 1.0}]}
+  :drop2 {:base :drop :drums :beat/jungle}
+  :outro {:pad :dnb/pad}}
+ :arrangement [[:intro 8 {:fill 1}] [:drop 16] [:break 8] [:drop2 16] [:outro 8]]}

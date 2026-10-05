@@ -1,21 +1,20 @@
 ;; Big-room pop at 128 BPM in D major, built from bundled parts: the axis progression drives the
 ;; piano, the arpeggio and the bass, and the hook comes back an octave higher in the last drop.
-{:globals {:tempo 128 :root :d}
+{:globals {:tempo 128 :root :d :kit :kit/tr909}
  :defs
- {:song/crash [:steps {:inst :cr :kit :kit/tr909} "x..............................................................................................................................."]
-  :anthem/piano [:prog/axis {:inst :synth/keys :octave 4 :voicing :open :vel 0.7}]
+ {:anthem/piano [:prog/axis {:inst :synth/keys :octave 4 :voicing :open :vel 0.7}]
   :anthem/pad [:prog/axis {:octave 3}]
-  :anthem/bass [:notes {:inst :synth/bass :scale :major} [:e :_ 0 :_ 0 :_ 0 :_ 0 :_ 4 :_ 4 :_ 4 :_ 4 :_ 5 :_ 5 :_ 5 :_ 5 :_ 3 :_ 3 :_ 3 :_ 3]]
-  :anthem/drums [:beat/house {:kit :kit/tr909}]}
- :scenes
+  :anthem/bass [:fx [:struct [:steps {:step 1/8} ".x.x .x.x"]] [:prog/axis {:inst :synth/bass :voicing :root}]]
+  :anthem/arp [:arp/axis {:vel 0.5}]
+  :anthem/crash [:fill/crash {:if :1st}]}
+ :sections
  {:intro {:piano :anthem/piano}
-  :verse {:drums :beat/four-floor :bass :anthem/bass :arp [:arp/axis {:vel 0.5}]}
-  :build {:drums nil :pad :anthem/pad :arp [:arp/axis {:vel 0.6 :cutoff [:ramp 500.0 7000.0 8]}]}
-  :roll {:roll :fill/snare-roll}
-  :drop {:roll nil :drums :anthem/drums :bass :anthem/bass :lead :lead/pop :crash :song/crash}
-  :break {:drums nil :bass nil :crash nil :lead [:lead/pop {:inst :synth/pluck :vel 0.5}] :arp nil}
-  :drop2 {:roll nil :drums :anthem/drums :bass :anthem/bass :arp [:arp/axis {:vel 0.5}]
-          :lead [:lead/pop {:octave 6}] :crash :song/crash}
-  :outro {:lead nil :drums :beat/four-floor :crash nil :pad nil}}
- :arrangement [[:intro 4] [:verse 8] [:build 7] [:roll 1] [:drop 16] [:break 8] [:build 7] [:roll 1]
+  :verse {:base :intro :drums :beat/four-floor :bass :anthem/bass :arp :anthem/arp}
+  :build {:piano :anthem/piano :pad :anthem/pad :bass :anthem/bass
+          :arp [:anthem/arp {:cutoff [:ramp 500.0 7000.0 8]}] :roll [:fill/snare-roll {:if :fill}]}
+  :drop {:base :verse :drums :beat/house :pad :anthem/pad :lead :lead/pop :crash :anthem/crash}
+  :break {:piano :anthem/piano :pad :anthem/pad :lead [:lead/pop {:inst :synth/pluck :vel 0.5}]}
+  :drop2 {:base :drop :lead [:lead/pop {:octave 6}]}
+  :outro {:base :verse}}
+ :arrangement [[:intro 4] [:verse 8] [:build 8 {:fill 1}] [:drop 16] [:break 8] [:build 8 {:fill 1}]
                [:drop2 16] [:outro 8]]}

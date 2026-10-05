@@ -1,19 +1,20 @@
 ;; Dub techno at 120 BPM in D dorian: a chord stab alternating i7 and IV7, drowned in delay and
 ;; reverb under a slow filter LFO, with the groove assembled and taken apart around it.
-{:globals {:tempo 120 :root :d :scale :dorian}
+{:globals {:tempo 120 :root :d :scale :dorian :kit :kit/tr909}
  :defs
  {:dub/stab [:notes {:inst :synth/keys :octave 4 :delay 1.0 :reverb 1.0 :vel 0.6
                      :cutoff [:lfo :sine 16 600.0 3000.0]}
-             [:e :_ :_ :_ :_ :i7 :_ :_ :_  :_ :_ :_ :_ :IV7 :_ :_ :_]]
-  :dub/sub [:notes {:inst :synth/sub :octave 1} [:e :_ 0 :_ 0 :_ 0 :_ 0  :_ 3 :_ 3 :_ 3 :_ 3]]
-  :dub/kick [:beat/four-floor {:kit :kit/tr909}]
+             [[:e :_ :_ :_ :_ :i7 :_ :_ :_]
+              [:e :_ :_ :_ :_ :IV7 :_ :_ :_]]]
+  :dub/sub [:notes {:inst :synth/sub :octave 1}
+            [[:e :_ 0 :_ 0 :_ 0 :_ 0]
+             [:e :_ 3 :_ 3 :_ 3 :_ 3]]]
   :dub/hats [:par [:steps {:inst :hh :vel 0.3} "..x. ..x. ..x. ..x."]
              [:steps {:inst :rim :vel 0.4 :delay 0.7} ".... .... ...x ...."]]}
- :scenes
+ :sections
  {:intro {:stab :dub/stab}
-  :pulse {:kick :dub/kick :sub :dub/sub}
-  :full {:hats :dub/hats}
-  :break {:kick nil :sub nil :hats nil :stab [:dub/stab {:cutoff [:ramp 300.0 4000.0 8]}]}
-  :return {:kick :dub/kick :sub :dub/sub :hats :dub/hats :stab :dub/stab}
-  :outro {:hats nil :sub nil}}
- :arrangement [[:intro 8] [:pulse 8] [:full 16] [:break 8] [:return 16] [:outro 8]]}
+  :pulse {:base :intro :kick :beat/four-floor :sub :dub/sub}
+  :full {:base :pulse :hats :dub/hats}
+  :break {:stab [:dub/stab {:cutoff [:ramp 300.0 4000.0 8]}]}
+  :outro {:base :pulse :sub nil}}
+ :arrangement [[:intro 8] [:pulse 8] [:full 16] [:break 8] [:full 16] [:outro 8]]}

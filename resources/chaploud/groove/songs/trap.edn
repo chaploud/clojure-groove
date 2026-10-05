@@ -1,16 +1,14 @@
 ;; Trap at 140 BPM in C minor: an Andalusian pad, a bell melody calling and answering, an 808 that
 ;; follows the descending roots, and ratcheted hats.
-{:globals {:tempo 140 :root :c}
+{:globals {:tempo 140 :root :c :kit :kit/tr808}
  :defs
  {:trap/pad [:prog/andalusian {:octave 3 :vel 0.45 :reverb 1.0}]
-  :trap/boom [:notes {:inst :synth/sub :gate 1.0 :scale :minor}
-             [:q. 0 :e :_ :q :_ :e 0 0 :q. 6 :e :_ :q :_ :e 6 6 :q. 5 :e :_ :q :_ :e 5 5 :q. 4 :e :_ :q :_ :e 4 4]]
-  :trap/bell [:lead/call-response {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.7}]
-  :trap/drums [:beat/trap {:kit :kit/tr808}]}
- :scenes
+  :trap/boom [:fx [:struct [:notes [:q. 0 :e :_ :q :_ :e 0 0]]]
+              [:prog/andalusian {:inst :synth/sub :voicing :root :gate 1.0}]]
+  :trap/bell [:lead/call-response {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.7}]}
+ :sections
  {:intro {:pad :trap/pad :bell :trap/bell}
-  :drop {:drums :trap/drums :808 :trap/boom}
-  :break {:drums nil :pad nil}
-  :drop2 {:drums :trap/drums :pad :trap/pad}
-  :outro {:drums nil :808 nil}}
- :arrangement [[:intro 8] [:drop 16] [:break 8] [:drop2 16] [:outro 4]]}
+  :drop {:base :intro :drums :beat/trap :808 :trap/boom}
+  :break {:bell :trap/bell :808 :trap/boom}
+  :outro {:base :intro}}
+ :arrangement [[:intro 8] [:drop 16] [:break 8] [:drop 16] [:outro 4]]}

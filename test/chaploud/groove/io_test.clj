@@ -56,3 +56,8 @@
                    (map #(subs % 0 (- (count %) 4)))
                    set)]
     (is (= files (set (map :name (io/bundled-songs)))))))
+
+(deftest old-scene-files-explain-the-change
+  (let [path (str (tmp-dir) "/song.edn")]
+    (spit path (pr-str {:scenes {:a {}}}))
+    (is (thrown-with-msg? Exception #":scenes was renamed to :sections" (io/read-song path)))))

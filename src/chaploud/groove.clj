@@ -1,10 +1,10 @@
 (ns chaploud.groove
   "Live-code grooves from the REPL.
 
-  Every function here changes one session: a map of tracks, definitions, scenes and globals.
+  Every function here changes one session: a map of tracks, definitions, sections and globals.
   Changes are validated before they are adopted and, while the transport runs, heard from the
   next bar. Gestures made while playing (`drum`, `play`, `mute`, `launch`, `fill`, `tempo` ...)
-  have no bang; definitions, files and the transport (`put!`, `scene!`, `save!`, `start!` ...) do.
+  have no bang; definitions, files and the transport (`put!`, `section!`, `save!`, `start!` ...) do.
 
   See docs/guide.md for a walkthrough and docs/reference.md for the data format."
   (:require [chaploud.groove.engine.output :as output]
@@ -58,7 +58,7 @@
 (defn hush
   "Stops every track and the arrangement."
   []
-  (commit! #(assoc % :tracks {} :arrangement nil :current-scene nil))
+  (commit! #(assoc % :tracks {} :arrangement nil :current-step nil))
   nil)
 
 (defn- default-drum [track]
@@ -142,33 +142,36 @@
   (globals! {:tempo bpm})
   bpm)
 
-;; ---------------------------------------------------------------- scenes & arrangement
+;; ---------------------------------------------------------------- sections & arrangement
 
-(defn scene!
-  "Defines a scene: a map from tracks to nodes, where nil stops a track. Tracks the scene
-  does not name keep playing."
+(defn section!
+  "Defines a section: the complete set of tracks it plays, as a map from tracks to nodes.
+  `:base` names a section to build on, and nil removes a track inherited from it. nil instead
+  of a map removes the section."
   [k tracks]
-  (commit! #(assoc-in % [:scenes k] tracks))
+  (commit! #(session/put-section % k tracks))
   k)
 
 (defn launch
-  "Applies a scene from the next bar."
-  [scene]
-  (commit! #(session/launch-scene % scene))
-  scene)
+  "Plays a section from the next bar: its tracks start from their first step and every other
+  track stops."
+  [section]
+  (commit! #(session/launch-section % section))
+  section)
 
 (defn snap!
-  "Saves the tracks playing now as a scene."
-  [scene]
-  (commit! #(session/snapshot % scene))
-  scene)
+  "Saves the tracks playing now as a section."
+  [section]
+  (commit! #(session/snapshot % section))
+  section)
 
 (defn- next-bar [] (inc (or (live/current-bar) -1)))
 
 (defn arrange!
-  "Plays scenes in order from the next bar: `plan` is a vector of `[scene bars]` pairs."
+  "Plays sections in order from the next bar. `plan` is a vector of `[section bars]` steps;
+  `[section bars {:fill n}]` makes `:if :fill` steps play in the step's last n bars."
   [plan]
-  (commit! #(assoc % :arrangement plan :arrangement-start (next-bar) :current-scene nil))
+  (commit! #(assoc % :arrangement plan :arrangement-start (next-bar) :current-step nil))
   plan)
 
 (defn fill
@@ -183,7 +186,7 @@
 ;; ---------------------------------------------------------------- files & views
 
 (defn save!
-  "Writes the session as an EDN song file: globals, kits, instruments, definitions, scenes,
+  "Writes the session as an EDN song file: globals, kits, instruments, definitions, sections,
   arrangement and tracks. Bundled parts and the audition track are left out."
   [path]
   (io/write-song! (update (session) :tracks dissoc :audition) path))

@@ -15,6 +15,23 @@
     (fail (str "Unexpected character " (pr-str ch) " at column " (inc i) " of step string")
           {:char ch :column (inc i)})))
 
+(defn- bar-error [i len]
+  (fail (str "Bar " (inc i) " lasts " len " of a bar; each bar must add up to exactly one") {:bar (inc i)}))
+
+(declare parse-steps)
+
+(defn parse-step-bars [bars step]
+  (into [] (comp (map-indexed (fn [i bar]
+                                (let [steps (parse-steps bar)]
+                                  (when-not (= 1 (* step (count steps))) (bar-error i (* step (count steps))))
+                                  steps)))
+                 cat)
+        bars))
+
+(defn bars? [x]
+  (and (vector? x) (seq x) (every? #(or (string? %) (vector? %)) x)
+       (not-any? map? x)))
+
 (defn parse-steps [x]
   (cond
     (string? x) (into []
@@ -68,7 +85,16 @@
 (declare link-glides)
 
 (defn parse-notes [items default-dur]
-  (link-glides (parse-notes* items default-dur)))
+  (link-glides
+   (if (and (vector? items) (seq items) (every? vector? items))
+     (loop [[bar & more] items, i 0, offset (num 0), out []]
+       (if-not bar
+         out
+         (let [notes (parse-notes* bar default-dur)
+               len (reduce + 0 (map :dur notes))]
+           (when-not (= 1 len) (bar-error i len))
+           (recur more (inc i) (+ offset 1) (into out (map #(update % :t + offset)) notes)))))
+     (parse-notes* items default-dur))))
 
 (def ^:private pitch-keys [:degree :note :midi :roman :chord :octave :transpose])
 

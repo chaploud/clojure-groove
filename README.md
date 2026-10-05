@@ -17,7 +17,7 @@ Live-code grooves from your Clojure REPL. Patterns are plain EDN data: write a d
 
 Everything runs on the JVM with no dependencies besides Clojure: drums and synths are synthesized in pure Clojure and played through Java Sound. A failed edit is rejected in the REPL with a pointed error, and the music keeps playing.
 
-> Status: 0.1.0, early. The data format is versioned (`:groove/format 1`) but may still change; see [CHANGELOG.md](CHANGELOG.md).
+> Status: 0.1.0, early. The data format is versioned (`:groove/format 2`) but may still change; see [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
@@ -66,9 +66,11 @@ clojure -Sdeps '{:deps {io.github.chaploud/clojure-groove {:git/tag "v0.1.0" :gi
 ```clojure
 (g/drum :kick "x... x... x... x...")        ; x hit, X accent, . or - rest; spaces and | are ignored
 (g/drum :snare [:_ :_ :_ :_ :x :_ {:vel 1 :if :fill} :x])   ; or a vector, with per-step attributes
+(g/drum :kick ["x... x... x... x..." "x... x... x.x. x.x."])   ; a vector of strings: one per bar, checked
+(g/drum :crash "x..............." :if [1 8])                ; a one-off: the first of every 8 loops
 ```
 
-Every step is a 16th note unless the cascade sets `:step`. A pattern of 12 steps loops every 12 steps, so mixing lengths gives you polymeter. `:swing` (0–1) delays every second step by that fraction of a step; `:swing-step 1/8` swings eighths instead. In MPC terms, 58% is about `0.16` and a triplet feel (66%) about `0.33`.
+Every step is a 16th note unless the cascade sets `:step`. A pattern of 12 steps loops every 12 steps, so mixing lengths gives you polymeter; write one string per bar when you want each bar checked to be exactly one bar long. `:swing` (0–1) delays every second step by that fraction of a step; `:swing-step 1/8` swings eighths instead. In MPC terms, 58% is about `0.16` and a triplet feel (66%) about `0.33`.
 
 Per-step attributes follow the vocabulary of hardware sequencers:
 
@@ -88,9 +90,11 @@ Per-step attributes follow the vocabulary of hardware sequencers:
 (g/synth :bass [:e 0 :_ 0 :s 3 5 :e 7 :_])   ; :s :e :q :h :w (and :q. dotted, :et triplet) set the length
 (g/synth :pad  [:w #{0 2 4} #{-2 0 2}])       ; a set is a chord
 (g/synth :lead [1/8 0 2 1/16 4 5 :c5 :_])     ; ratios set the length; keywords like :c5 are note names
+(g/synth :hook [[:e 4 4 :q 7 :e 4 2 :q 0]       ; a vector of vectors: one per bar, each checked
+                [:e 5 5 :q 9 :e 7 5 :q 7]])     ; to add up to exactly one bar
 ```
 
-Integers are scale degrees, resolved through `:root`, `:scale` and `:octave` from the cascade. A length applies until the next length keyword, but never outside its vector. A note written as `{:degree 4 :glide true}` slides into its pitch from the note before it, like a 303 slide (`:glide-time` sets how long, default 0.06 s).
+Integers are scale degrees, resolved through `:root`, `:scale` and `:octave` from the cascade. A length applies until the next length keyword, but never outside its vector (or its bar). A note written as `{:degree 4 :glide true}` slides into its pitch from the note before it, like a 303 slide (`:glide-time` sets how long, default 0.06 s).
 
 ### Chords
 
@@ -101,10 +105,11 @@ Roman numerals build a chord on a degree of the current scale: uppercase is majo
 (g/synth :pad  [:w :i :VI :III :VII] :inst :synth/pad :octave 3)
 (g/play  :keys [:notes {:inst :synth/keys :voicing :drop2} [:h :ii7 :V7 :w :Imaj7]])
 (g/play  :arp  [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck}]])
-(g/play  :bass [:prog/epic {:inst :synth/bass :voicing :root}])
+(g/play  :bass [:fx [:struct ".x.x .x.x .x.x .x.x"] [:prog/epic {:inst :synth/bass :voicing :root}]])
+(g/play  :stab [:fx [:struct "..x. ...x .... ..x."] [:prog/deep-house {:inst :synth/keys}]])
 ```
 
-`:voicing` is `:close` (default), `:open`, `:drop2` or `:root`, and `:inv n` inverts. `[:arp order rate]` plays each chord one note at a time (`:up :down :up-down :random`), so one progression can drive a pad, an arpeggio and a bassline. Mini-notation accepts the same numerals: `"<i VI III VII>"`.
+`:voicing` is `:close` (default), `:open`, `:drop2` or `:root`, and `:inv n` inverts. `[:arp order rate]` plays each chord one note at a time (`:up :down :up-down :random`), and `[:struct rhythm]` plays whatever sounds underneath at the rhythm's hits, like Strudel's `struct`: the rhythm is a step string or any node, and only its timing and step attributes are used. Together they let one progression drive a pad, an arpeggio, stabs and a bassline. Mini-notation accepts the same numerals: `"<i VI III VII>"`.
 
 ### Cycles: mini-notation
 
@@ -193,7 +198,7 @@ Gestures you make while playing have no bang; definitions, files and the transpo
 | `fill` | make `:if :fill` steps play for the next n bars |
 | `put!` `instrument!` `kit!` `globals!` `tempo` | definitions and the root of the cascade |
 | `browse` `audition` `describe` | find, hear and inspect bundled parts, kits and instruments |
-| `scene!` `snap!` `launch` `arrange!` | scenes (track → node maps) and a scene timeline |
+| `section!` `snap!` `launch` `arrange!` | sections (the complete set of tracks to play) and a timeline of them |
 | `save!` `load!` `render!` `show` | song files, offline WAV rendering, a text grid of any node |
 
 ## Sounds
@@ -212,17 +217,21 @@ The kick ducks the bass and synth buses (sidechain). Every track has `:delay` an
 ## Song files
 
 ```clojure
-{:groove/format 1
+{:groove/format 2
  :include ["lib/house-kit.edn"]
  :globals {:tempo 138 :root :g :scale :minor}
  :instruments {...}
  :defs {:clip/kick [:steps {:inst :drum/kick} "x... x... x... x..."] ...}
- :scenes {:intro {:kick :clip/kick} :drop {...}}
- :arrangement [[:intro 4] [:drop 8]]
+ :sections {:intro {:kick :clip/kick}
+            :drop {:base :intro :bass :clip/bass :roll [:fill/snare-roll {:if :fill}]}
+            :break {:base :drop :kick nil}}
+ :arrangement [[:intro 4] [:drop 8 {:fill 1}] [:break 4]]
  :tracks {...}}
 ```
 
-`:include` merges instruments, definitions and scenes from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
+A section is the complete set of tracks it plays: entering it starts them from their first step and stops every other track. `:base` builds on another section and `nil` drops a track inherited from it. An arrangement step `[:drop 8 {:fill 1}]` makes `:if :fill` steps play in its last bar, and `:if :1st` steps play only in a section's first loop, which is how a crash marks the start of a drop.
+
+`:include` merges kits, instruments, definitions and sections from other files, resolved relative to the including file; the including file wins. `load!`, `bb play` and `bb render` accept a file path, a classpath resource or the name of a bundled song. The bundled songs live in [`resources/chaploud/groove/songs`](resources/chaploud/groove/songs): house, acid, techno, trance, drum and bass, lo-fi, trap, UK garage, synthwave, dub techno, an anthem built from bundled parts, polymeter, Euclidean rhythms and a walkthrough of references and the cascade.
 
 ## Development
 

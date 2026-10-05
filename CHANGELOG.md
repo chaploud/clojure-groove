@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Sections replace scenes. A section is the complete set of tracks it plays: entering it restarts them and stops the rest, `:base` builds on another section and `nil` drops an inherited track. Song files use `:sections` and `:groove/format 2`; files with `:scenes` are rejected with a message explaining the change. `scene!` is now `section!`.
+- Arrangement steps take options: `[:build 8 {:fill 1}]` turns on `:if :fill` steps in the step's last bar, so fills no longer need their own section.
+- `[:struct rhythm]` plays the notes underneath at a rhythm's hits, so stabs and basslines can follow a progression without writing every bar out.
+- Step and note bodies can be written one bar at a time (a vector of strings, or a vector of note vectors); each bar is checked to be exactly one bar long.
+- New parts: `:lead/` melodies and `:arp/` arpeggios. The bundled songs are rewritten as full arrangements with melodies, builds, fills and second drops.
+
 ## 0.1.0 (2026-10-05)
 
 First release.

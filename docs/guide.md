@@ -44,10 +44,10 @@ Degree 0 is the root, 7 the octave above. `:s` makes the following notes 16ths; 
 (g/play :pad [:prog/epic {:octave 3}])
 (g/play :arp [:fx [:arp :up-down 1/16] [:prog/epic {:inst :synth/pluck :vel 0.6}]])
 (g/clear :acid)
-(g/play :bass [:prog/epic {:inst :synth/bass :voicing :root}])
+(g/play :bass [:fx [:struct ".x.x .x.x .x.x .x.x"] [:prog/epic {:inst :synth/bass :voicing :root}]])
 ```
 
-One progression now drives the pad, the arpeggio and the bass, so they always agree. Swap `:prog/epic` for `:prog/sensitive` in all three and the whole harmony changes.
+One progression now drives the pad, the arpeggio and the bass, so they always agree: `[:struct ".x.x ..."]` plays the chord root underneath at each offbeat. Swap `:prog/epic` for `:prog/sensitive` in all three and the whole harmony changes.
 
 ## 4. Movement
 
@@ -74,12 +74,12 @@ Attributes at a reference win over the definition, so `:echo` is the same arpegg
 
 ```clojure
 (g/snap! :drop)
-(g/scene! :break {:drums nil :bass nil :fill :fill/snare-roll})
-(g/scene! :back {:fill nil :drums [:beat/house {:kit :kit/tr909}] :bass [:prog/epic {:inst :synth/bass :voicing :root}]})
-(g/arrange! [[:break 4] [:back 8]])
+(g/section! :break {:base :drop :drums nil :bass nil :roll [:fill/snare-roll {:if :fill}]})
+(g/section! :drop2 {:base :drop :lead [:my/arp {:octave 6 :vel 0.4}] :crash [:fill/crash {:if :1st}]})
+(g/arrange! [[:break 4 {:fill 1}] [:drop2 8]])
 ```
 
-A scene only changes the tracks it names; `nil` stops a track. `(g/fill 1)` makes `:if :fill` steps play for the next bar, and `(g/mute :pad)` / `(g/solo :drums)` work while playing.
+`snap!` saves what plays now as a section. A section is everything that plays in it: `:base` starts from another one and `nil` drops a track. `{:fill 1}` makes the `:if :fill` snare roll play in the break's last bar, and `:if :1st` makes the crash hit only when the drop starts. `(g/fill 1)` does the same for the next bar by hand, and `(g/mute :pad)` / `(g/solo :drums)` work while playing.
 
 ## 7. Keep it
 

@@ -1,17 +1,16 @@
 ;; Deep house at 122 BPM in F minor: minor-seventh stabs walk i7-VImaj7-iv7-v7 over a swung beat,
 ;; the bass follows the roots, and a call-and-answer melody arrives for the second half.
-{:globals {:tempo 122 :root :f :scale :minor}
+{:globals {:tempo 122 :root :f :scale :minor :kit :kit/tr909 :swing 0.12}
  :defs
- {:house/drums [:beat/deep-house {:kit :kit/tr909}]
-  :house/stabs [:notes {:inst :synth/keys :octave 4 :swing 0.12 :reverb 0.5 :delay 0.4} [:e :_ :i7 :_ :i7 :q :_ :e :_ :i7 :e :_ :VImaj7 :_ :VImaj7 :q :_ :e :_ :VImaj7 :e :_ :iv7 :_ :iv7 :q :_ :e :_ :iv7 :e :_ :v7 :_ :v7 :q :_ :e :_ :v7]]
-  :house/bass [:notes {:inst :synth/bass :swing 0.12} [:e 0 :_ :_ 0 :_ 0 :q 4 :e 5 :_ :_ 5 :_ 5 :q 9 :e 3 :_ :_ 3 :_ 3 :q 7 :e 4 :_ :_ 4 :_ 4 :q 8]]
-  :house/crash [:steps {:inst :cr :kit :kit/tr909} "x..............................................................................................................................."]}
- :scenes
- {:intro {:drums :beat/four-floor :hats [:steps {:inst :hh :vel 0.3 :swing 0.12} "xxxx xxxx xxxx xxXx"]}
-  :groove {:drums :house/drums :hats nil :bass :house/bass}
-  :stabs {:stabs :house/stabs :crash :house/crash}
-  :break {:drums nil :bass nil :crash nil :stabs [:house/stabs {:cutoff [:lfo :sine 8 400.0 2200.0]}]
-          :lead [:lead/call-response {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.8}]}
-  :main {:drums :house/drums :bass :house/bass :stabs :house/stabs :crash :house/crash}
-  :outro {:lead nil :stabs nil :crash nil}}
+ {:house/stabs [:fx [:struct [:steps {:step 1/8} ".x.x ...x"]]
+                [:prog/deep-house {:inst :synth/keys :octave 4 :reverb 0.5 :delay 0.4}]]
+  :house/bass [:fx [:struct [:steps {:step 1/8} "x..x .x.."]] [:prog/deep-house {:inst :synth/bass :voicing :root}]]
+  :house/lead [:lead/call-response {:inst :synth/keys :octave 5 :vel 0.5 :delay 0.8}]}
+ :sections
+ {:intro {:drums :beat/four-floor :hats [:steps {:inst :hh :vel 0.3} "xxxx xxxx xxxx xxXx"]}
+  :groove {:drums :beat/deep-house :bass :house/bass}
+  :stabs {:base :groove :stabs :house/stabs :crash [:fill/crash {:if :1st}]}
+  :break {:stabs [:house/stabs {:cutoff [:lfo :sine 8 400.0 2200.0]}] :lead :house/lead}
+  :main {:base :stabs :lead :house/lead}
+  :outro {:base :groove}}
  :arrangement [[:intro 8] [:groove 8] [:stabs 16] [:break 8] [:main 16] [:outro 8]]}

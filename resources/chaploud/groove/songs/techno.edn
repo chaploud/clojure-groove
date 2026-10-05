@@ -1,21 +1,22 @@
 ;; Driving techno at 130 BPM in E phrygian: a rumbling reese, Euclidean rims, a dark stab that
 ;; echoes through the delay, and a filtered arpeggio that opens into each peak.
-{:globals {:tempo 130 :root :e :scale :phrygian}
+{:globals {:tempo 130 :root :e :scale :phrygian :kit :kit/hard}
  :defs
- {:techno/drums [:beat/techno {:kit :kit/hard}]
-  :techno/rumble [:notes {:inst :synth/reese :gate 0.5} [:s :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 1]]
+ {:techno/rumble [:notes {:inst :synth/reese :gate 0.5} [:s :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 0 :_ :_ 0 1]]
   :techno/stab [:notes {:inst :synth/keys :octave 4 :delay 1.0 :reverb 0.8 :vel 0.55
                         :cutoff [:lfo :sine 16 500.0 2500.0]}
-                [:e :_ :_ :_ :i :_ :_ :_ :_ :e :_ :_ :_ :_ :_ :bII :_ :_]]
-  :techno/crash [:steps {:inst :cr :kit :kit/hard} "x..............................................................................................................................."]}
- :scenes
- {:intro {:drums [:beat/four-floor {:kit :kit/hard}]}
-  :groove {:drums :techno/drums :rumble :techno/rumble}
-  :build {:stab :techno/stab :arp [:arp/thirds {:octave 4 :vel 0.4 :cutoff [:ramp 300.0 5000.0 8]}]}
-  :roll {:roll [:fill/snare-roll {:kit :kit/hard}]}
-  :peak {:roll nil :arp [:arp/thirds {:octave 4 :vel 0.4}] :ride [:steps {:inst :rd :vel 0.4} "..x. ..x. ..x. ..x."]
-         :crash :techno/crash}
-  :break {:drums nil :rumble nil :ride nil :arp nil :crash nil}
-  :outro {:stab nil :crash nil :ride nil :arp nil}}
- :arrangement [[:intro 8] [:groove 8] [:build 7] [:roll 1] [:peak 16] [:break 8] [:groove 8] [:build 7] [:roll 1]
-               [:peak 16] [:outro 8]]}
+                [[:e :_ :_ :_ :i :_ :_ :_ :_]
+                 [:e :_ :_ :_ :_ :_ :bII :_ :_]]]
+  :techno/arp [:arp/thirds {:octave 4 :vel 0.4}]}
+ :sections
+ {:intro {:drums :beat/four-floor}
+  :groove {:drums :beat/techno :rumble :techno/rumble}
+  :build {:base :groove :stab :techno/stab :arp [:techno/arp {:cutoff [:ramp 300.0 5000.0 8]}]
+          :roll [:fill/snare-roll {:if :fill}]}
+  :peak {:base :groove :stab :techno/stab :arp :techno/arp :crash [:fill/crash {:if :1st}]
+         :ride [:steps {:inst :rd :vel 0.4} "..x. ..x. ..x. ..x."]}
+  :break {:stab :techno/stab}
+  :return {:base :groove :stab :techno/stab}
+  :outro {:base :groove}}
+ :arrangement [[:intro 8] [:groove 8] [:build 8 {:fill 1}] [:peak 16] [:break 8] [:return 8]
+               [:build 8 {:fill 1}] [:peak 16] [:outro 8]]}
